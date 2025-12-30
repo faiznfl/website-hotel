@@ -63,4 +63,21 @@ class BookingController extends Controller
         // Kirim ke view (resources/views/user/history.blade.php)
         return view('user.history', compact('bookings'));
     }
+
+    public function cancel($id)
+    {
+        // Cari booking milik user yang login
+        $booking = \App\Models\Booking::where('id', $id)
+            ->where('user_id', \Illuminate\Support\Facades\Auth::id())
+            ->firstOrFail();
+
+        // Cek status
+        if ($booking->status == 'pending') {
+            $booking->status = 'cancelled';
+            $booking->save();
+            return redirect()->back()->with('success', 'Pesanan berhasil dibatalkan.');
+        }
+
+        return redirect()->back()->with('error', 'Pesanan tidak dapat dibatalkan.');
+    }
 }

@@ -20,6 +20,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Forms\Components\ToggleButtons;
 use App\Filament\Resources\Bookings\Pages\EditBooking;
 use App\Filament\Resources\Bookings\Pages\ListBookings;
 use App\Filament\Resources\Bookings\Pages\CreateBooking;
@@ -32,75 +33,86 @@ class BookingResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'zondicon-calendar';
 
+    protected static ?string $navigationLabel = 'Booking';
+
     protected static ?string $recordTitleAttribute = 'Booking';
 
     public static function form(Schema $schema): Schema
     {
-        return BookingForm::configure($schema);
-        // return $schema
-        //     ->schema([
-        //         // KOTAK 1: DATA TAMU
-        //         Section::make('Informasi Tamu')
-        //             ->description('Data diri pemesan kamar')
-        //             ->icon('heroicon-o-user')
-        //             ->schema([
-        //                 Grid::make(2)->schema([
-        //                     TextInput::make('nama_tamu')
-        //                         ->label('Nama Lengkap')
-        //                         ->disabled()
-        //                         ->maxLength(255)
-        //                         ->dehydrated(false),
+        return $schema
+            ->schema([
+                
+                // KELOMPOK 1: KOLOM KANAN (STATUS & TANGGAL)
+                // Kita taruh status di atas atau samping agar mudah diakses
+                Section::make('Status Reservasi')
+                    ->description('Update status pembayaran/booking di sini')
+                    ->schema([
+                        ToggleButtons::make('status')
+                        ->label('Update Status')
+                        ->options([
+                            'pending'   => 'Menunggu',
+                            'confirmed' => 'Confirmed',
+                            'cancelled' => 'Cancelled',
+                        ])
+                        ->colors([
+                            'pending'   => 'warning',
+                            'confirmed' => 'success',
+                            'cancelled' => 'danger',
+                        ])
+                        ->icons([
+                            'pending'   => 'heroicon-o-clock',
+                            'confirmed' => 'heroicon-o-check-circle',
+                            'cancelled' => 'heroicon-o-x-circle',
+                        ])
+                        ->inline() // Agar tombolnya berjejer ke samping
+                        ->required(),
+                    ])
+                    ->columnSpan('full'), // Memanjang penuh
+
+                // KELOMPOK 2: DATA TAMU (Read Only / Disabled)
+                // Admin biasanya hanya melihat data ini, jarang mengubah nama tamu
+                Section::make('Informasi Tamu')
+                    ->icon('heroicon-o-user')
+                    ->schema([
+                        Grid::make(2)->schema([
+                            TextInput::make('nama_tamu')
+                                ->label('Nama Lengkap')
+                                ->disabled() // Tidak bisa diedit sembarangan
+                                ->dehydrated(false), // Agar tidak ikut terkirim saat save (opsional)
                             
-        //                     TextInput::make('nomor_hp')
-        //                         ->label('WhatsApp / HP')
-        //                         ->disabled()
-        //                         ->tel()
-        //                         ->maxLength(20),
-        //                 ]),
-        //             ]),
+                            TextInput::make('nomor_hp')
+                                ->label('WhatsApp')
+                                ->disabled()
+                                ->dehydrated(false),
+                        ]),
+                    ]),
 
-        //         // KOTAK 2: DETAIL BOOKING
-        //         Section::make('Detail Reservasi')
-        //             ->schema([
-        //                 Grid::make(2)->schema([
-        //                     // Pilihan Kamar (Relasi ke tabel kamars)
-        //                     Select::make('kamar_id')
-        //                         ->relationship('kamar', 'tipe_kamar') // Pastikan relasi di Model Booking benar
-        //                         ->label('Tipe Kamar')
-        //                         ->required()
-        //                         ->searchable()
-        //                         ->preload(),
+                // KELOMPOK 3: DETAIL KAMAR & TANGGAL
+                // Ini bisa diedit jika tamu minta reschedule
+                Section::make('Detail Reservasi')
+                    ->icon('heroicon-o-calendar-days')
+                    ->schema([
+                        Grid::make(2)->schema([
+                            Select::make('kamar_id')
+                                ->relationship('kamar', 'tipe_kamar')
+                                ->label('Tipe Kamar')
+                                ->required(),
 
-        //                     TextInput::make('jumlah_kamar')
-        //                         ->numeric()
-        //                         ->default(1)
-        //                         ->required(),
+                            TextInput::make('jumlah_kamar')
+                                ->numeric()
+                                ->default(1)
+                                ->required(),
 
-        //                     DatePicker::make('check_in')
-        //                         ->label('Tanggal Check-In')
-        //                         ->required(),
+                            DatePicker::make('check_in')
+                                ->label('Tanggal Check-In')
+                                ->required(),
 
-        //                     DatePicker::make('check_out')
-        //                         ->label('Tanggal Check-Out')
-        //                         ->required(),
-        //                 ]),
-        //             ]),
-
-        //         // KOTAK 3: STATUS (Untuk Admin Konfirmasi)
-        //         Section::make('Status Reservasi')
-        //             ->schema([
-        //                 Select::make('status')
-        //                     ->options([
-        //                         'pending' => 'Menunggu Konfirmasi',
-        //                         'confirmed' => 'Dikonfirmasi (Sudah Bayar)',
-        //                         'cancelled' => 'Dibatalkan',
-        //                     ])
-        //                     ->required()
-        //                     ->native(false) // Tampilan lebih modern
-        //                     ->selectablePlaceholder(false),
-        //             ])
-        //             ->columns(1),
-        //     ]);
+                            DatePicker::make('check_out')
+                                ->label('Tanggal Check-Out')
+                                ->required(),
+                        ]),
+                    ]),
+            ]);
     }
     
 

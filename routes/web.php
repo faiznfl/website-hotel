@@ -74,6 +74,7 @@ Route::middleware('auth')->group(function () {
     // Halaman Riwayat Pesanan
     Route::get('/riwayat-pesanan', [BookingController::class, 'history'])->name('booking.history');
 
+    Route::patch('/booking/{id}/cancel', [BookingController::class, 'cancel'])->name('booking.cancel');
 
     // --- FITUR BAWAAN BREEZE (PROFILE) ---
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
