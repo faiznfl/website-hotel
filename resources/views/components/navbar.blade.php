@@ -1,53 +1,79 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/material_blue.css">
+
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.css" rel="stylesheet" />
 
-{{-- WRAPPER ALPINE.JS (PENTING: x-data ini mengontrol pop-up) --}}
+{{-- STYLE CSS CUSTOM --}}
+<style>
+    /* CSS Kalender Dasar */
+    .flatpickr-calendar {
+        font-family: inherit !important;
+        border-radius: 12px !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+        z-index: 100000 !important;
+        /* Agar di atas modal */
+    }
+
+    /* PERBAIKAN CSS: 
+       Hanya class .date-full yang akan berwarna MERAH.
+       Tanggal masa lalu (yang cuma .flatpickr-disabled biasa) akan tetap abu-abu bawaan.
+    */
+    .flatpickr-day.date-full {
+        background-color: #fef2f2 !important;
+        /* Merah Muda */
+        color: #ef4444 !important;
+        /* Teks Merah */
+        border: 1px solid #fee2e2 !important;
+        font-weight: bold;
+        cursor: not-allowed;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        line-height: 1.2 !important;
+    }
+
+    /* Label "PENUH" hanya untuk date-full */
+    .flatpickr-day.date-full::after {
+        content: 'PENUH';
+        font-size: 7px;
+        font-weight: 800;
+        color: #dc2626;
+        margin-top: 2px;
+    }
+</style>
+
+{{-- WRAPPER ALPINE.JS --}}
 <div x-data="{ showGlobalBooking: false }">
 
-    {{-- 1. BAGIAN ATAS (USER MENU / LOGIN) --}}
-    {{-- PERBAIKAN: Tambahkan 'relative z-[60]' agar dropdown muncul DI ATAS navbar utama --}}
+    {{-- 1. TOP BAR --}}
     <div
         class="relative z-[60] hidden md:flex items-center justify-end px-4 py-2 bg-gray-50 border-b border-gray-100 space-x-3">
         @guest
-            {{-- Jika Belum Login --}}
             <a href="{{ route('login') }}"
-                class="text-xs font-bold text-gray-600 hover:text-yellow-600 transition tracking-wide">
-                SIGN IN <i class="fa-solid fa-right-to-bracket ml-1"></i>
-            </a>
+                class="text-xs font-bold text-gray-600 hover:text-yellow-600 transition tracking-wide">SIGN IN</a>
             <span class="text-gray-300">|</span>
             <a href="{{ route('register') }}"
-                class="text-xs font-bold text-gray-600 hover:text-yellow-600 transition tracking-wide">
-                REGISTER
-            </a>
+                class="text-xs font-bold text-gray-600 hover:text-yellow-600 transition tracking-wide">REGISTER</a>
         @endguest
-    
         @auth
-            {{-- Jika Sudah Login (Dropdown Menu) --}}
             <div class="relative" x-data="{ open: false }">
                 <button @click="open = !open"
                     class="flex items-center gap-2 text-sm font-bold text-gray-800 hover:text-yellow-600 transition">
-                    Halo, {{ Auth::user()->name }}
-                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                    Halo, {{ Auth::user()->name }} <i class="fa-solid fa-chevron-down text-xs"></i>
                 </button>
-
-                {{-- Dropdown Content --}}
                 <div x-show="open" @click.outside="open = false"
-                    class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 overflow-hidden"
+                    class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-xl border border-gray-100 py-2 z-50 overflow-hidden"
                     style="display: none;">
-
                     <a href="{{ route('booking.history') }}"
-                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-700 transition">
-                        <i class="fa-solid fa-clock-rotate-left mr-2"></i> Riwayat Pesanan
-                    </a>
-
+                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-700 transition">Riwayat
+                        Pesanan</a>
                     <div class="border-t border-gray-100 my-1"></div>
-
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit"
-                            class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition">
-                            <i class="fa-solid fa-right-from-bracket mr-2"></i> Logout
-                        </button>
+                            class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition">Logout</button>
                     </form>
                 </div>
             </div>
@@ -57,184 +83,312 @@
     {{-- 2. MAIN NAVBAR --}}
     <nav class="bg-white border-gray-200 shadow-sm sticky top-0 z-50">
         <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
-
-            {{-- Logo --}}
             <a href="{{ url('/') }}" class="flex items-center space-x-3 rtl:space-x-reverse">
                 <img src="{{ asset('img/logo-hotel.png') }}" class="h-12 md:h-16 w-auto" alt="Logo Hotel" />
             </a>
 
-            {{-- Mobile Menu Button --}}
-            <button data-collapse-toggle="navbar-default" type="button"
-                class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200"
-                aria-controls="navbar-default" aria-expanded="false">
-                <span class="sr-only">Open main menu</span>
-                <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-                    viewBox="0 0 17 14">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M1 1h15M1 7h15M1 13h15" />
-                </svg>
-            </button>
-
-            {{-- Menu Links --}}
-            <div class="hidden w-full md:block md:w-auto" id="navbar-default">
-                <ul
-                    class="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-white items-center">
-            
-                    {{-- 1. HOME --}}
-                    <li>
-                        <a href="{{ url('/') }}"
-                            class="block py-2 px-3 rounded md:p-0 transition-colors duration-300 {{ Request::is('/') ? 'text-yellow-500 font-bold' : 'text-gray-700 hover:text-yellow-600' }}">Home</a>
+            <div class="hidden w-full md:block md:w-auto">
+                <ul class="font-medium flex flex-col md:flex-row md:space-x-8 items-center">
+                    <li><a href="{{ url('/') }}" class="text-gray-700 hover:text-yellow-600 font-medium">Home</a></li>
+                    <li><a href="{{ url('/rooms') }}" class="text-gray-700 hover:text-yellow-600 font-medium">Rooms</a>
                     </li>
-            
-                    {{-- 2. ROOMS --}}
+                    <li><a href="{{ url('/meetings-events') }}"
+                            class="text-gray-700 hover:text-yellow-600 font-medium">Meetings</a></li>
+                    <li><a href="{{ url('/contact') }}"
+                            class="text-gray-700 hover:text-yellow-600 font-medium">Contact</a></li>
                     <li>
-                        <a href="{{ url('/rooms') }}"
-                            class="block py-2 px-3 rounded md:p-0 transition-colors duration-300 {{ Request::is('rooms*') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600' }}">Rooms & Suite</a>
-                    </li>
-            
-                    {{-- 3. MEETINGS (Ini yang tadi hilang) --}}
-                    <li>
-                        <a href="{{ url('/meetings-events') }}"
-                            class="block py-2 px-3 rounded md:p-0 transition-colors duration-300 {{ Request::is('meetings-events*') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600' }}">Meetings & Events</a>
-                    </li>
-            
-                    {{-- 4. GALLERY --}}
-                    <li>
-                        <a href="{{ url('/gallery') }}"
-                            class="block py-2 px-3 rounded md:p-0 transition-colors duration-300 {{ Request::is('gallery*') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600' }}">Gallery</a>
-                    </li>
-            
-                    {{-- 5. CONTACT (Ini juga tadi hilang) --}}
-                    <li>
-                        <a href="{{ url('/contact') }}"
-                            class="block py-2 px-3 rounded md:p-0 transition-colors duration-300 {{ Request::is('contact*') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600' }}">Contact</a>
-                    </li>
-            
-                    {{-- 6. TOMBOL BOOKING --}}
-                    <li class="mt-2 md:mt-0">
-                        @guest
-                            {{-- Jika Tamu (Belum Login) --}}
-                            <a href="{{ route('login') }}"
-                                class="block text-center text-white bg-yellow-500 hover:bg-yellow-900 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none transition-all shadow-md w-full md:w-auto uppercase">
-                                Login to Book
-                            </a>
-                        @endguest
-            
                         @auth
-                            {{-- Jika Member (Sudah Login) --}}
                             <button @click="showGlobalBooking = true" type="button"
-                                class="text-white bg-gray-900 hover:bg-yellow-600 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 w-full md:w-auto uppercase">
+                                class="text-white bg-gray-900 hover:bg-yellow-600 px-6 py-2.5 rounded-md text-sm font-bold shadow-sm transition-all transform hover:-translate-y-0.5 uppercase tracking-wide">
                                 Book Now
                             </button>
+                        @else
+                            <a href="{{ route('login') }}"
+                                class="text-white bg-yellow-500 hover:bg-yellow-600 px-6 py-2.5 rounded-md text-sm font-bold shadow-sm transition-all transform hover:-translate-y-0.5 uppercase tracking-wide">
+                                Login to Book
+                            </a>
                         @endauth
                     </li>
-            
                 </ul>
             </div>
         </div>
     </nav>
 
-
-    {{-- 3. GLOBAL BOOKING MODAL (POP-UP) --}}
-    <div x-show="showGlobalBooking" x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-        x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
-        x-transition:leave-end="opacity-0"
-        class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+    {{-- 3. GLOBAL BOOKING MODAL --}}
+    <div x-show="showGlobalBooking"
+        class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
         style="display: none;">
 
-        <div @click.outside="showGlobalBooking = false"
-            class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden relative">
+        {{-- Klik di luar modal akan menutup (kecuali klik kalender) --}}
+        <div @click.outside="if (!$event.target.closest('.flatpickr-calendar')) showGlobalBooking = false"
+            class="bg-white rounded-lg shadow-2xl w-full max-w-2xl overflow-hidden relative transition-all transform max-h-[90vh] flex flex-col">
 
-            {{-- Header Modal --}}
-            <div class="bg-gray-900 px-6 py-4 flex justify-between items-center">
-                <h3 class="text-lg font-bold text-white uppercase tracking-wider">Reservasi Kamar</h3>
-                <button @click="showGlobalBooking = false" class="text-gray-400 hover:text-white transition">
+            {{-- Header --}}
+            <div class="bg-gray-900 px-6 py-5 flex justify-between items-center flex-shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="bg-yellow-500 p-2 rounded text-gray-900">
+                        <i class="fa-solid fa-calendar-days text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-white uppercase tracking-wider">Reservasi Kamar</h3>
+                        <p class="text-[10px] text-gray-300">Isi form di bawah untuk memesan</p>
+                    </div>
+                </div>
+                <button @click="showGlobalBooking = false"
+                    class="text-gray-400 hover:text-white transition w-8 h-8 flex items-center justify-center rounded hover:bg-gray-700">
                     <i class="fa-solid fa-times text-xl"></i>
                 </button>
             </div>
 
-            {{-- Body Modal --}}
-            <div class="p-6">
-
-                {{-- Alert Error (Jika Validasi Gagal) --}}
+            {{-- Body --}}
+            <div class="p-8 overflow-y-auto">
                 @if (session('error'))
-                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4 text-sm">
-                        <strong class="font-bold">Error!</strong>
-                        <span class="block sm:inline">{{ session('error') }}</span>
+                    <div class="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 mb-6 text-sm rounded-sm">
+                        <strong class="font-bold">Gagal:</strong> {{ session('error') }}
                     </div>
                 @endif
 
-                <form action="{{ route('booking.store') }}" method="POST" class="space-y-4">
+                <form action="{{ route('booking.store') }}" method="POST" class="space-y-6">
                     @csrf
 
-                    {{-- Pilihan Kamar --}}
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Pilih Tipe Kamar</label>
-                        <select name="tipe_kamar_manual" required
-                            class="w-full bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2 text-sm focus:border-yellow-500 outline-none font-bold text-gray-800">
-                            <option value="" disabled selected>-- Pilih Kamar --</option>
-                            <option value="Superior Room">Superior Room</option>
-                            <option value="Deluxe Room">Deluxe Room</option>
-                            <option value="Family Room">Family Room</option>
-                        </select>
-                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
 
-                    {{-- Nama (AUTO FILL DARI USER LOGIN) --}}
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nama Lengkap</label>
-                        <input type="text" name="nama_tamu" value="{{ Auth::user()->name ?? '' }}" required
-                            placeholder="Nama Anda"
-                            class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-sm focus:border-yellow-500 outline-none font-medium text-gray-900">
-                    </div>
+                        {{-- KOLOM KIRI: Data Diri --}}
+                        <div class="space-y-5">
+                            {{-- Pilih Kamar --}}
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Pilih
+                                    Tipe Kamar</label>
+                                <div class="relative">
+                                    <div
+                                        class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                                        <i class="fa-solid fa-bed"></i>
+                                    </div>
+                                    <select id="kamar_id" name="kamar_id" required
+                                        class="pl-10 w-full bg-gray-50 border border-gray-200 rounded-md px-4 py-3 text-sm font-bold text-gray-800 focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none transition-all shadow-sm">
+                                        <option value="" disabled selected>-- Pilih Kamar --</option>
+                                        @foreach(\App\Models\Kamar::all() as $kamar)
+                                            <option value="{{ $kamar->id }}">{{ $kamar->tipe_kamar }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
 
-                    {{-- No HP --}}
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">WhatsApp</label>
-                        <input type="tel" name="nomor_hp" required placeholder="0812..."
-                            class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-sm focus:border-yellow-500 outline-none">
-                    </div>
+                            {{-- Nama --}}
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nama
+                                    Lengkap</label>
+                                <div class="relative">
+                                    <div
+                                        class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                                        <i class="fa-solid fa-user"></i>
+                                    </div>
+                                    <input type="text" name="nama_tamu" value="{{ Auth::user()->name ?? '' }}" required
+                                        class="pl-10 w-full bg-gray-50 border border-gray-200 rounded-md px-4 py-3 text-sm font-medium text-gray-900 focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none transition-all shadow-sm">
+                                </div>
+                            </div>
 
-                    {{-- Tanggal --}}
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Check-In</label>
-                            <input type="date" name="check_in" required
-                                class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-yellow-500 outline-none">
+                            {{-- WhatsApp --}}
+                            <div>
+                                <label
+                                    class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">WhatsApp</label>
+                                <div class="relative">
+                                    <div
+                                        class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                                        <i class="fa-brands fa-whatsapp"></i>
+                                    </div>
+                                    <input type="tel" name="nomor_hp" required placeholder="08..."
+                                        class="pl-10 w-full bg-gray-50 border border-gray-200 rounded-md px-4 py-3 text-sm font-medium text-gray-900 focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none transition-all shadow-sm">
+                                </div>
+                            </div>
+
+                            {{-- Jumlah Kamar --}}
+                            <div>
+                                <label
+                                    class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Jumlah
+                                    Kamar</label>
+                                <div class="relative">
+                                    <div
+                                        class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                                        <i class="fa-solid fa-door-open"></i>
+                                    </div>
+                                    <select name="jumlah_kamar"
+                                        class="pl-10 w-full bg-gray-50 border border-gray-200 rounded-md px-4 py-3 text-sm font-medium text-gray-900 focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none appearance-none transition-all shadow-sm">
+                                        <option value="1">1 Kamar</option>
+                                        <option value="2">2 Kamar</option>
+                                        <option value="3">3 Kamar</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Check-Out</label>
-                            <input type="date" name="check_out" required
-                                class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-yellow-500 outline-none">
+
+                        {{-- KOLOM KANAN: Tanggal --}}
+                        <div class="bg-blue-50/50 p-5 rounded-lg border border-blue-100 flex flex-col justify-between">
+                            <div>
+                                <h4 class="text-xs font-bold text-blue-800 uppercase mb-4 flex items-center gap-2">
+                                    <i class="fa-regular fa-calendar-days"></i> Jadwal Menginap
+                                </h4>
+
+                                <div class="space-y-4">
+                                    {{-- Check In --}}
+                                    <div>
+                                        <label
+                                            class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Check-In</label>
+                                        <div class="relative">
+                                            <input type="text" id="check_in" name="check_in" required
+                                                placeholder="Pilih Tanggal..." disabled
+                                                class="w-full bg-white border border-blue-200 rounded-md px-4 py-3 text-sm font-bold text-gray-800 focus:ring-2 focus:ring-blue-400 outline-none disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed shadow-sm transition-all text-center placeholder-gray-400">
+                                        </div>
+                                        <p id="loading-text"
+                                            class="text-[10px] text-blue-600 hidden mt-1 animate-pulse font-bold text-center">
+                                            <i class="fa-solid fa-spinner fa-spin mr-1"></i> Cek ketersediaan...
+                                        </p>
+                                    </div>
+
+                                    <div class="flex justify-center -my-2 relative z-10">
+                                        <div class="bg-blue-100 text-blue-600 rounded p-1 border-2 border-white">
+                                            <i class="fa-solid fa-arrow-down text-xs"></i>
+                                        </div>
+                                    </div>
+
+                                    {{-- Check Out --}}
+                                    <div>
+                                        <label
+                                            class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Check-Out</label>
+                                        <div class="relative">
+                                            <input type="text" id="check_out" name="check_out" required
+                                                placeholder="Pilih Tanggal..." disabled
+                                                class="w-full bg-white border border-blue-200 rounded-md px-4 py-3 text-sm font-bold text-gray-800 focus:ring-2 focus:ring-blue-400 outline-none disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed shadow-sm transition-all text-center placeholder-gray-400">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- LEGENDA --}}
+                            <div class="mt-4 pt-4 border-t border-blue-200">
+                                <div class="flex justify-between items-center text-[10px] text-gray-500">
+                                    <div class="flex items-center gap-1">
+                                        <div class="w-2 h-2 rounded bg-white border border-gray-400"></div>
+                                        <span>Available</span>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        {{-- Legend Merah --}}
+                                        <div class="w-2 h-2 rounded bg-red-100 border border-red-300"></div>
+                                        <span class="font-bold text-red-500">Penuh</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+
+                    </div> {{-- End Grid --}}
+
+                    <div class="border-t border-gray-100 pt-6 mt-4">
+                        <button type="submit"
+                            class="w-full bg-gray-900 text-white font-bold py-4 rounded-md hover:bg-yellow-500 hover:text-gray-900 transition-all shadow-xl hover:shadow-yellow-200 transform hover:-translate-y-1 flex justify-center items-center gap-3 text-sm tracking-widest uppercase">
+                            <span>Konfirmasi & Pesan</span>
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
                     </div>
 
-                    {{-- Jumlah Kamar --}}
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Jumlah Kamar</label>
-                        <select name="jumlah_kamar"
-                            class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-sm focus:border-yellow-500 outline-none">
-                            <option value="1">1 Kamar</option>
-                            <option value="2">2 Kamar</option>
-                            <option value="3">3 Kamar</option>
-                        </select>
-                    </div>
-
-                    {{-- Tombol Submit --}}
-                    <button type="submit"
-                        class="w-full bg-gray-900 text-white font-bold py-3 rounded-xl hover:bg-yellow-600 transition-all shadow-lg mt-2 flex justify-center items-center gap-2">
-                        <span>KIRIM RESERVASI</span>
-                        <i class="fa-solid fa-paper-plane"></i>
-                    </button>
-
-                    <p class="text-[10px] text-center text-gray-400">*Admin akan menghubungi WA Anda untuk konfirmasi.
-                    </p>
                 </form>
             </div>
         </div>
     </div>
-
 </div>
-{{-- End Wrapper x-data --}}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const kamarSelect = document.getElementById('kamar_id');
+        const checkInInput = document.getElementById('check_in');
+        const checkOutInput = document.getElementById('check_out');
+        const loadingText = document.getElementById('loading-text');
+
+        // Variabel untuk menyimpan tanggal yang benar-benar penuh (dari API)
+        let bookedDates = [];
+
+        // Setup Check-in
+        let checkInPicker = flatpickr(checkInInput, {
+            minDate: "today",
+            dateFormat: "Y-m-d",
+            disable: [],
+
+            // HOOK PENTING: Saat kalender dirender, cek tanggal mana yang FULL
+            onDayCreate: function (dObj, dStr, fp, dayElem) {
+                // Ubah tanggal element jadi string Y-m-d
+                // Hati-hati timezone, gunakan format bawaan flatpickr
+                let dateStr = fp.formatDate(dayElem.dateObj, "Y-m-d");
+
+                // Jika tanggal ini ada di daftar bookedDates, kasih class 'date-full' (MERAH)
+                if (bookedDates.includes(dateStr)) {
+                    dayElem.classList.add('date-full');
+                }
+            },
+
+            onChange: function (selectedDates, dateStr, instance) {
+                checkOutPicker.set('minDate', dateStr);
+                let nextDay = new Date(selectedDates[0]);
+                nextDay.setDate(nextDay.getDate() + 1);
+                checkOutPicker.setDate(nextDay);
+
+                checkOutInput.disabled = false;
+                checkOutInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
+                checkOutInput.placeholder = "Pilih tanggal pulang";
+
+                setTimeout(() => checkOutPicker.open(), 100);
+            }
+        });
+
+        // Setup Check-out
+        let checkOutPicker = flatpickr(checkOutInput, {
+            minDate: "today",
+            dateFormat: "Y-m-d",
+            // Lakukan hal yang sama untuk kalender checkout
+            onDayCreate: function (dObj, dStr, fp, dayElem) {
+                let dateStr = fp.formatDate(dayElem.dateObj, "Y-m-d");
+                if (bookedDates.includes(dateStr)) {
+                    dayElem.classList.add('date-full');
+                }
+            }
+        });
+
+        // Logic saat ganti kamar
+        kamarSelect.addEventListener('change', function () {
+            let kamarId = this.value;
+            if (!kamarId) return;
+
+            checkInInput.disabled = true;
+            checkInInput.value = "";
+            checkInInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+
+            checkOutInput.disabled = true;
+            checkOutInput.value = "";
+
+            loadingText.classList.remove('hidden');
+
+            fetch(`/api/check-availability?kamar_id=${kamarId}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Simpan data tanggal penuh ke variabel global
+                    bookedDates = data;
+
+                    // Disable tanggal di Flatpickr (agar tidak bisa diklik)
+                    // Flatpickr akan merender ulang (trigger onDayCreate)
+                    checkInPicker.set('disable', data);
+                    checkOutPicker.set('disable', data);
+
+                    checkInInput.disabled = false;
+                    checkInInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
+                    checkInInput.placeholder = "Pilih tanggal masuk";
+
+                    loadingText.classList.add('hidden');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    loadingText.textContent = "Gagal memuat data.";
+                });
+        });
+    });
+</script>
