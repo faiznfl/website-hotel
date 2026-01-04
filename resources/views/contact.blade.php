@@ -15,12 +15,9 @@
 
             {{-- 2. SECTION MAPS --}}
             <div class="w-full h-[400px] bg-gray-100 rounded-2xl overflow-hidden shadow-lg mb-16 border border-gray-200">
-                <iframe
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.266791602805!2d100.38834907501273!3d-0.9526867990381085!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2fd4b976ba8ad5bd%3A0xbced85b733fbfa74!2sHotel%20Rumah%20RB!5e0!3m2!1sid!2sid!4v1766650944239!5m2!1sid!2sid"
-                    {{-- GANTI LINK INI DENGAN MAPS ASLI --}} width="100%" height="100%" style="border:0;"
-                    allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
-                    class="grayscale hover:grayscale-0 transition-all duration-500"> {{-- Efek: Peta hitam putih, berwarna
-                    saat dihover --}}
+                <iframe src="https://maps.google.com/maps?q=Hotel%20Rumah%20RB%20Padang&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                    width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade" class="grayscale hover:grayscale-0 transition-all duration-500">
                 </iframe>
             </div>
 

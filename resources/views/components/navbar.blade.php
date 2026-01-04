@@ -202,7 +202,10 @@
                                     <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
                                         <i class="fa-brands fa-whatsapp"></i>
                                     </div>
+                                    
+                                    {{-- PERUBAHAN ADA DI SINI (Atribut value) --}}
                                     <input type="tel" name="nomor_hp" required placeholder="08..."
+                                        value="{{ old('nomor_hp', Auth::user()?->nomor_hp) }}" 
                                         class="pl-10 w-full bg-gray-50 border border-gray-200 rounded-md px-4 py-3 text-sm font-medium text-gray-900 focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none transition-all shadow-sm">
                                 </div>
                             </div>

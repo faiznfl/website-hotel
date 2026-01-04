@@ -29,15 +29,19 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        // 1. TAMBAHKAN VALIDASI NOMOR HP
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'nomor_hp' => ['required', 'string', 'max:15'], // <-- Tambahan Validasi
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        // 2. SIMPAN KE DATABASE
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'nomor_hp' => $request->nomor_hp, // <-- Tambahan Data
             'password' => Hash::make($request->password),
         ]);
 

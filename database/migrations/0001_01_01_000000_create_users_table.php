@@ -16,10 +16,15 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             
-            // --- TAMBAHKAN BARIS INI ---
-            // Kita set default 'user' agar yang daftar lewat web otomatis jadi user biasa
+            // --- TAMBAHAN KHUSUS HOTEL RUMAH RB ---
+            
+            // 1. Kolom Nomor HP (Wajib ada karena sudah ditambahkan di form Register)
+            $table->string('nomor_hp')->nullable(); 
+
+            // 2. Kolom Role (Untuk membedakan Admin dan Tamu biasa)
             $table->string('role')->default('user'); 
-            // ---------------------------
+            
+            // --------------------------------------
 
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
