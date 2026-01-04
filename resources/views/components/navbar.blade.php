@@ -6,6 +6,7 @@
 
 {{-- STYLE CSS CUSTOM --}}
 <style>
+    /* Z-Index Tinggi untuk Kalender */
     .flatpickr-calendar {
         font-family: inherit !important;
         border-radius: 4px !important;
@@ -13,6 +14,7 @@
         z-index: 100000 !important;
     }
     
+    /* Style Tanggal Penuh */
     .flatpickr-day.date-full {
         background-color: #fef2f2 !important;
         color: #ef4444 !important;
@@ -36,9 +38,13 @@
 </style>
 
 {{-- WRAPPER ALPINE.JS --}}
-<div x-data="{ showGlobalBooking: {{ session('error') || $errors->any() ? 'true' : 'false' }} }">
+{{-- 
+    PENTING: Tambahkan class="contents" di sini.
+    Ini membuat div ini tidak membatasi tinggi sticky navbar.
+--}}
+<div x-data="{ showGlobalBooking: {{ session('error') || $errors->any() ? 'true' : 'false' }} }" class="contents">
 
-    {{-- 1. TOP BAR --}}
+    {{-- 1. TOP BAR (Akan ikut scroll ke atas/menghilang) --}}
     <div class="relative z-[60] hidden md:flex items-center justify-end px-4 py-2 bg-gray-50 border-b border-gray-100 space-x-3">
         @guest
             <a href="{{ route('login') }}" class="text-xs font-bold text-gray-600 hover:text-yellow-600 transition tracking-wide">SIGN IN</a>
@@ -62,8 +68,8 @@
         @endauth
     </div>
 
-    {{-- 2. MAIN NAVBAR --}}
-    <nav class="bg-white border-gray-200 shadow-sm sticky top-0 z-50">
+    {{-- 2. MAIN NAVBAR (Akan STICKY/LENGKET di atas) --}}
+    <nav class="bg-white border-gray-200 shadow-sm sticky top-0 z-50 w-full transition-all duration-300">
         <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
             <a href="{{ url('/') }}" class="flex items-center space-x-3 rtl:space-x-reverse">
                 <img src="{{ asset('img/logo-hotel.png') }}" class="h-12 md:h-16 w-auto" alt="Logo Hotel" />
@@ -71,11 +77,44 @@
             
             <div class="hidden w-full md:block md:w-auto">
                 <ul class="font-medium flex flex-col md:flex-row md:space-x-8 items-center">
-                    <li><a href="{{ url('/') }}" class="text-gray-700 hover:text-yellow-600 font-medium">Home</a></li>
-                    <li><a href="{{ url('/rooms') }}" class="text-gray-700 hover:text-yellow-600 font-medium">Rooms & Suite</a></li>
-                    <li><a href="{{ url('/meetings-events') }}" class="text-gray-700 hover:text-yellow-600 font-medium">Meetings & Events</a></li>
-                    <li><a href="{{ url('/gallery') }}" class="text-gray-700 hover:text-yellow-600 font-medium">Gallery</a></li>
-                    <li><a href="{{ url('/contact') }}" class="text-gray-700 hover:text-yellow-600 font-medium">Contact</a></li>
+                    
+                    {{-- MENU ITEMS DENGAN LOGIKA ACTIVE --}}
+                    <li>
+                        <a href="{{ url('/') }}" 
+                           class="{{ Request::is('/') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600 font-medium' }}">
+                           Home
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{{ url('/rooms') }}" 
+                           class="{{ Request::is('rooms*') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600 font-medium' }}">
+                           Rooms & Suite
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{{ url('/meetings-events') }}" 
+                           class="{{ Request::is('meetings-events*') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600 font-medium' }}">
+                           Meetings & Events
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{{ url('/gallery') }}" 
+                           class="{{ Request::is('gallery*') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600 font-medium' }}">
+                           Gallery
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{{ url('/contact') }}" 
+                           class="{{ Request::is('contact*') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600 font-medium' }}">
+                           Contact
+                        </a>
+                    </li>
+
+                    {{-- TOMBOL BOOKING --}}
                     <li>
                         @auth
                             <button @click="showGlobalBooking = true" type="button" class="text-white bg-gray-900 hover:bg-yellow-600 px-6 py-2.5 rounded-md text-sm font-bold shadow-sm transition-all transform hover:-translate-y-0.5 uppercase tracking-wide">
@@ -97,9 +136,6 @@
         class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
         style="display: none;">
 
-        {{-- PERUBAHAN DI SINI: --}}
-        {{-- Saya MENGHAPUS @click.outside="..." --}}
-        {{-- Sekarang modal TIDAK AKAN tertutup jika klik di luar --}}
         <div class="bg-white rounded-lg shadow-2xl w-full max-w-2xl overflow-hidden relative transition-all transform max-h-[90vh] flex flex-col">
             
             {{-- Header --}}
@@ -113,7 +149,6 @@
                         <p class="text-[10px] text-gray-300">Isi form di bawah untuk memesan</p>
                     </div>
                 </div>
-                {{-- Hanya tombol ini yang bisa menutup modal --}}
                 <button @click="showGlobalBooking = false" class="text-gray-400 hover:text-white transition w-8 h-8 flex items-center justify-center rounded hover:bg-gray-700">
                     <i class="fa-solid fa-times text-xl"></i>
                 </button>
@@ -134,7 +169,6 @@
                         
                         {{-- KOLOM KIRI --}}
                         <div class="space-y-5">
-                            {{-- Pilih Kamar --}}
                             <div>
                                 <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Pilih Tipe Kamar</label>
                                 <div class="relative">
@@ -151,7 +185,6 @@
                                 </div>
                             </div>
 
-                            {{-- Nama --}}
                             <div>
                                 <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nama Lengkap</label>
                                 <div class="relative">
@@ -163,7 +196,6 @@
                                 </div>
                             </div>
 
-                            {{-- WhatsApp --}}
                             <div>
                                 <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">WhatsApp</label>
                                 <div class="relative">
@@ -175,7 +207,6 @@
                                 </div>
                             </div>
 
-                            {{-- Jumlah Kamar --}}
                             <div>
                                 <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Jumlah Kamar</label>
                                 <div class="relative">
@@ -191,7 +222,7 @@
                             </div>
                         </div>
 
-                        {{-- KOLOM KANAN: Tanggal --}}
+                        {{-- KOLOM KANAN --}}
                         <div class="bg-blue-50/50 p-5 rounded-lg border border-blue-100 flex flex-col justify-between">
                             <div>
                                 <h4 class="text-xs font-bold text-blue-800 uppercase mb-4 flex items-center gap-2">
@@ -199,7 +230,6 @@
                                 </h4>
                                 
                                 <div class="space-y-4">
-                                    {{-- Check In Navbar --}}
                                     <div>
                                         <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Check-In</label>
                                         <div class="relative">
@@ -217,7 +247,6 @@
                                         </div>
                                     </div>
 
-                                    {{-- Check Out Navbar --}}
                                     <div>
                                         <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Check-Out</label>
                                         <div class="relative">
@@ -228,7 +257,6 @@
                                 </div>
                             </div>
 
-                            {{-- LEGENDA --}}
                             <div class="mt-4 pt-4 border-t border-blue-200">
                                 <div class="flex justify-between items-center text-[10px] text-gray-500">
                                     <div class="flex items-center gap-1">
@@ -243,7 +271,7 @@
                             </div>
                         </div>
 
-                    </div> {{-- End Grid --}}
+                    </div>
 
                     <div class="border-t border-gray-100 pt-6 mt-4">
                         <button type="submit" class="w-full bg-gray-900 text-white font-bold py-4 rounded-md hover:bg-yellow-500 hover:text-gray-900 transition-all shadow-xl hover:shadow-yellow-200 transform hover:-translate-y-1 flex justify-center items-center gap-3 text-sm tracking-widest uppercase">
@@ -270,34 +298,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let bookedDates = [];
 
-    // Setup Check-in
     let checkInPicker = flatpickr(checkInInput, {
         minDate: "today",
         dateFormat: "Y-m-d",
         disable: [], 
-        
         onDayCreate: function(dObj, dStr, fp, dayElem) {
             let dateStr = fp.formatDate(dayElem.dateObj, "Y-m-d");
             if (bookedDates.includes(dateStr)) {
                 dayElem.classList.add('date-full');
             }
         },
-
         onChange: function(selectedDates, dateStr, instance) {
             checkOutPicker.set('minDate', dateStr);
             let nextDay = new Date(selectedDates[0]);
             nextDay.setDate(nextDay.getDate() + 1);
             checkOutPicker.setDate(nextDay);
-            
             checkOutInput.disabled = false;
             checkOutInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
             checkOutInput.placeholder = "Pilih tanggal pulang";
-            
             setTimeout(() => checkOutPicker.open(), 100);
         }
     });
 
-    // Setup Check-out
     let checkOutPicker = flatpickr(checkOutInput, {
         minDate: "today",
         dateFormat: "Y-m-d",
@@ -309,7 +331,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Logic saat ganti kamar
     kamarSelect.addEventListener('change', function() {
         let kamarId = this.value;
         if(!kamarId) return;
@@ -317,7 +338,6 @@ document.addEventListener('DOMContentLoaded', function() {
         checkInInput.disabled = true;
         checkInInput.value = "";
         checkInInput.classList.add('bg-gray-100', 'cursor-not-allowed');
-        
         checkOutInput.disabled = true;
         checkOutInput.value = "";
         
@@ -329,11 +349,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 bookedDates = data;
                 checkInPicker.set('disable', data);
                 checkOutPicker.set('disable', data);
-
                 checkInInput.disabled = false;
                 checkInInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
                 checkInInput.placeholder = "Pilih tanggal masuk";
-                
                 loadingText.classList.add('hidden');
             })
             .catch(error => {
