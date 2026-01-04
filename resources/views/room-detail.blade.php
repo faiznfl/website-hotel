@@ -7,19 +7,13 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/material_blue.css">
     <style>
-        /* Z-Index Super Tinggi agar Kalender di atas Modal */
         .flatpickr-calendar {
             font-family: inherit !important;
             border-radius: 4px !important;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
             z-index: 999999 !important;
-            /* Dibuat sangat tinggi */
         }
 
-        /* PERBAIKAN CSS: 
-               Hanya tanggal yang benar-benar PENUH (ada di database) yang merah.
-               Tanggal masa lalu (yesterday) tetap abu-abu biasa.
-            */
         .flatpickr-day.date-full {
             background-color: #fef2f2 !important;
             color: #ef4444 !important;
@@ -33,7 +27,6 @@
             line-height: 1.2 !important;
         }
 
-        /* Label "PENUH" */
         .flatpickr-day.date-full::after {
             content: 'PENUH';
             font-size: 7px;
@@ -105,7 +98,7 @@
                         </div>
 
                         {{-- WRAPPER MODAL --}}
-                        <div x-data="{ open: false }">
+                        <div x-data="{ open: {{ session('error') || $errors->any() ? 'true' : 'false' }} }">
 
                             @guest
                                 <a href="{{ route('login') }}"
@@ -127,9 +120,8 @@
                                 class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
                                 style="display: none;">
 
-                                {{-- Fix Click Outside (Ignore Calendar Clicks) --}}
-                                <div @click.outside="if (!$event.target.closest('.flatpickr-calendar')) open = false"
-                                    class="bg-white rounded-lg shadow-2xl w-full max-w-2xl overflow-hidden relative transition-all transform max-h-[90vh] flex flex-col">
+                                {{-- PERUBAHAN: MENGHAPUS @click.outside --}}
+                                <div class="bg-white rounded-lg shadow-2xl w-full max-w-2xl overflow-hidden relative transition-all transform max-h-[90vh] flex flex-col">
 
                                     {{-- Header --}}
                                     <div class="bg-gray-900 px-6 py-5 flex justify-between items-center flex-shrink-0">
@@ -138,8 +130,7 @@
                                                 <i class="fa-solid fa-bed text-lg"></i>
                                             </div>
                                             <div>
-                                                <h3 class="text-lg font-bold text-white uppercase tracking-wider">Booking
-                                                    {{ $room->tipe_kamar }}</h3>
+                                                <h3 class="text-lg font-bold text-white uppercase tracking-wider">Booking {{ $room->tipe_kamar }}</h3>
                                                 <p class="text-[10px] text-gray-300">Lengkapi data untuk reservasi</p>
                                             </div>
                                         </div>
@@ -151,9 +142,9 @@
 
                                     {{-- Body --}}
                                     <div class="p-8 overflow-y-auto">
+                                        
                                         @if (session('error'))
-                                            <div
-                                                class="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 mb-6 text-sm rounded-sm">
+                                            <div class="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 mb-6 text-sm rounded-sm">
                                                 <strong class="font-bold">Gagal:</strong> {{ session('error') }}
                                             </div>
                                         @endif
@@ -167,12 +158,9 @@
                                                 <div class="space-y-5">
                                                     {{-- Tipe Kamar (Read Only) --}}
                                                     <div>
-                                                        <label
-                                                            class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Tipe
-                                                            Kamar</label>
+                                                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Tipe Kamar</label>
                                                         <div class="relative">
-                                                            <div
-                                                                class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                                                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
                                                                 <i class="fa-solid fa-bed"></i>
                                                             </div>
                                                             <input type="text" value="{{ $room->tipe_kamar }}" disabled
@@ -183,27 +171,21 @@
 
                                                     {{-- Nama --}}
                                                     <div>
-                                                        <label
-                                                            class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nama
-                                                            Lengkap</label>
+                                                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nama Lengkap</label>
                                                         <div class="relative">
-                                                            <div
-                                                                class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                                                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
                                                                 <i class="fa-solid fa-user"></i>
                                                             </div>
-                                                            <input type="text" name="nama_tamu"
-                                                                value="{{ Auth::user()->name ?? '' }}" required
+                                                            <input type="text" name="nama_tamu" value="{{ Auth::user()->name ?? '' }}" required
                                                                 class="pl-10 w-full bg-gray-50 border border-gray-200 rounded-md px-4 py-3 text-sm font-medium text-gray-900 focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none shadow-sm">
                                                         </div>
                                                     </div>
 
                                                     {{-- WhatsApp --}}
                                                     <div>
-                                                        <label
-                                                            class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">WhatsApp</label>
+                                                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">WhatsApp</label>
                                                         <div class="relative">
-                                                            <div
-                                                                class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                                                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
                                                                 <i class="fa-brands fa-whatsapp"></i>
                                                             </div>
                                                             <input type="tel" name="nomor_hp" required placeholder="08..."
@@ -213,16 +195,12 @@
 
                                                     {{-- Jumlah Kamar --}}
                                                     <div>
-                                                        <label
-                                                            class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Jumlah
-                                                            Kamar</label>
+                                                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Jumlah Kamar</label>
                                                         <div class="relative">
-                                                            <div
-                                                                class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                                                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
                                                                 <i class="fa-solid fa-door-open"></i>
                                                             </div>
-                                                            <select name="jumlah_kamar"
-                                                                class="pl-10 w-full bg-gray-50 border border-gray-200 rounded-md px-4 py-3 text-sm font-medium text-gray-900 focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none appearance-none shadow-sm">
+                                                            <select name="jumlah_kamar" class="pl-10 w-full bg-gray-50 border border-gray-200 rounded-md px-4 py-3 text-sm font-medium text-gray-900 focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none appearance-none shadow-sm">
                                                                 <option value="1">1 Kamar</option>
                                                                 <option value="2">2 Kamar</option>
                                                                 <option value="3">3 Kamar</option>
@@ -232,46 +210,38 @@
                                                 </div>
 
                                                 {{-- KANAN (Kalender) --}}
-                                                <div
-                                                    class="bg-blue-50/50 p-5 rounded-lg border border-blue-100 flex flex-col justify-between">
+                                                <div class="bg-blue-50/50 p-5 rounded-lg border border-blue-100 flex flex-col justify-between">
                                                     <div>
-                                                        <h4
-                                                            class="text-xs font-bold text-blue-800 uppercase mb-4 flex items-center gap-2">
+                                                        <h4 class="text-xs font-bold text-blue-800 uppercase mb-4 flex items-center gap-2">
                                                             <i class="fa-regular fa-calendar-days"></i> Jadwal Menginap
                                                         </h4>
 
                                                         <div class="space-y-4">
                                                             {{-- Check In Detail --}}
                                                             <div>
-                                                                <label
-                                                                    class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Check-In</label>
+                                                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Check-In</label>
                                                                 <div class="relative">
                                                                     <input type="text" id="check_in_detail" name="check_in"
                                                                         required placeholder="Pilih Tanggal..." disabled
                                                                         class="w-full bg-white border border-blue-200 rounded-md px-4 py-3 text-sm font-bold text-gray-800 focus:ring-2 focus:ring-blue-400 outline-none disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed shadow-sm transition-all text-center placeholder-gray-400">
                                                                 </div>
-                                                                <p id="loading-text-detail"
-                                                                    class="text-[10px] text-blue-600 hidden mt-1 animate-pulse font-bold text-center">
-                                                                    <i class="fa-solid fa-spinner fa-spin mr-1"></i> Cek
-                                                                    ketersediaan...
+                                                                <p id="loading-text-detail" class="text-[10px] text-blue-600 hidden mt-1 animate-pulse font-bold text-center">
+                                                                    <i class="fa-solid fa-spinner fa-spin mr-1"></i> Cek ketersediaan...
                                                                 </p>
                                                             </div>
 
                                                             <div class="flex justify-center -my-2 relative z-10">
-                                                                <div
-                                                                    class="bg-blue-100 text-blue-600 rounded p-1 border-2 border-white">
+                                                                <div class="bg-blue-100 text-blue-600 rounded p-1 border-2 border-white">
                                                                     <i class="fa-solid fa-arrow-down text-xs"></i>
                                                                 </div>
                                                             </div>
 
                                                             {{-- Check Out Detail --}}
                                                             <div>
-                                                                <label
-                                                                    class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Check-Out</label>
+                                                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Check-Out</label>
                                                                 <div class="relative">
-                                                                    <input type="text" id="check_out_detail"
-                                                                        name="check_out" required
-                                                                        placeholder="Pilih Tanggal..." disabled
+                                                                    <input type="text" id="check_out_detail" name="check_out"
+                                                                        required placeholder="Pilih Tanggal..." disabled
                                                                         class="w-full bg-white border border-blue-200 rounded-md px-4 py-3 text-sm font-bold text-gray-800 focus:ring-2 focus:ring-blue-400 outline-none disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed shadow-sm transition-all text-center placeholder-gray-400">
                                                                 </div>
                                                             </div>
@@ -279,19 +249,13 @@
                                                     </div>
 
                                                     <div class="mt-4 pt-4 border-t border-blue-200">
-                                                        <div
-                                                            class="flex justify-between items-center text-[10px] text-gray-500">
+                                                        <div class="flex justify-between items-center text-[10px] text-gray-500">
                                                             <div class="flex items-center gap-1">
-                                                                <div
-                                                                    class="w-2 h-2 rounded bg-white border border-gray-400">
-                                                                </div>
+                                                                <div class="w-2 h-2 rounded bg-white border border-gray-400"></div>
                                                                 <span>Available</span>
                                                             </div>
                                                             <div class="flex items-center gap-1">
-                                                                {{-- Legend Merah --}}
-                                                                <div
-                                                                    class="w-2 h-2 rounded bg-red-100 border border-red-300">
-                                                                </div>
+                                                                <div class="w-2 h-2 rounded bg-red-100 border border-red-300"></div>
                                                                 <span class="font-bold text-red-500">Penuh</span>
                                                             </div>
                                                         </div>
@@ -330,16 +294,16 @@
 
     {{-- SCRIPT KHUSUS DETAIL --}}
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            
+            // --- LOGIKA FLATPICKR ---
+            
             const kamarId = "{{ $room->id }}";
-
-            // ID Unik agar tidak bentrok dengan Navbar
             const checkInInput = document.getElementById('check_in_detail');
             const checkOutInput = document.getElementById('check_out_detail');
             const loadingText = document.getElementById('loading-text-detail');
-
-            // Variabel penampung tanggal penuh
             let bookedDates = [];
 
             // Setup Check-in
@@ -348,7 +312,7 @@
                 dateFormat: "Y-m-d",
                 disable: [],
 
-                // HOOK: Warnai tanggal penuh dengan MERAH, abaikan tanggal kemarin
+                // HOOK: Warnai tanggal penuh dengan MERAH
                 onDayCreate: function (dObj, dStr, fp, dayElem) {
                     let dateStr = fp.formatDate(dayElem.dateObj, "Y-m-d");
                     if (bookedDates.includes(dateStr)) {
@@ -382,17 +346,14 @@
                 }
             });
 
-            // AUTO LOAD: Langsung cek saat halaman dibuka
+            // AUTO LOAD
             if (kamarId) {
                 loadingText.classList.remove('hidden');
 
                 fetch(`/api/check-availability?kamar_id=${kamarId}`)
                     .then(response => response.json())
                     .then(data => {
-                        // Simpan data ke variabel global
                         bookedDates = data;
-
-                        // Disable tanggal di Flatpickr
                         checkInPicker.set('disable', data);
                         checkOutPicker.set('disable', data);
 
