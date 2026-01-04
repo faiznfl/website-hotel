@@ -72,8 +72,9 @@
             <div class="hidden w-full md:block md:w-auto">
                 <ul class="font-medium flex flex-col md:flex-row md:space-x-8 items-center">
                     <li><a href="{{ url('/') }}" class="text-gray-700 hover:text-yellow-600 font-medium">Home</a></li>
-                    <li><a href="{{ url('/rooms') }}" class="text-gray-700 hover:text-yellow-600 font-medium">Rooms</a></li>
-                    <li><a href="{{ url('/meetings-events') }}" class="text-gray-700 hover:text-yellow-600 font-medium">Meetings</a></li>
+                    <li><a href="{{ url('/rooms') }}" class="text-gray-700 hover:text-yellow-600 font-medium">Rooms & Suite</a></li>
+                    <li><a href="{{ url('/meetings-events') }}" class="text-gray-700 hover:text-yellow-600 font-medium">Meetings & Events</a></li>
+                    <li><a href="{{ url('/gallery') }}" class="text-gray-700 hover:text-yellow-600 font-medium">Gallery</a></li>
                     <li><a href="{{ url('/contact') }}" class="text-gray-700 hover:text-yellow-600 font-medium">Contact</a></li>
                     <li>
                         @auth
