@@ -35,16 +35,18 @@
         color: #dc2626;
         margin-top: 2px;
     }
+
+    /* FIX PENTING: Agar SweetAlert Muncul DI ATAS Modal Booking */
+    div:where(.swal2-container) {
+        z-index: 100001 !important; /* Harus lebih tinggi dari z-index modal (9999) */
+    }
 </style>
 
 {{-- WRAPPER ALPINE.JS --}}
-{{-- 
-    PENTING: Tambahkan class="contents" di sini.
-    Ini membuat div ini tidak membatasi tinggi sticky navbar.
---}}
+{{-- PENTING: Logic ini membuat modal tetap terbuka saat reload karena error --}}
 <div x-data="{ showGlobalBooking: {{ session('error') || $errors->any() ? 'true' : 'false' }} }" class="contents">
 
-    {{-- 1. TOP BAR (Akan ikut scroll ke atas/menghilang) --}}
+    {{-- 1. TOP BAR --}}
     <div class="relative z-[60] hidden md:flex items-center justify-end px-4 py-2 bg-gray-50 border-b border-gray-100 space-x-3">
         @guest
             <a href="{{ route('login') }}" class="text-xs font-bold text-gray-600 hover:text-yellow-600 transition tracking-wide">SIGN IN</a>
@@ -68,7 +70,7 @@
         @endauth
     </div>
 
-    {{-- 2. MAIN NAVBAR (Akan STICKY/LENGKET di atas) --}}
+    {{-- 2. MAIN NAVBAR (STICKY) --}}
     <nav class="bg-white border-gray-200 shadow-sm sticky top-0 z-50 w-full transition-all duration-300">
         <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
             <a href="{{ url('/') }}" class="flex items-center space-x-3 rtl:space-x-reverse">
@@ -77,44 +79,11 @@
             
             <div class="hidden w-full md:block md:w-auto">
                 <ul class="font-medium flex flex-col md:flex-row md:space-x-8 items-center">
-                    
-                    {{-- MENU ITEMS DENGAN LOGIKA ACTIVE --}}
-                    <li>
-                        <a href="{{ url('/') }}" 
-                           class="{{ Request::is('/') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600 font-medium' }}">
-                           Home
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="{{ url('/rooms') }}" 
-                           class="{{ Request::is('rooms*') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600 font-medium' }}">
-                           Rooms & Suite
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="{{ url('/meetings-events') }}" 
-                           class="{{ Request::is('meetings-events*') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600 font-medium' }}">
-                           Meetings & Events
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="{{ url('/gallery') }}" 
-                           class="{{ Request::is('gallery*') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600 font-medium' }}">
-                           Gallery
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="{{ url('/contact') }}" 
-                           class="{{ Request::is('contact*') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600 font-medium' }}">
-                           Contact
-                        </a>
-                    </li>
-
-                    {{-- TOMBOL BOOKING --}}
+                    <li><a href="{{ url('/') }}" class="{{ Request::is('/') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600 font-medium' }}">Home</a></li>
+                    <li><a href="{{ url('/rooms') }}" class="{{ Request::is('rooms*') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600 font-medium' }}">Rooms & Suite</a></li>
+                    <li><a href="{{ url('/meetings-events') }}" class="{{ Request::is('meetings-events*') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600 font-medium' }}">Meetings & Events</a></li>
+                    <li><a href="{{ url('/gallery') }}" class="{{ Request::is('gallery*') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600 font-medium' }}">Gallery</a></li>
+                    <li><a href="{{ url('/contact') }}" class="{{ Request::is('contact*') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600 font-medium' }}">Contact</a></li>
                     <li>
                         @auth
                             <button @click="showGlobalBooking = true" type="button" class="text-white bg-gray-900 hover:bg-yellow-600 px-6 py-2.5 rounded-md text-sm font-bold shadow-sm transition-all transform hover:-translate-y-0.5 uppercase tracking-wide">
@@ -156,18 +125,14 @@
 
             {{-- Body --}}
             <div class="p-8 overflow-y-auto">
-                @if (session('error'))
-                    <div class="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 mb-6 text-sm rounded-sm">
-                        <strong class="font-bold">Gagal:</strong> {{ session('error') }}
-                    </div>
-                @endif
+                
+                {{-- NOTE: Alert HTML dihapus, diganti SweetAlert di bawah --}}
 
                 <form action="{{ route('booking.store') }}" method="POST" class="space-y-6">
                     @csrf
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        
-                        {{-- KOLOM KIRI --}}
+                        {{-- KIRI --}}
                         <div class="space-y-5">
                             <div>
                                 <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Pilih Tipe Kamar</label>
@@ -202,8 +167,6 @@
                                     <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
                                         <i class="fa-brands fa-whatsapp"></i>
                                     </div>
-                                    
-                                    {{-- PERUBAHAN ADA DI SINI (Atribut value) --}}
                                     <input type="tel" name="nomor_hp" required placeholder="08..."
                                         value="{{ old('nomor_hp', Auth::user()?->nomor_hp) }}" 
                                         class="pl-10 w-full bg-gray-50 border border-gray-200 rounded-md px-4 py-3 text-sm font-medium text-gray-900 focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none transition-all shadow-sm">
@@ -225,7 +188,7 @@
                             </div>
                         </div>
 
-                        {{-- KOLOM KANAN --}}
+                        {{-- KANAN --}}
                         <div class="bg-blue-50/50 p-5 rounded-lg border border-blue-100 flex flex-col justify-between">
                             <div>
                                 <h4 class="text-xs font-bold text-blue-800 uppercase mb-4 flex items-center gap-2">
@@ -273,7 +236,6 @@
                                 </div>
                             </div>
                         </div>
-
                     </div>
 
                     <div class="border-t border-gray-100 pt-6 mt-4">
@@ -291,9 +253,36 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+{{-- SCRIPT SWEETALERT2 --}}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    
+    // --- 1. SWEETALERT LOGIC ---
+    @if(session('error'))
+        Swal.fire({
+            icon: 'error',
+            title: 'Maaf, Reservasi Gagal!',
+            text: "{{ session('error') }}",
+            confirmButtonText: 'Coba Pilih Tanggal Lain',
+            confirmButtonColor: '#111827', // Warna Hitam (Gray-900)
+            iconColor: '#ef4444' // Warna Merah
+        });
+    @endif
+
+    @if($errors->any())
+        Swal.fire({
+            icon: 'warning',
+            title: 'Periksa Data Anda',
+            html: '<ul class="text-left text-sm text-gray-600 list-disc pl-5">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>',
+            confirmButtonText: 'Lengkapi Form',
+            confirmButtonColor: '#111827'
+        });
+    @endif
+
+
+    // --- 2. FLATPICKR LOGIC ---
     const kamarSelect = document.getElementById('kamar_id_navbar');
     const checkInInput = document.getElementById('check_in_navbar');
     const checkOutInput = document.getElementById('check_out_navbar');
