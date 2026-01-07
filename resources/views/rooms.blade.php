@@ -52,7 +52,7 @@
                                 @endif
 
                                 <span class="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded">
-                                    <i class="fa-solid fa-bed text-yellow-600"></i> {{ $kamar->beds }} Bed
+                                    <i class="fa-solid fa-bed text-yellow-600"></i> {{ $kamar->beds }}
                                 </span>
 
                                 <span class="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded">

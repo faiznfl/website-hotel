@@ -10,107 +10,146 @@ use Filament\Schemas\Schema;
 use Filament\Actions\EditAction;
 use Filament\Resources\Resource;
 use Filament\Actions\DeleteAction;
-use Filament\Forms\Components\Grid;
-use Filament\Support\Icons\Heroicon;
 use Filament\Actions\BulkActionGroup;
 use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Grid;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Schemas\Components\Group;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Forms\Components\FileUpload;
-use Filament\Schemas\Components\Grid as enter;
+use Filament\Forms\Components\RichEditor;
 use App\Filament\Resources\Kamars\Pages\EditKamar;
 use App\Filament\Resources\Kamars\Pages\ListKamars;
 use App\Filament\Resources\Kamars\Pages\CreateKamar;
-use App\Filament\Resources\Kamars\Schemas\KamarForm;
-use App\Filament\Resources\Kamars\Tables\KamarsTable;
 use Filament\Schemas\Components\Utilities\Set as set;
 
 class KamarResource extends Resource
 {
     protected static ?string $model = Kamar::class;
 
-    protected static string|BackedEnum|null $navigationIcon = 'gmdi-meeting-room'; // Saya ubah icon default karena gmdi kadang perlu plugin khusus
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-home-modern';
 
-    protected static ?string $recordTitleAttribute = 'tipe_kamar'; // Ganti jadi tipe_kamar biar pencarian enak
-    protected static ?string $navigationLabel = 'Kamar';
+    protected static ?string $navigationLabel = 'Data Kamar';
+
+    protected static ?string $recordTitleAttribute = 'tipe_kamar';
 
     public static function form(Schema $schema): Schema
     {
         return $schema
-            ->components([
+            ->columns(3) // BAGI LAYAR JADI 3 KOLOM
+            ->schema([
                 
-                // 2. MODIFIKASI SELECT TIPE KAMAR
-                Select::make('tipe_kamar')
-                    ->options([
-                        'Superior Room' => 'Superior Room',
-                        'Deluxe Room' => 'Deluxe Room',
-                        'Family Room' => 'Family Room'
-                    ])
-                    ->label('Tipe Kamar')
-                    ->placeholder('Pilih Tipe Kamar')
-                    ->required()
-                    ->live() // Agar bereaksi saat dipilih
-                    ->afterStateUpdated(fn (set $set, ?string $state) => $set('slug', Str::slug($state))), // Auto Generate Slug
-
-                // 3. TAMBAHKAN INPUT SLUG DISINI
-                TextInput::make('slug')
-                    ->label('URL Slug (Otomatis)')
-                    ->disabled()
-                    ->dehydrated()
-                    ->required()
-                    ->unique(Kamar::class, 'slug', ignoreRecord: true),
-
-                TextInput::make('harga')
-                    ->label('Harga Kamar Per Malam')
-                    ->placeholder('Masukan Harga Per Malam')
-                    ->prefix('Rp')
-                    ->numeric()
-                    ->required(),
-                    
-                FileUpload::make('foto')
-                    ->image()
-                    ->imageEditor()
-                    ->imagePreviewHeight('250')
-                    ->directory('rooms') // Folder penyimpanan
-                    ->preserveFilenames()
-                    ->maxSize(10240)
-                    ->label('Foto Kamar')
-                    ->placeholder('Masukkan Foto Kamar')
-                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/jpg'])
-                    ->visibility('public')
-                    ->disk('public')
-                    ->required(),
-
-                    Textarea::make('deskripsi')
-                    ->label('Deskripsi Kamar')
-                    ->rows(4)
-                    ->columnSpanFull(),
-
-                    Textarea::make('fasilitas')
-                    ->label('Fasilitas (Pisahkan dengan koma)')
-                    ->placeholder('Contoh: Wifi, AC, TV Kabel, Sarapan')
-                    ->helperText('Tulis fasilitas dipisahkan dengan tanda koma (,)')
-                    ->columnSpanFull(),
-
-                enter::make(4)
+                // --- KOLOM KIRI (2 BAGIAN): DETAIL UTAMA ---
+                Group::make()
+                    ->columnSpan(['lg' => 2])
                     ->schema([
-                        TextInput::make('max_dewasa')
-                            ->numeric()
-                            ->default(2)
-                            ->label('Max Dewasa'),
-                        TextInput::make('max_anak')
-                            ->numeric()
-                            ->default(1)
-                            ->label('Max Anak'),
-                        TextInput::make('beds')
-                            ->numeric() // Sebaiknya numeric jika input angka, atau text jika "2 King Size"
-                            ->label('Jml Kasur'),
-                        TextInput::make('baths')
-                            ->numeric()
-                            ->label('Jml Kamar Mandi'),
+                        
+                        // SECTION 1: INFO DASAR
+                        Section::make('Informasi Kamar')
+                            ->description('Nama kamar, deskripsi, dan media.')
+                            ->icon('heroicon-m-information-circle')
+                            ->schema([
+                                Grid::make(2)->schema([
+                                    Select::make('tipe_kamar')
+                                        ->label('Tipe Kamar')
+                                        ->options([
+                                            'Superior Room' => 'Superior Room',
+                                            'Deluxe Room'   => 'Deluxe Room',
+                                            'Family Room'   => 'Family Room'
+                                        ])
+                                        ->prefixIcon('heroicon-m-tag')
+                                        ->required()
+                                        ->live()
+                                        ->afterStateUpdated(fn (set $set, ?string $state) => $set('slug', Str::slug($state))),
+
+                                    TextInput::make('slug')
+                                        ->label('Link Slug')
+                                        ->prefix('hotel.com/rooms/')
+                                        ->disabled()
+                                        ->dehydrated()
+                                        ->required()
+                                        ->unique(Kamar::class, 'slug', ignoreRecord: true),
+                                ]),
+
+                                RichEditor::make('deskripsi') // Pakai RichEditor biar bisa Bold/List
+                                    ->label('Deskripsi Lengkap')
+                                    ->toolbarButtons([
+                                        'bold', 'italic', 'bulletList', 'orderedList', 'undo', 'redo',
+                                    ])
+                                    ->columnSpanFull(),
+
+                                TagsInput::make('fasilitas') // UX BAGUS: Ketik koma/enter jadi tag
+                                    ->label('Fasilitas')
+                                    ->placeholder('Ketik fasilitas lalu tekan Enter (Cth: Wifi, AC, TV)')
+                                    ->separator(',') // Simpan ke DB sebagai string dipisah koma
+                                    ->splitKeys(['Tab', ','])
+                                    ->columnSpanFull(),
+                            ]),
+
+                        // SECTION 2: MEDIA FOTO
+                        Section::make('Media')
+                            ->schema([
+                                FileUpload::make('foto')
+                                    ->hiddenLabel()
+                                    ->image()
+                                    ->imageEditor()
+                                    ->imagePreviewHeight('250')
+                                    ->directory('rooms')
+                                    ->preserveFilenames()
+                                    ->maxSize(10240) // 10MB
+                                    ->columnSpanFull(),
+                            ]),
+                    ]),
+
+                // --- KOLOM KANAN (1 BAGIAN): HARGA & SPESIFIKASI ---
+                Group::make()
+                    ->columnSpan(['lg' => 1])
+                    ->schema([
+                        
+                        // SECTION HARGA
+                        Section::make('Harga')
+                            ->schema([
+                                TextInput::make('harga')
+                                    ->label('Harga Per Malam')
+                                    ->prefix('Rp')
+                                    ->numeric()
+                                    ->required(),
+                            ]),
+
+                        // SECTION KAPASITAS
+                        Section::make('Spesifikasi')
+                            ->icon('heroicon-m-adjustments-horizontal')
+                            ->schema([
+                                Grid::make(2)->schema([
+                                    TextInput::make('max_dewasa')
+                                        ->label('Dewasa')
+                                        ->numeric()
+                                        ->default(2)
+                                        ->prefixIcon('heroicon-m-user'),
+                                    
+                                    TextInput::make('max_anak')
+                                        ->label('Anak')
+                                        ->numeric()
+                                        ->default(1)
+                                        ->prefixIcon('heroicon-m-face-smile'),
+                                ]),
+
+                                TextInput::make('beds')
+                                    ->label('Jenis Kasur')
+                                    ->placeholder('Cth: 1 King Bed')
+                                    ->prefixIcon('heroicon-m-archive-box'), // Ikon kasur/box
+
+                                TextInput::make('baths')
+                                    ->label('Kamar Mandi')
+                                    ->numeric()
+                                    ->suffix('Unit')
+                                    ->prefixIcon('heroicon-m-beaker'), // Ikon bath/air
+                            ]),
                     ]),
             ]);
     }
@@ -120,33 +159,47 @@ class KamarResource extends Resource
         return $table
             ->columns([
                 ImageColumn::make('foto')
-                    ->label('Foto Kamar')
+                    ->label('Foto')
                     ->visibility('public')
                     ->disk('public')
-                    ->square(), // Biar rapi
+                    ->square()
+                    ->size(60), // Ukuran thumbnail pas
                 
                 TextColumn::make('tipe_kamar')
+                    ->label('Tipe Kamar')
                     ->searchable()
                     ->sortable()
-                    ->weight('bold'),
+                    ->weight('bold')
+                    ->badge() // Tampil sebagai Badge warna-warni
+                    ->color(fn (string $state): string => match ($state) {
+                        'Superior Room' => 'info',
+                        'Deluxe Room'   => 'warning',
+                        'Family Room'   => 'success',
+                        default         => 'gray',
+                    }),
                 
-                // Menampilkan Slug di Tabel (Opsional, biar tau linknya apa)
-                TextColumn::make('slug')
-                    ->label('Link URL')
-                    ->color('gray')
-                    ->limit(20),
-
                 TextColumn::make('harga') 
-                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.'))
-                    ->sortable(),
+                    ->label('Harga/Malam')
+                    ->money('IDR', locale: 'id') // Format Rp otomatis
+                    ->sortable()
+                    ->weight('bold')
+                    ->color('success'),
                 
                 TextColumn::make('capacity')
                     ->label('Kapasitas')
-                    ->getStateUsing(fn ($record) => "{$record->max_dewasa} Dewasa, {$record->max_anak} Anak"),
+                    ->getStateUsing(fn ($record) => "{$record->max_dewasa} Dewasa, {$record->max_anak} Anak")
+                    ->color('gray'),
+
+                TextColumn::make('fasilitas')
+                    ->label('Fasilitas')
+                    ->limit(30)
+                    ->icon('heroicon-m-sparkles')
+                    ->toggleable(isToggledHiddenByDefault: true), // Disembunyikan default biar tabel ga penuh
             ])
-            ->actions([ // Saya ubah recordActions jadi actions (Filament v3 standar)
-                EditAction::make(),
-                DeleteAction::make(),
+            ->defaultSort('tipe_kamar', 'asc')
+            ->actions([
+                EditAction::make()->iconButton(),   // Tombol jadi icon pencil
+                DeleteAction::make()->iconButton(), // Tombol jadi icon tong sampah
             ])
             ->bulkActions([
                 BulkActionGroup::make([
@@ -157,9 +210,7 @@ class KamarResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array

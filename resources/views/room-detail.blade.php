@@ -66,10 +66,10 @@
                 <div class="lg:col-span-2 space-y-8">
                     <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
                         <h3 class="text-xl font-bold text-gray-900 mb-4 border-l-4 border-yellow-500 pl-4">DESCRIPTION</h3>
-                        <p class="text-gray-600 leading-relaxed text-justify">
-                            {{ $room->deskripsi }}
-                        </p>
-                    </div>
+                            <div class="text-gray-600 leading-relaxed text-justify">
+                                {!! $room->deskripsi !!}
+                            </div>
+                        </div>
 
                     <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
                         <h3 class="text-xl font-bold text-gray-900 mb-6 border-l-4 border-yellow-500 pl-4">AMENITIES</h3>
@@ -142,7 +142,7 @@
 
                                     {{-- Body --}}
                                     <div class="p-8 overflow-y-auto">
-                                        
+
                                         @if (session('error'))
                                             <div class="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 mb-6 text-sm rounded-sm">
                                                 <strong class="font-bold">Gagal:</strong> {{ session('error') }}
@@ -300,9 +300,9 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            
+
             // --- LOGIKA FLATPICKR ---
-            
+
             const kamarId = "{{ $room->id }}";
             const checkInInput = document.getElementById('check_in_detail');
             const checkOutInput = document.getElementById('check_out_detail');
