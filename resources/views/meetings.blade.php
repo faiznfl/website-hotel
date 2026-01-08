@@ -27,10 +27,10 @@
                                 class="w-full h-full object-cover transform transition duration-700 group-hover:scale-110">
 
                             {{-- Badge Kapasitas --}}
-                            <div
+                            {{-- <div
                                 class="absolute top-4 right-4 bg-yellow-500 text-white text-xs font-bold px-4 py-2 rounded-full shadow-md uppercase tracking-wide">
                                 {{ $meeting->kapasitas }}
-                            </div>
+                            </div> --}}
                         </div>
 
                         {{-- Konten --}}
@@ -38,9 +38,9 @@
                             <h3 class="text-2xl font-bold text-gray-800 mb-3 group-hover:text-yellow-600 transition-colors">
                                 {{ $meeting->judul }}
                             </h3>
-                            <p class="text-gray-500 text-sm leading-relaxed mb-6 break-words w-full text-justify">
-                                {{ $meeting->deskripsi }}
-                            </p>
+                            <div class="text-gray-500 text-sm leading-relaxed mb-6 break-words w-full text-justify prose prose-sm max-w-none">
+                                {!! $meeting->deskripsi !!}
+                            </div>
 
                             {{-- Fasilitas (Looping Tags) --}}
                             @if($meeting->fasilitas)

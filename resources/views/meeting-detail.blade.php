@@ -37,9 +37,9 @@
                         <h3 class="text-xl font-bold text-gray-900 mb-4 border-l-4 border-yellow-500 pl-4">
                             ABOUT THIS VENUE
                         </h3>
-                        <p class="text-gray-600 leading-relaxed text-justify">
-                            {{ $meeting->deskripsi }}
-                        </p>
+                        <div class="text-gray-600 leading-relaxed text-justify">
+                            {!! $meeting->deskripsi !!}
+                        </div>
                     </div>
 
                     {{-- Fasilitas --}}

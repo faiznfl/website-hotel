@@ -19,15 +19,11 @@ use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\RichEditor;
 use Filament\Schemas\Components\Utilities\Set as set;
 use App\Filament\Resources\Meetings\Pages\EditMeeting;
 use App\Filament\Resources\Meetings\Pages\ListMeetings;
-
-// --- 1. TAMBAHKAN IMPORT INI ---
 use App\Filament\Resources\Meetings\Pages\CreateMeeting;
-use App\Filament\Resources\Meetings\Schemas\MeetingForm;
-use App\Filament\Resources\Meetings\Tables\MeetingsTable;
-// -------------------------------
 
 class MeetingResource extends Resource
 {
@@ -35,73 +31,86 @@ class MeetingResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-briefcase';
 
-    protected static ?string $recordTitleAttribute = 'Meeting';
+    protected static ?string $recordTitleAttribute = 'judul';
 
     protected static ?string $navigationLabel = 'Meeting & Events';
 
+    // --- TETAP GUNAKAN SCHEMA SESUAI PERMINTAAN ---
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
-                Section::make('Informasi Ruangan')
+                // BAGIAN 1: IDENTITAS (Grid 2 Kolom)
+                Section::make('Identitas Ruangan')
+                    ->description('Informasi dasar mengenai nama dan kapasitas ruangan.')
                     ->schema([
                         Grid::make(2)->schema([
-                            // 2. EDIT BAGIAN JUDUL (AUTO SLUG)
                             TextInput::make('judul')
                                 ->label('Nama Ruangan')
                                 ->required()
-                                ->placeholder('Contoh: VIP Meeting Room')
-                                ->live(onBlur: true) // Bereaksi saat selesai ketik
-                                ->afterStateUpdated(fn (set $set, ?string $state) => $set('slug', Str::slug($state))), // Auto isi slug
+                                ->placeholder('Contoh: Grand Ballroom')
+                                ->live(onBlur: true)
+                                ->afterStateUpdated(fn (set $set, ?string $state) => $set('slug', Str::slug($state))),
 
-                            // 3. TAMBAHKAN INPUT SLUG
                             TextInput::make('slug')
-                                ->label('Link URL (Otomatis)')
+                                ->label('Link URL')
                                 ->disabled()
                                 ->dehydrated()
                                 ->required()
                                 ->unique(Meeting::class, 'slug', ignoreRecord: true),
-
-                            // Kapasitas
-                            TextInput::make('kapasitas')
-                                ->label('Kapasitas')
-                                ->required()
-                                ->placeholder('Contoh: Max: 20 Pax'),
                         ]),
 
-                        // Upload Gambar
+                        TextInput::make('kapasitas')
+                            ->label('Kapasitas Penumpang')
+                            ->placeholder('Masukan angka saja, contoh: 50')
+                            ->numeric() // Validasi angka
+                            ->suffix('Pax / Orang') // Pemanis di belakang input
+                            ->required()
+                            ->columnSpanFull(),
+                    ]),
+
+                // BAGIAN 2: MEDIA (Gambar)
+                Section::make('Visualisasi')
+                    ->schema([
                         FileUpload::make('gambar')
                             ->label('Foto Ruangan')
                             ->image()
                             ->directory('meeting-images')
                             ->required()
                             ->columnSpanFull()
-                            ->imageEditor() // Fitur crop bawaan filament
-                            ->imageResizeMode('cover') // Resize agar ringan
-                            ->imageCropAspectRatio('16:9')
-                            ->imageResizeTargetWidth('800')
-                            ->imageResizeTargetHeight('450')
+                            ->imageEditor() // Editor crop bawaan
+                            ->imageResizeMode('cover')
+                            ->imageCropAspectRatio('16:9') // Rasio wide
+                            ->imageResizeTargetWidth('1000')
+                            ->imageResizeTargetHeight('560')
                             ->preserveFilenames()
-                            ->maxSize(10240)
-                            ->visibility('public')
-                            ->disk('public'),
+                            ->maxSize(5120), // Max 5MB
+                    ]),
 
-                        // Deskripsi
-                        Textarea::make('deskripsi')
-                            ->label('Deskripsi Singkat')
-                            ->rows(3)
+                // BAGIAN 3: DETAIL (RichEditor & Fasilitas)
+                Section::make('Detail & Fasilitas')
+                    ->schema([
+                        // GUNAKAN RICH EDITOR (Biar bisa bold/italic)
+                        RichEditor::make('deskripsi')
+                            ->label('Deskripsi Lengkap')
+                            ->toolbarButtons([
+                                'bold',
+                                'italic',
+                                'bulletList',
+                                'orderedList',
+                                'undo',
+                                'redo',
+                            ])
                             ->required()
                             ->columnSpanFull(),
 
-                        // 4. UBAH FASILITAS JADI TEXTAREA (Bukan TagsInput)
-                        // Agar tersimpan sebagai string biasa: "Wifi, AC, Projector"
                         Textarea::make('fasilitas')
-                            ->label('Fasilitas')
-                            ->placeholder('Contoh: Wifi, AC, Projector, Sound System')
-                            ->helperText('Pisahkan setiap fasilitas dengan tanda koma (,)')
-                            ->rows(2)
+                            ->label('Fasilitas Tersedia')
+                            ->placeholder('Contoh: Wifi High Speed, Projector, Sound System...')
+                            ->helperText('Pisahkan setiap fasilitas dengan tanda koma (,).')
+                            ->rows(3)
                             ->columnSpanFull(),
-                    ])
+                    ]),
             ]);
     }
 
@@ -109,30 +118,32 @@ class MeetingResource extends Resource
     {
         return $table
             ->columns([
+                // Gambar Kotak agak besar
                 ImageColumn::make('gambar')
-                    ->label('Foto')
+                    ->label('Preview')
                     ->square()
-                    ->visibility('public')
-                    ->disk('public')
-                    ->sortable(),
-                
-                TextColumn::make('judul')
-                    ->searchable()
-                    ->weight('bold')
-                    ->sortable(),
-                
-                // Tampilkan slug biar admin tau link-nya
-                TextColumn::make('slug')
-                    ->label('Link URL')
-                    ->color('gray')
-                    ->limit(20),
+                    ->size(80), 
 
-                TextColumn::make('kapasitas')
+                // Judul & Slug
+                TextColumn::make('judul')
+                    ->label('Ruangan')
+                    ->searchable()
                     ->sortable()
-                    ->searchable(),
-                
+                    ->weight('bold')
+                    ->description(fn (Meeting $record): string => $record->slug ?? '-') // Slug jadi deskripsi kecil
+                    ->wrap(),
+
+                // Kapasitas pakai Badge/Warna
+                TextColumn::make('kapasitas')
+                    ->label('Kapasitas')
+                    ->sortable()
+                    ->badge() 
+                    ->color('info') 
+                    ->formatStateUsing(fn (string $state): string => $state . ' Pax'),
+
                 TextColumn::make('created_at')
-                    ->dateTime()
+                    ->label('Dibuat')
+                    ->date()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->actions([
