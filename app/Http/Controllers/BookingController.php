@@ -188,4 +188,18 @@ class BookingController extends Controller
         // Kirim daftar tanggal penuh ke Frontend (Flatpickr)
         return response()->json($fullDates);
     }
+
+    public function show($id)
+{
+    // 1. Cari booking berdasarkan ID
+    $booking = Booking::with('kamar')->findOrFail($id);
+
+    // 2. Keamanan: Pastikan yang melihat adalah pemilik booking itu sendiri
+    if ($booking->user_id !== auth::id()) {
+        abort(403, 'Unauthorized action.');
+    }
+
+    // 3. Tampilkan view invoice
+    return view('user.invoice', compact('booking'));
+}
 }

@@ -93,6 +93,11 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+Route::middleware('auth')->group(function () {
+    // Route untuk melihat detail/invoice booking
+    Route::get('/booking/{id}', [BookingController::class, 'show'])->name('booking.show');
+});
+
 
 /*
 |--------------------------------------------------------------------------
