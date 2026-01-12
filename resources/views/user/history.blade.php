@@ -44,10 +44,7 @@
                 <div class="grid gap-6">
                     @foreach($bookings as $booking)
                         
-                        {{-- 
-                            BUNGKUS CARD DENGAN TAG <a> AGAR BISA DIKLIK 
-                            (Menuju Halaman Detail/Invoice)
-                        --}}
+                        {{-- Card Link --}}
                         <a href="{{ route('booking.show', $booking->id) }}" class="group block relative">
                             
                             <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center hover:shadow-lg hover:border-yellow-400 transition duration-300">
@@ -97,12 +94,8 @@
                                         </span>
                                     @endif
 
-                                    {{-- 2. TOMBOL BATALKAN (PENTING: Gunakan z-index tinggi agar bisa diklik terpisah) --}}
+                                    {{-- 2. TOMBOL BATALKAN --}}
                                     @if($booking->status == 'pending')
-                                        {{-- 
-                                            Kita gunakan object tag atau div dengan onclick stopPropagation 
-                                            agar saat tombol batal diklik, link utama (detail) TIDAK ikut terklik.
-                                        --}}
                                         <div onclick="event.preventDefault();"> 
                                             <form action="{{ route('booking.cancel', $booking->id) }}" method="POST" 
                                                   onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pesanan ini?');">
@@ -120,11 +113,6 @@
                                     <span class="text-xs text-gray-400">
                                         Dipesan: {{ $booking->created_at->diffForHumans() }}
                                     </span>
-                                </div>
-
-                                {{-- Panah Navigasi (Pemanis) --}}
-                                <div class="absolute right-6 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-10 md:opacity-0 transition-opacity">
-                                    <i class="fa-solid fa-chevron-right text-6xl text-gray-900"></i>
                                 </div>
 
                             </div>

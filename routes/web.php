@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\Contact;
+use App\Http\Controllers\ContactController;
 use App\Models\Kamar;
 use App\Models\Gallery;
 use App\Models\Meeting;
@@ -57,6 +59,9 @@ Route::get('/meetings-events/{slug}', function ($slug) {
     $meeting = Meeting::where('slug', $slug)->firstOrFail();
     return view('meeting-detail', compact('meeting'));
 })->name('meeting.detail');
+
+// Route untuk memproses form
+Route::post('/contact-send', [ContactController::class, 'store'])->name('contact.send');
 
 
 /*

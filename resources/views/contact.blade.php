@@ -24,63 +24,89 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
 
                 {{-- 3. KOLOM KIRI: CONTACT FORM --}}
-                <div class="bg-white p-0 lg:p-4">
-                    <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                        <span class="w-8 h-[2px] bg-yellow-500 inline-block"></span> SEND A MESSAGE
-                    </h3>
+<div class="bg-white p-0 lg:p-4">
+    <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+        <span class="w-8 h-[2px] bg-yellow-500 inline-block"></span> SEND A MESSAGE
+    </h3>
 
-                    <form action="#" method="POST" class="space-y-5">
-                        @csrf
+    {{-- TAMPILKAN PESAN SUKSES DI SINI --}}
+    @if(session('success'))
+        <div class="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg relative text-sm" role="alert">
+            <strong class="font-bold"><i class="fa-solid fa-check-circle"></i> Berhasil!</strong>
+            <span class="block sm:inline">{{ session('success') }}</span>
+        </div>
+    @endif
 
-                        {{-- Input Name --}}
-                        <div>
-                            <label for="name"
-                                class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Full
-                                Name</label>
-                            <input type="text" id="name" name="name"
-                                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition-all duration-300 placeholder-gray-300"
-                                placeholder="Enter your full name" required>
-                        </div>
+    {{-- Arahkan action ke route 'contact.send' --}}
+    <form action="{{ route('contact.send') }}" method="POST" class="space-y-5">
+        @csrf
 
-                        {{-- Input Email --}}
-                        <div>
-                            <label for="email"
-                                class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Email
-                                Address</label>
-                            <input type="email" id="email" name="email"
-                                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition-all duration-300 placeholder-gray-300"
-                                placeholder="name@example.com" required>
-                        </div>
+        {{-- Input Name --}}
+        <div>
+            <label for="name" class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">
+                Full Name
+            </label>
+            <input type="text" id="name" name="name" value="{{ old('name') }}"
+                class="w-full px-4 py-3 bg-gray-50 border {{ $errors->has('name') ? 'border-red-500' : 'border-gray-200' }} rounded-lg focus:bg-white focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition-all duration-300 placeholder-gray-300"
+                placeholder="Enter your full name" required>
+            
+            {{-- Pesan Error Validasi --}}
+            @error('name')
+                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+            @enderror
+        </div>
 
-                        {{-- Input Phone --}}
-                        <div>
-                            <label for="phone"
-                                class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Phone
-                                Number</label>
-                            <input type="tel" id="phone" name="phone"
-                                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition-all duration-300 placeholder-gray-300"
-                                placeholder="+62...">
-                        </div>
+        {{-- Input Email --}}
+        <div>
+            <label for="email" class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">
+                Email Address
+            </label>
+            <input type="email" id="email" name="email" value="{{ old('email') }}"
+                class="w-full px-4 py-3 bg-gray-50 border {{ $errors->has('email') ? 'border-red-500' : 'border-gray-200' }} rounded-lg focus:bg-white focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition-all duration-300 placeholder-gray-300"
+                placeholder="name@example.com" required>
 
-                        {{-- Input Message --}}
-                        <div>
-                            <label for="message"
-                                class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Your
-                                Message</label>
-                            <textarea id="message" name="message" rows="5"
-                                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition-all duration-300 placeholder-gray-300"
-                                placeholder="Write your inquiries here..." required></textarea>
-                        </div>
+            @error('email')
+                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+            @enderror
+        </div>
 
-                        {{-- Submit Button --}}
-                        <div class="pt-2">
-                            <button type="submit"
-                                class="w-full md:w-auto px-10 py-3.5 bg-gray-900 text-white font-bold uppercase tracking-wider rounded-lg hover:bg-yellow-600 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1">
-                                Send Message
-                            </button>
-                        </div>
-                    </form>
-                </div>
+        {{-- Input Phone (Sesuai update sebelumnya) --}}
+        <div>
+            <label for="phone" class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">
+                Phone Number
+            </label>
+            <input type="tel" id="phone" name="phone" value="{{ old('phone') }}"
+                class="w-full px-4 py-3 bg-gray-50 border {{ $errors->has('phone') ? 'border-red-500' : 'border-gray-200' }} rounded-lg focus:bg-white focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition-all duration-300 placeholder-gray-300"
+                placeholder="+62..." required>
+
+            @error('phone')
+                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+            @enderror
+        </div>
+
+        {{-- Input Message --}}
+        <div>
+            <label for="message" class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">
+                Your Message
+            </label>
+            <textarea id="message" name="message" rows="5"
+                class="w-full px-4 py-3 bg-gray-50 border {{ $errors->has('message') ? 'border-red-500' : 'border-gray-200' }} rounded-lg focus:bg-white focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition-all duration-300 placeholder-gray-300"
+                placeholder="Write your inquiries here..." required>{{ old('message') }}</textarea>
+
+            @error('message')
+                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+            @enderror
+        </div>
+
+        {{-- Submit Button --}}
+        <div class="pt-2">
+            <button type="submit"
+                class="w-full md:w-auto px-10 py-3.5 bg-gray-900 text-white font-bold uppercase tracking-wider rounded-lg hover:bg-yellow-600 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1">
+                Send Message
+            </button>
+        </div>
+    </form>
+</div>
 
                 {{-- 4. KOLOM KANAN: CONTACT INFO --}}
                 <div class="bg-gray-50 p-8 rounded-2xl border border-gray-100 shadow-sm">
