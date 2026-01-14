@@ -143,7 +143,7 @@
                                     <select id="kamar_id_navbar" name="kamar_id" required
                                         class="pl-10 w-full bg-gray-50 border border-gray-200 rounded-md px-4 py-3 text-sm font-bold text-gray-800 focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none transition-all shadow-sm">
                                         <option value="" disabled selected>-- Pilih Kamar --</option>
-                                        @foreach(\App\Models\Kamar::all() as $kamar)
+                                        @foreach(\App\Models\Kamar::select('id', 'tipe_kamar')->get() as $kamar)
                                             <option value="{{ $kamar->id }}">{{ $kamar->tipe_kamar }}</option>
                                         @endforeach
                                     </select>

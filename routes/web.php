@@ -3,8 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\BookingController;
-use App\Http\Controllers\Contact;
-use App\Http\Controllers\ContactController;
+use App\Http\Controllers\ContactController; // Pastikan ini ada
 use App\Models\Kamar;
 use App\Models\Gallery;
 use App\Models\Meeting;
@@ -20,7 +19,7 @@ Route::get('/', function () {
     return view('home'); 
 });
 
-// Redirect dashboard ke Home
+// Redirect dashboard ke Home (Opsional, bawaan Breeze)
 Route::get('/dashboard', function () {
     return redirect('/');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -60,16 +59,15 @@ Route::get('/meetings-events/{slug}', function ($slug) {
     return view('meeting-detail', compact('meeting'));
 })->name('meeting.detail');
 
-// Route untuk memproses form
+// Route Kirim Pesan (Contact Us)
 Route::post('/contact-send', [ContactController::class, 'store'])->name('contact.send');
 
 
 /*
 |--------------------------------------------------------------------------
-| 2. API / AJAX ROUTES (Untuk Javascript)
+| 2. API / AJAX ROUTES (Untuk Javascript Flatpickr)
 |--------------------------------------------------------------------------
 */
-// Route ini dipanggil oleh Kalender Flatpickr untuk cek tanggal penuh
 // Ditaruh di luar middleware auth agar tamu bisa cek tanggal sebelum login
 Route::get('/api/check-availability', [BookingController::class, 'checkAvailability'])->name('api.check_availability');
 
@@ -89,6 +87,9 @@ Route::middleware('auth')->group(function () {
     // Halaman Riwayat Pesanan
     Route::get('/riwayat-pesanan', [BookingController::class, 'history'])->name('booking.history');
 
+    // Detail Invoice Booking
+    Route::get('/booking/{id}', [BookingController::class, 'show'])->name('booking.show');
+
     // Batalkan Pesanan
     Route::patch('/booking/{id}/cancel', [BookingController::class, 'cancel'])->name('booking.cancel');
 
@@ -96,11 +97,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-
-Route::middleware('auth')->group(function () {
-    // Route untuk melihat detail/invoice booking
-    Route::get('/booking/{id}', [BookingController::class, 'show'])->name('booking.show');
 });
 
 
