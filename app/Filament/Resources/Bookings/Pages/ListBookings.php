@@ -10,10 +10,12 @@ class ListBookings extends ListRecords
 {
     protected static string $resource = BookingResource::class;
 
+    protected ?string $heading = 'Booking';
+
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            // CreateAction::make(),
         ];
     }
 }
