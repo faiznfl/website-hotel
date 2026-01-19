@@ -99,6 +99,7 @@ class KamarResource extends Resource
                                     ->image()
                                     ->imageEditor()
                                     ->imagePreviewHeight('250')
+                                    ->disk('public')
                                     ->directory('rooms')
                                     ->preserveFilenames()
                                     ->maxSize(10240) // 10MB

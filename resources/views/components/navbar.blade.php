@@ -79,11 +79,11 @@
             
             <div class="hidden w-full md:block md:w-auto">
                 <ul class="font-medium flex flex-col md:flex-row md:space-x-8 items-center">
-                    <li><a href="{{ url('/') }}" class="{{ Request::is('/') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600 font-medium' }}">Home</a></li>
-                    <li><a href="{{ url('/rooms') }}" class="{{ Request::is('rooms*') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600 font-medium' }}">Rooms & Suite</a></li>
-                    <li><a href="{{ url('/meetings-events') }}" class="{{ Request::is('meetings-events*') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600 font-medium' }}">Meetings & Events</a></li>
-                    <li><a href="{{ url('/gallery') }}" class="{{ Request::is('gallery*') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600 font-medium' }}">Gallery</a></li>
-                    <li><a href="{{ url('/contact') }}" class="{{ Request::is('contact*') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600 font-medium' }}">Contact</a></li>
+                    <li><a href="{{ url('/') }}" class="{{ Request::is('/') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600 font-medium' }}" wire:navigate>Home</a></li>
+                    <li><a href="{{ url('/rooms') }}" class="{{ Request::is('rooms*') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600 font-medium' }}" wire:navigate>Rooms & Suite</a></li>
+                    <li><a href="{{ url('/meetings-events') }}" class="{{ Request::is('meetings-events*') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600 font-medium' }}" wire:navigate>Meetings & Events</a></li>
+                    <li><a href="{{ url('/gallery') }}" class="{{ Request::is('gallery*') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600 font-medium' }}" wire:navigate>Gallery</a></li>
+                    <li><a href="{{ url('/contact') }}" class="{{ Request::is('contact*') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600 font-medium' }}" wire:navigate>Contact</a></li>
                     <li>
                         @auth
                             <button @click="showGlobalBooking = true" type="button" class="text-white bg-gray-900 hover:bg-yellow-600 px-6 py-2.5 rounded-md text-sm font-bold shadow-sm transition-all transform hover:-translate-y-0.5 uppercase tracking-wide">

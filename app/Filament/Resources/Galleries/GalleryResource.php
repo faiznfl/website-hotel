@@ -44,35 +44,40 @@ class GalleryResource extends Resource
                     ->imageResizeTargetWidth('800')
                     ->imageResizeTargetHeight('800')
                     ->directory('gallery-images') 
+                    ->visibility('public')
+                    ->disk('public') // <--- INI KUNCINYA
                     ->required()
             ]);
         // return GalleryForm::configure($schema);
     }
 
     public static function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                ImageColumn::make('gambar')->label('Preview Foto')->visibility('public')->disk('public')->sortable()
-                    ->size(200) // Ukuran preview lebih besar
-                    ->square(), // Bentuk kotak
+{
+    return $table
+        ->columns([
+            ImageColumn::make('gambar')
+                ->label('Preview Foto')
+                ->visibility('public')
+                ->disk('public') // <--- INI KUNCINYA
+                ->sortable()
+                ->size(100) // Ukuran di tabel jangan terlalu besar biar ga lemot
+                ->square(),
 
-                TextColumn::make('created_at')
-                    ->label('Diupload Pada')
-                    ->dateTime()
-                    ->sortable(),
-            ])
-            ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ])
-            ]);
-        // return GalleriesTable::configure($table);
-    }
+            TextColumn::make('created_at')
+                ->label('Diupload Pada')
+                ->dateTime('d M Y, H:i') // Format tanggal biar enak dibaca
+                ->sortable(),
+        ])
+        ->actions([ // GANTI 'recordActions' JADI 'actions'
+            EditAction::make(),
+            DeleteAction::make(),
+        ])
+        ->bulkActions([ // GANTI 'toolbarActions' JADI 'bulkActions'
+            BulkActionGroup::make([
+                DeleteBulkAction::make(),
+            ]),
+        ]);
+}
 
     public static function getRelations(): array
     {

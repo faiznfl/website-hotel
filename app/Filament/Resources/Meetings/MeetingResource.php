@@ -76,6 +76,8 @@ class MeetingResource extends Resource
                             ->label('Foto Ruangan')
                             ->image()
                             ->directory('meeting-images')
+                            ->disk('public')
+                            ->visibility('public')
                             ->required()
                             ->columnSpanFull()
                             ->imageEditor() // Editor crop bawaan
@@ -122,6 +124,8 @@ class MeetingResource extends Resource
                 ImageColumn::make('gambar')
                     ->label('Preview')
                     ->square()
+                    ->disk('public')
+                    ->visibility('public')
                     ->size(80), 
 
                 // Judul & Slug
