@@ -3,7 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\BookingController;
-use App\Http\Controllers\ContactController; // Pastikan ini ada
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\HomeController;
 use App\Models\Kamar;
 use App\Models\Gallery;
 use App\Models\Meeting;
@@ -15,9 +16,7 @@ use App\Models\Meeting;
 */
 
 // Halaman Utama
-Route::get('/', function () {
-    return view('home'); 
-});
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Redirect dashboard ke Home (Opsional, bawaan Breeze)
 Route::get('/dashboard', function () {
@@ -61,6 +60,9 @@ Route::get('/meetings-events/{slug}', function ($slug) {
 
 // Route Kirim Pesan (Contact Us)
 Route::post('/contact-send', [ContactController::class, 'store'])->name('contact.send');
+
+// Testimoni
+Route::post('/testimoni', [HomeController::class, 'store'])->name('testimoni.store');
 
 
 /*
