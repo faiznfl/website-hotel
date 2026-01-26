@@ -14,7 +14,7 @@ class HomeController extends Controller
     {
         // 1. Ambil data Testimonial (3 terbaru)
         // Jika model Testimonial belum ada datanya, dia akan mengembalikan array kosong (aman, tidak error)
-        $testimonials = Testimonial::latest()->take(5)->get();
+        $testimonials = Testimonial::latest()->take(7)->get();
 
         // 2. Kirim data ke View 'home'
         return view('home', [
@@ -37,5 +37,15 @@ class HomeController extends Controller
         // 3. Kembali ke Home dengan Pesan Sukses
         return redirect()->to(url()->previous() . '#testimoni')
             ->with('success', 'Terima kasih! Review Anda telah berhasil dikirim.');
+    }
+
+    // Method untuk halaman khusus semua review
+    public function reviews()
+    {
+        // Pakai 'paginate', bukan 'get'. Biar kalau ada 1000 review, tidak dimuat semua.
+        // Kita tampilkan 9 review per halaman.
+        $reviews = Testimonial::latest()->paginate(9);
+        
+        return view('reviews', compact('reviews'));
     }
 }

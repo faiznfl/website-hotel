@@ -155,7 +155,7 @@
                 .animate-scroll {
                     display: flex;
                     width: max-content;
-                    animation: scroll 35s linear infinite;
+                    animation: scroll 40s linear infinite;
                     /* Ubah angka 40s kalau mau lebih cepat/lambat */
                 }
 
@@ -205,13 +205,22 @@
                                     </div>
                                     <div>
                                         <h4 class="font-bold text-gray-900 text-sm">{{ $testi->name }}</h4>
-                                        <span class="text-xs text-gray-400">Tamu Terverifikasi</span>
+                                        {{-- <span class="text-xs text-gray-400">Tamu Terverifikasi</span> --}}
                                     </div>
                                 </div>
                             </div>
                         @endforeach
                     @endfor
                 </div>
+            </div>
+
+            {{-- TOMBOL LIHAT SEMUA (BARU DITAMBAHKAN) --}}
+            <div class="text-center mt-10 relative z-20">
+                <a href="{{ route('reviews.index') }}"
+                    class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-md text-white transition bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300">
+                    Lihat Semua Review
+                    <i class="fa-solid fa-arrow-right ml-2"></i>
+                </a>
             </div>
 
         @else

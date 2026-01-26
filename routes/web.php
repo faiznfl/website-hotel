@@ -64,6 +64,8 @@ Route::post('/contact-send', [ContactController::class, 'store'])->name('contact
 // Testimoni
 Route::post('/testimoni', [HomeController::class, 'store'])->name('testimoni.store');
 
+Route::get('/reviews', [HomeController::class, 'reviews'])->name('reviews.index');
+
 
 /*
 |--------------------------------------------------------------------------
