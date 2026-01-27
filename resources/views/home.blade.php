@@ -18,7 +18,7 @@
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Rumah RB Experience</h2>
                 <div class="w-24 h-1 bg-yellow-400 mx-auto mb-6"></div>
                 <p class="text-gray-500 max-w-3xl mx-auto text-lg">
-                    Discover the traditional Padang escape at Hotel Rumah RB...
+                    Discover the traditional Padang escape at Hotel Rumah RB, where distinctive hotel experiences reflect the people most desirable destinations. From secluded getaway retreats to family-friendly destinations, there are endless ways to find your place in the sun.
                 </p>
             </div>
 
