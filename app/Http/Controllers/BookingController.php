@@ -11,7 +11,7 @@ use Carbon\CarbonPeriod;
 
 class BookingController extends Controller
 {
-    // --- HELPER: Function Khusus Stok (Biar tidak ditulis ulang-ulang) ---
+    // --- HELPER: Function Khusus Stok ---
     private function getTotalStok($tipeKamar)
     {
         $tipe = strtolower($tipeKamar);
@@ -23,7 +23,30 @@ class BookingController extends Controller
         return 5; // Default
     }
 
-    // --- 1. Fungsi Simpan Booking (Store) ---
+    // =================================================================
+    // 1. FUNGSI BARU: MENAMPILKAN HALAMAN BOOKING (View)
+    // =================================================================
+    public function create(Request $request)
+    {
+        // 1. Ambil ID Kamar (Kalau ada)
+        $kamarId = $request->query('room_id');
+
+        // 2. Ambil SEMUA data kamar (Untuk Dropdown)
+        $rooms = \App\Models\Kamar::all();
+
+        // 3. Cek apakah user sudah memilih kamar sebelumnya
+        $selectedRoom = null;
+        if ($kamarId) {
+            $selectedRoom = \App\Models\Kamar::find($kamarId);
+        }
+
+        // 4. Tampilkan View
+        return view('booking', compact('rooms', 'selectedRoom'));
+    }
+
+    // =================================================================
+    // 2. FUNGSI SIMPAN BOOKING (Store)
+    // =================================================================
     public function store(Request $request)
     {
         // 1. Validasi Input
@@ -33,30 +56,15 @@ class BookingController extends Controller
             'check_in' => 'required|date',
             'check_out' => 'required|date|after:check_in',
             'jumlah_kamar' => 'required|integer|min:1',
-            'kamar_id' => 'nullable|exists:kamars,id',
-            'tipe_kamar_manual' => 'nullable|string',
+            'kamar_id' => 'required|exists:kamars,id', // Wajib ada ID Kamar
+            'total_harga' => 'required|numeric', // Wajib ada Total Harga
         ]);
 
-        // 2. Logic Cari Kamar ID
-        $kamarId = null;
-        if ($request->filled('kamar_id')) {
-            $kamarId = $request->kamar_id;
-        } elseif ($request->filled('tipe_kamar_manual')) {
-            $kamar = Kamar::where('tipe_kamar', $request->tipe_kamar_manual)->first();
-            if ($kamar) {
-                $kamarId = $kamar->id;
-            } else {
-                return back()->with('error', 'Maaf, tipe kamar tersebut tidak ditemukan.');
-            }
-        }
+        // 2. Ambil ID Kamar
+        $kamarId = $request->kamar_id;
 
-        // ============================================================
-        // 3. VALIDASI STOK (Versi Lebih Rapi)
-        // ============================================================
-        
+        // 3. VALIDASI STOK
         $kamar = Kamar::find($kamarId);
-        
-        // Panggil Helper Function di atas
         $totalStokKamar = $this->getTotalStok($kamar->tipe_kamar);
 
         // Cek Stok Fisik
@@ -64,7 +72,7 @@ class BookingController extends Controller
             return back()->with('error', "Maaf, tipe {$kamar->tipe_kamar} hanya memiliki total {$totalStokKamar} kamar.");
         }
 
-        // Cek Ketersediaan Tanggal
+        // Cek Ketersediaan Tanggal (Supaya tidak double book)
         $kamarTerpakai = Booking::where('kamar_id', $kamarId)
             ->where('status', '!=', 'cancelled')
             ->where(function ($query) use ($request) {
@@ -88,16 +96,16 @@ class BookingController extends Controller
             'check_in'     => $request->check_in,
             'check_out'    => $request->check_out,
             'jumlah_kamar' => $request->jumlah_kamar,
+            'total_harga'  => $request->total_harga, // PENTING: Simpan harga
             'status'       => 'pending',
         ]);
 
-        return back()->with('success', "Reservasi Berhasil! Kode Booking: {$booking->kode_booking}.");
+        return redirect()->route('booking.history')->with('success', "Reservasi Berhasil! Kode Booking: {$booking->kode_booking}.");
     }
 
-    // --- 2. Fungsi Lihat Riwayat (History) ---
+    // --- 3. Fungsi Lihat Riwayat (History) ---
     public function history()
     {
-        // PERBAIKAN: Tambahkan with('kamar') agar tidak N+1 Query (Biar Cepat)
         $bookings = Booking::with('kamar')
             ->where('user_id', Auth::id())
             ->latest()
@@ -106,7 +114,7 @@ class BookingController extends Controller
         return view('user.history', compact('bookings'));
     }
 
-    // --- 3. Fungsi Batalkan Pesanan (Cancel) ---
+    // --- 4. Fungsi Batalkan Pesanan (Cancel) ---
     public function cancel($id)
     {
         $booking = Booking::where('id', $id)
@@ -122,7 +130,8 @@ class BookingController extends Controller
         return redirect()->back()->with('error', 'Pesanan tidak dapat dibatalkan.');
     }
 
-    // --- 4. Fungsi Cek Ketersediaan Kamar (API) ---
+    // --- 5. Fungsi Cek Ketersediaan Kamar (API) ---
+    // (Opsional: Tetap disimpan jika nanti butuh fitur kalender canggih)
     public function checkAvailability(Request $request)
     {
         $kamarId = $request->kamar_id;
@@ -132,7 +141,6 @@ class BookingController extends Controller
         $kamar = Kamar::find($kamarId);
         if (!$kamar) return response()->json([]);
 
-        // Panggil Helper Function (Jadi tidak perlu tulis ulang angka 9, 14, 2)
         $totalKamar = $this->getTotalStok($kamar->tipe_kamar);
 
         $bookings = Booking::where('kamar_id', $kamarId)
@@ -164,10 +172,9 @@ class BookingController extends Controller
         return response()->json($fullDates);
     }
 
-    // --- 5. Fungsi Invoice ---
+    // --- 6. Fungsi Invoice ---
     public function show($id)
     {
-        // Sudah bagus pakai with('kamar')
         $booking = Booking::with('kamar')->findOrFail($id);
 
         if ($booking->user_id !== Auth::id()) {

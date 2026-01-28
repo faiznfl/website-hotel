@@ -21,6 +21,7 @@ return new class extends Migration
             $table->date('check_in');
             $table->date('check_out');
             $table->integer('jumlah_kamar')->default(1);
+            $table->decimal('total_harga', 15, 2)->default(0); 
             $table->enum('status', ['pending', 'confirmed', 'cancelled'])->default('pending');
             $table->text('catatan_admin')->nullable();
             $table->timestamps();
