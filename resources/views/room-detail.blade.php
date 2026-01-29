@@ -11,12 +11,10 @@
         <div class="absolute inset-0 bg-black/40"></div>
         <div class="absolute bottom-0 left-0 w-full p-8 md:p-12 bg-gradient-to-t from-black/90 to-transparent">
             <div class="max-w-screen-xl mx-auto">
-                <h1 class="text-4xl md:text-5xl font-extrabold text-white uppercase tracking-wide mb-2 shadow-sm">
+                {{-- JUDUL KAMAR (Tanpa Recommended Room) --}}
+                <h1 class="text-4xl md:text-5xl font-extrabold text-white uppercase tracking-wide shadow-sm">
                     {{ $room->tipe_kamar }}
                 </h1>
-                <p class="text-yellow-400 text-lg font-medium flex items-center gap-2">
-                    <i class="fa-solid fa-star"></i> Recommended Room
-                </p>
             </div>
         </div>
     </div>
@@ -44,7 +42,8 @@
                         @if ($room->fasilitas)
                             <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                                 @foreach (explode(',', $room->fasilitas) as $facility)
-                                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100 hover:border-yellow-200 transition">
+                                    <div
+                                        class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100 hover:border-yellow-200 transition">
                                         <div class="text-yellow-500"><i class="fa-solid fa-check-circle"></i></div>
                                         <span class="text-gray-700 text-sm font-medium">{{ trim($facility) }}</span>
                                     </div>
@@ -68,22 +67,12 @@
                         {{-- TOMBOL AKSI --}}
                         <div class="space-y-4">
 
-                            @guest
-                                {{-- Jika Belum Login --}}
-                                <a href="{{ route('login') }}"
-                                    class="w-full block text-center bg-gray-200 text-gray-500 font-bold py-4 rounded-md uppercase tracking-wider hover:bg-gray-300 transition-all duration-300 shadow-inner">
-                                    <i class="fa-solid fa-lock mr-2"></i> LOGIN TO BOOK
-                                </a>
-                                <p class="text-[10px] text-center text-gray-400">Anda harus login terlebih dahulu untuk memesan.</p>
-                            @endguest
-
-                            @auth
-                                {{-- Jika Sudah Login -> ARAHKAN KE HALAMAN BOOKING --}}
-                                <a href="{{ route('booking.create', ['room_id' => $room->id]) }}"
-                                    class="w-full block text-center bg-gray-900 text-white font-bold py-4 rounded-md uppercase tracking-wider hover:bg-yellow-600 transition-all duration-300 shadow-lg transform hover:-translate-y-1">
-                                    BOOK NOW <i class="fa-solid fa-arrow-right ml-2"></i>
-                                </a>
-                            @endauth
+                            {{-- SATU TOMBOL UNTUK SEMUA --}}
+                            <a href="{{ route('booking.create', ['room_id' => $room->id]) }}"
+                                class="w-full block text-center bg-gray-900 text-white font-bold py-4 rounded-md uppercase tracking-wider hover:bg-yellow-600 transition-all duration-300 shadow-lg transform hover:-translate-y-1 group">
+                                BOOK NOW <i
+                                    class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                            </a>
 
                             {{-- Tombol WhatsApp (Tanya Dulu) --}}
                             <a href="https://wa.me/6285777479609?text=Halo%20Admin,%20saya%20mau%20tanya%20tentang%20{{ urlencode($room->tipe_kamar) }}"
@@ -92,6 +81,13 @@
                                 <i class="fa-brands fa-whatsapp text-lg mr-1"></i> Chat Tanya Dulu
                             </a>
 
+                        </div>
+
+                        {{-- Security Badge Kecil --}}
+                        <div class="mt-6 text-center">
+                            <p class="text-[10px] text-gray-400 flex justify-center items-center gap-1">
+                                <i class="fa-solid fa-shield-halved"></i> Best Price Guarantee
+                            </p>
                         </div>
 
                     </div>
