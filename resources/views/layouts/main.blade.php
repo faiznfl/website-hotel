@@ -6,7 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    {{-- 1. CSS IZITOAST --}}
+    {{-- === 1. FAVICON (LOGO TAB) === --}}
+    {{-- Ganti 'img/logo-hotel.png' dengan nama file logomu --}}
+    <link rel="icon" href="{{ asset('img/logo-hotel-1.png') }}" type="image/png">
+    <link rel="shortcut icon" href="{{ asset('img/logo-hotel-1.png') }}" type="image/png">
+
+    {{-- 2. CSS IZITOAST --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/css/iziToast.min.css">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
