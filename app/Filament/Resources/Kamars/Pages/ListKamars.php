@@ -10,6 +10,8 @@ class ListKamars extends ListRecords
 {
     protected static string $resource = KamarResource::class;
 
+    protected ?string $heading = 'Data Kamar';
+
     protected function getHeaderActions(): array
     {
         return [

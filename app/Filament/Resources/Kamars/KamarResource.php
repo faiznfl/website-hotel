@@ -34,9 +34,12 @@ class KamarResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-home-modern';
 
-    protected static ?string $navigationLabel = 'Data Kamar';
+    protected static ?string $navigationLabel = 'Kamar';
 
     protected static ?string $recordTitleAttribute = 'tipe_kamar';
+
+    protected static string | \UnitEnum | null $navigationGroup = 'Data Master Hotel';
+    protected static ?int $navigationSort = 2;
 
     public static function form(Schema $schema): Schema
     {

@@ -32,6 +32,9 @@ class GalleryResource extends Resource
 
     protected static ?string $navigationLabel = 'Galeri';
 
+    protected static string | \UnitEnum | null $navigationGroup = 'Website & Feedback';
+    protected static ?int $navigationSort = 4;
+
     public static function form(Schema $schema): Schema
     {
         return $schema

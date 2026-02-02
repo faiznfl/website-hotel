@@ -10,6 +10,8 @@ class ListTestimonials extends ListRecords
 {
     protected static string $resource = TestimonialResource::class;
 
+    protected ?string $heading = 'Data Review Customer';
+
     protected function getHeaderActions(): array
     {
         return [

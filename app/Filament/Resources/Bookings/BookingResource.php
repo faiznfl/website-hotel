@@ -38,6 +38,14 @@ class BookingResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'nama_tamu';
 
+    protected static string | \UnitEnum | null $navigationGroup = 'Manajemen Reservasi';
+    protected static ?int $navigationSort = 1; // Supaya paling atas
+
+    public static function getNavigationBadge(): ?string
+    {
+        return (string) static::getModel()::count();
+    }
+
     // --- OPTIMASI 1: Eager Loading (Biar Tabel Gak Lemot N+1) ---
     public static function getEloquentQuery(): Builder
     {

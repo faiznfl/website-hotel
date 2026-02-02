@@ -33,6 +33,14 @@ class TestimonialResource extends Resource
 
     protected static ?string $navigationLabel = "Review";
 
+    protected static string | \UnitEnum | null $navigationGroup = 'Website & Feedback';
+    protected static ?int $navigationSort = 5;
+
+    public static function getNavigationBadge(): ?string
+    {
+        return (string) static::getModel()::count();
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema

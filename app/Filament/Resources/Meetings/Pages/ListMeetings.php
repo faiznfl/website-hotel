@@ -10,6 +10,8 @@ class ListMeetings extends ListRecords
 {
     protected static string $resource = MeetingResource::class;
 
+    protected ?string $heading = 'Data Meetings & Events';
+
     protected function getHeaderActions(): array
     {
         return [

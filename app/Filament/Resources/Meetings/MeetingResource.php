@@ -35,6 +35,9 @@ class MeetingResource extends Resource
 
     protected static ?string $navigationLabel = 'Meeting & Events';
 
+    protected static string | \UnitEnum | null $navigationGroup = 'Data Master Hotel';
+    protected static ?int $navigationSort = 3;
+
     // --- TETAP GUNAKAN SCHEMA SESUAI PERMINTAAN ---
     public static function form(Schema $schema): Schema
     {

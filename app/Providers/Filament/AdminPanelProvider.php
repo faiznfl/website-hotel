@@ -46,7 +46,7 @@ class AdminPanelProvider extends PanelProvider
 
             // === 2. (OPSIONAL) GANTI JUDUL & LOGO DI POJOK KIRI ATAS DASHBOARD ===
             ->brandName('Hotel Rumah RB') 
-            // ->brandLogo(asset('img/logo-hotel.png')) // Kalau mau pakai gambar logo panjang
+            ->brandLogo(asset('img/logo-hotel.png')) // Kalau mau pakai gambar logo panjang
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([

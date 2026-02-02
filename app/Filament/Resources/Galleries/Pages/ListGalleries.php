@@ -10,6 +10,8 @@ class ListGalleries extends ListRecords
 {
     protected static string $resource = GalleryResource::class;
 
+    protected ?string $heading = 'Data Galeri';
+
     protected function getHeaderActions(): array
     {
         return [

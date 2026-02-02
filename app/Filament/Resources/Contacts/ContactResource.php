@@ -36,6 +36,9 @@ class ContactResource extends Resource
 
     protected static ?string $navigationLabel = 'Contact';
 
+    protected static string | \UnitEnum | null $navigationGroup = 'Website & Feedback';
+    protected static ?int $navigationSort = 6;
+
     public static function getNavigationBadge(): ?string
     {
         return (string) static::getModel()::count();
