@@ -62,7 +62,6 @@
                             class="{{ Request::is('contact*') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600 font-medium' }}">Contact</a>
                     </li>
                     <li>
-                        {{-- TOMBOL BOOK NOW (Sekarang Link ke Halaman Rooms) --}}
                         <a href="{{ route('booking.create') }}"
                             class="text-white bg-gray-900 hover:bg-yellow-600 px-6 py-2.5 rounded-md text-sm font-bold shadow-sm transition-all transform hover:-translate-y-0.5 uppercase tracking-wide">
                             Book Now
@@ -75,29 +74,8 @@
 
 </div>
 
+{{--
+SCRIPT FLOWBITE BIARKAN DI SINI JIKA DIPERLUKAN NAVBAR.
+TAPI SCRIPT SWEETALERT WAJIB DIHAPUS KARENA SUDAH ADA DI LAYOUT UTAMA (MAIN.BLADE.PHP)
+--}}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
-{{-- SCRIPT SWEETALERT2 (Saya sisakan ini agar notifikasi Sukses/Gagal Booking tetap muncul cantik) --}}
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        @if(session('error'))
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal!',
-                text: "{{ session('error') }}",
-                confirmButtonColor: '#111827',
-                iconColor: '#ef4444'
-            });
-        @endif
-
-        @if(session('success'))
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: "{{ session('success') }}",
-                confirmButtonColor: '#111827'
-            });
-        @endif
-    });
-</script>
