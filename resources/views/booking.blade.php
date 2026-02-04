@@ -26,18 +26,16 @@
         }
         .flatpickr-innerContainer { overflow: visible !important; }
         
-        /* HEADER BULAN */
         .flatpickr-months .flatpickr-month {
             color: #111827 !important;
             fill: #111827 !important;
             margin-bottom: 10px;
         }
 
-        /* TANGGAL BIASA */
         .flatpickr-day {
             border-radius: 8px !important;
             font-weight: 600 !important;
-            color: #374151 !important; /* Warna default (Hitam Abu) */
+            color: #374151 !important;
             border: 1px solid transparent !important;
             margin: 2px !important;
             width: 38px !important;
@@ -45,23 +43,20 @@
             line-height: 38px !important;
         }
 
-        /* TANGGAL DISABILIT (LEWAT) - PERBAIKAN DISINI */
         .flatpickr-day.flatpickr-disabled,
         .flatpickr-day.flatpickr-disabled:hover {
-            color: #d1d5db !important; /* Abu-abu muda banget */
+            color: #d1d5db !important;
             background: transparent !important;
             border-color: transparent !important;
             cursor: not-allowed !important;
         }
 
-        /* TANGGAL TERPILIH */
         .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange {
             background: #CA8A04 !important; /* Yellow-600 */
             color: white !important;
             border-color: #CA8A04 !important;
         }
 
-        /* TANGGAL DALAM RANGE */
         .flatpickr-day.inRange {
             background: #FEF3C7 !important;
             border-color: #FEF3C7 !important;
@@ -69,7 +64,6 @@
             box-shadow: -5px 0 0 #FEF3C7, 5px 0 0 #FEF3C7 !important;
         }
 
-        /* HOVER TANGGAL AKTIF */
         .flatpickr-day:not(.flatpickr-disabled):hover {
             background: #FEF9C3 !important;
         }
@@ -145,8 +139,8 @@
                                     <div class="md:col-span-2 relative z-50">
                                         <label class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">Pilih Tipe Kamar</label>
                                         
-                                        {{-- Hidden Select --}}
-                                        <select name="kamar_id" id="kamar_select" class="hidden">
+                                        {{-- Hidden Select (Untuk Backend) --}}
+                                        <select name="kamar_id" id="kamar_select" class="hidden" required>
                                             <option value="" data-harga="0" data-foto="">-- Pilih Kamar --</option>
                                             @foreach($rooms as $r)
                                                 <option value="{{ $r->id }}" 
@@ -159,7 +153,7 @@
                                             @endforeach
                                         </select>
 
-                                        {{-- Trigger --}}
+                                        {{-- Visual Trigger --}}
                                         <div class="relative">
                                             <div id="custom_trigger" class="w-full h-[60px] bg-gray-50 rounded-2xl px-5 flex items-center justify-between cursor-pointer border border-transparent hover:border-yellow-400 transition-all group shadow-sm">
                                                 <div class="flex flex-col">
@@ -173,6 +167,7 @@
                                                 <i class="fa-solid fa-chevron-down text-gray-400 group-hover:text-yellow-600 transition-colors"></i>
                                             </div>
 
+                                            {{-- Dropdown Options --}}
                                             <div id="custom_options" class="custom-options absolute top-full left-0 w-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden max-h-60 overflow-y-auto z-[9999]">
                                                 @foreach($rooms as $r)
                                                     <div class="option-item p-4 cursor-pointer border-b border-gray-50 last:border-0 flex items-center justify-between group transition-colors"
@@ -263,7 +258,8 @@
                             </div>
                         </div>
 
-                        {{-- TOMBOL SUBMIT (MOBILE) --}}
+                        {{-- TOMBOL SUBMIT (HANYA MUNCUL DI HP) --}}
+                        {{-- lg:hidden artinya: Sembunyi kalau layar Besar (Laptop) --}}
                         <div class="lg:hidden mt-6">
                             <button type="submit" id="btnSubmitMobile" disabled
                                 class="w-full bg-gray-800 text-white font-bold py-4 rounded-2xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
@@ -323,8 +319,10 @@
                                     <div class="text-3xl font-black text-gray-900 tracking-tight" id="txt_total">Rp 0</div>
                                 </div>
 
+                                {{-- TOMBOL SUBMIT (HANYA MUNCUL DI LAPTOP) --}}
+                                {{-- hidden lg:flex artinya: Sembunyi Default, Muncul Flexbox kalau layar Besar --}}
                                 <button type="submit" form="bookingForm" id="btnSubmitDesktop" disabled
-                                    class="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-extrabold py-4 rounded-2xl shadow-lg shadow-yellow-500/20 transform hover:-translate-y-1 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none flex justify-center items-center gap-2">
+                                    class="hidden lg:flex w-full bg-yellow-500 hover:bg-yellow-400 text-black font-extrabold py-4 rounded-2xl shadow-lg shadow-yellow-500/20 transform hover:-translate-y-1 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none justify-center items-center gap-2">
                                     <span>Konfirmasi & Bayar</span>
                                     <i class="fa-solid fa-arrow-right"></i>
                                 </button>
@@ -348,8 +346,10 @@
         function selectOption(id, nama, harga) {
             const select = document.getElementById('kamar_select');
             select.value = id;
+            // Trigger change event manual agar JS utama mendeteksi perubahan
             const event = new Event('change');
             select.dispatchEvent(event);
+            
             document.getElementById('trigger_label').innerText = nama;
             document.getElementById('trigger_price').innerText = 'Rp ' + new Intl.NumberFormat('id-ID').format(harga) + '/malam';
             document.getElementById('custom_options').classList.remove('show');
@@ -365,7 +365,7 @@
             const checkOutBg = document.getElementById('check_out_bg');
             const checkOutIcon = document.getElementById('check_out_icon');
 
-            // --- FLATPICKR ---
+            // --- FLATPICKR (DATE PICKER) ---
             const fpCheckIn = flatpickr(checkInInput, {
                 minDate: "today",
                 dateFormat: "Y-m-d",
@@ -374,6 +374,8 @@
                     if (selectedDates.length > 0) {
                         const nextDay = new Date(selectedDates[0]);
                         nextDay.setDate(nextDay.getDate() + 1);
+                        
+                        // Update Min Date untuk Check-Out
                         fpCheckOut.set('minDate', nextDay);
                         fpCheckOut.clear();
                         
@@ -387,6 +389,7 @@
                         checkOutIcon.classList.remove('bg-gray-100', 'text-gray-400');
                         checkOutIcon.classList.add('bg-yellow-100', 'text-yellow-600');
 
+                        // Buka Checkout otomatis setelah pilih Checkin
                         setTimeout(() => fpCheckOut.open(), 200); 
                     }
                     hitungTotal();
@@ -411,7 +414,6 @@
                 }
             });
 
-
             // --- CUSTOM DROPDOWN TOGGLE ---
             const trigger = document.getElementById('custom_trigger');
             const options = document.getElementById('custom_options');
@@ -428,7 +430,7 @@
             });
 
 
-            // --- VARIABLES LAINNYA ---
+            // --- VARIABLES LOGIKA HITUNGAN ---
             const kamarSelect = document.getElementById('kamar_select');
             const btnMinus = document.getElementById('btnMinus');
             const btnPlus = document.getElementById('btnPlus');
@@ -538,6 +540,7 @@
                 toggleButton(false);
             }
 
+            // Inisialisasi awal
             updateQtyDisplay();
         });
     </script>
