@@ -57,6 +57,7 @@
                 <ul class="font-medium flex flex-col lg:flex-row lg:space-x-8 items-center">
                     <li><a href="{{ url('/') }}" class="{{ Request::is('/') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600 font-medium' }}">Home</a></li>
                     <li><a href="{{ url('/rooms') }}" class="{{ Request::is('rooms*') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600 font-medium' }}">Rooms & Suite</a></li>
+                    <li><a href="{{ url('/restaurant') }}" class="{{ Request::is('restaurant*') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600 font-medium' }}">Restaurant</a></li>
                     <li><a href="{{ url('/meetings-events') }}" class="{{ Request::is('meetings-events*') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600 font-medium' }}">Meetings & Events</a></li>
                     <li><a href="{{ url('/gallery') }}" class="{{ Request::is('gallery*') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600 font-medium' }}">Gallery</a></li>
                     <li><a href="{{ url('/contact') }}" class="{{ Request::is('contact*') ? 'text-yellow-600 font-bold' : 'text-gray-700 hover:text-yellow-600 font-medium' }}">Contact</a></li>

@@ -8,6 +8,7 @@ use App\Http\Controllers\HomeController;
 use App\Models\Kamar;
 use App\Models\Gallery;
 use App\Models\Meeting;
+use App\Models\Menu;
 
 /*
 |--------------------------------------------------------------------------
@@ -54,6 +55,13 @@ Route::get('/meetings-events/{slug}', function ($slug) {
 Route::post('/contact-send', [ContactController::class, 'store'])->name('contact.send');
 Route::post('/testimoni', [HomeController::class, 'store'])->name('testimoni.store');
 Route::get('/reviews', [HomeController::class, 'reviews'])->name('reviews.index');
+
+Route::get('/restaurant', function () {
+    // Ambil menu yang statusnya 'is_available' (Tersedia) saja
+    $menus = Menu::where('is_available', true)->latest()->get();
+    
+    return view('restaurant', compact('menus'));
+})->name('restaurant');
 
 /*
 |--------------------------------------------------------------------------
