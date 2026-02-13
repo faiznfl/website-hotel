@@ -2,145 +2,198 @@
 
 namespace App\Filament\Resources\Menus;
 
-use BackedEnum;
-use App\Models\Menu;
-use Filament\Tables\Table;
-use Illuminate\Support\Str;
-use Filament\Schemas\Schema;
-use Filament\Actions\EditAction;
-use Filament\Resources\Resource;
-use Filament\Actions\DeleteAction;
-use Filament\Support\Icons\Heroicon;
-use Filament\Actions\BulkActionGroup;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Forms\Components\Textarea;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Section;
-use Filament\Tables\Columns\ImageColumn;
-use Filament\Forms\Components\FileUpload;
-use Filament\Tables\Columns\ToggleColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Schemas\Components\Utilities\Set;
+use App\Filament\Resources\Menus\Pages\CreateMenu;
 use App\Filament\Resources\Menus\Pages\EditMenu;
 use App\Filament\Resources\Menus\Pages\ListMenus;
-use App\Filament\Resources\Menus\Pages\CreateMenu;
-use App\Filament\Resources\Menus\Schemas\MenuForm;
-use App\Filament\Resources\Menus\Tables\MenusTable;
-use Filament\Widgets\StatsOverviewWidget\Stat;
+use App\Models\Menu;
+use BackedEnum;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Resources\Resource;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use Illuminate\Support\Str;
 
 class MenuResource extends Resource
 {
     protected static ?string $model = Menu::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-book-open';
 
     protected static ?string $navigationLabel = "Restoran";
+
+    protected static ?string $recordTitleAttribute = 'name';
+    protected static string | \UnitEnum | null $navigationGroup = 'Data Master Hotel';
+    protected static ?int $navigationSort = 3;
 
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->schema([
-                Section::make('Informasi Menu')->schema([
-                    // 1. Nama Menu (Otomatis buat slug saat diketik)
-                    TextInput::make('name')
-                        ->label('Nama Menu')
-                        ->required()
-                        ->maxLength(255)
-                        ->live(onBlur: true)
-                        ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state))),
+                // --- KOLOM KIRI: INFORMASI UTAMA ---
+                Group::make()
+                    ->schema([
+                        Section::make('Detail Hidangan')
+                            ->description('Masukan informasi dasar mengenai menu makanan/minuman.')
+                            ->icon('heroicon-o-clipboard-document-list')
+                            ->schema([
+                                // Nama Menu
+                                TextInput::make('name')
+                                    ->label('Nama Menu')
+                                    ->placeholder('Contoh: Nasi Goreng Spesial')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state)))
+                                    ->prefixIcon('heroicon-m-pencil-square'),
 
-                    // 2. Slug (Disembunyikan atau Readonly)
-                    TextInput::make('slug')
-                        ->required()
-                        ->disabled()
-                        ->dehydrated(), 
+                                Grid::make(2)->schema([
+                                    // Kategori
+                                    Select::make('category')
+                                        ->label('Kategori')
+                                        ->options([
+                                            'makanan' => 'Makanan Berat',
+                                            'minuman' => 'Minuman',
+                                            'snack' => 'Cemilan / Dessert',
+                                        ])
+                                        ->native(false) // Tampilan dropdown lebih modern
+                                        ->searchable()
+                                        ->required()
+                                        ->prefixIcon('heroicon-m-tag'),
 
-                    // 3. Harga
-                    TextInput::make('price')
-                        ->label('Harga (IDR)')
-                        ->required()
-                        ->numeric()
-                        ->prefix('Rp'),
+                                    // Harga
+                                    TextInput::make('price')
+                                        ->label('Harga')
+                                        ->placeholder('0')
+                                        ->required()
+                                        ->numeric()
+                                        ->prefix('Rp')
+                                        ->minValue(0),
+                                ]),
 
-                    // 4. Kategori (Dropdown)
-                    Select::make('category')
-                        ->label('Kategori')
-                        ->options([
-                            'makanan' => 'Makanan Berat',
-                            'minuman' => 'Minuman',
-                            'snack' => 'Cemilan / Dessert',
-                        ])
-                        ->required(),
-                    
-                    // 5. Deskripsi
-                    Textarea::make('description')
-                        ->label('Deskripsi Singkat')
-                        ->required()
-                        ->columnSpanFull(),
+                                // Deskripsi
+                                Textarea::make('description')
+                                    ->label('Deskripsi Singkat')
+                                    ->placeholder('Jelaskan bahan utama dan rasa hidangan ini...')
+                                    ->rows(4)
+                                    ->required()
+                                    ->columnSpanFull(),
+                            ]),
+                    ])->columnSpan(['lg' => 2]), // Lebar 2 kolom di layar besar
 
-                    // 6. Upload Gambar
-                    FileUpload::make('image')
-                        ->Label('Foto Menu')
-                        ->image()
-                        ->imageEditor()
-                        ->imagePreviewHeight('250')
-                        ->disk('public')
-                        ->directory('menus')
-                        ->preserveFilenames()
-                        ->maxSize(10240) // 10MB
-                        ->columnSpanFull(),
+                // --- KOLOM KANAN: MEDIA & PENGATURAN ---
+                Group::make()
+                    ->schema([
+                        Section::make('Media & Status')
+                            ->schema([
+                                // Upload Gambar
+                                FileUpload::make('image')
+                                    ->label('Foto Menu')
+                                    ->image()
+                                    ->imageEditor()
+                                    ->imagePreviewHeight('200')
+                                    ->directory('menus')
+                                    ->disk('public')
+                                    ->preserveFilenames()
+                                    ->maxSize(5120) // 5MB
+                                    ->columnSpanFull(),
 
-                    // 7. Status Tersedia
-                    Toggle::make('is_available')
-                        ->label('Tersedia?')
-                        ->default(true),
-                ])->columns(2),
-            ]);
-    
-        // return MenuForm::configure($schema);
+                                // Toggle Ketersediaan
+                                Toggle::make('is_available')
+                                    ->label('Stok Tersedia?')
+                                    ->onColor('success')
+                                    ->offColor('danger')
+                                    ->inline(false)
+                                    ->default(true),
+                            ]),
+
+                        Section::make('Meta Data')
+                            ->schema([
+                                // Slug (Read Only tapi terlihat)
+                                TextInput::make('slug')
+                                    ->label('URL Slug')
+                                    ->helperText('Otomatis dibuat dari nama menu.')
+                                    ->readOnly()
+                                    ->disabled()
+                                    ->dehydrated()
+                                    ->prefixIcon('heroicon-m-link'),
+                            ]),
+                    ])->columnSpan(['lg' => 1]), // Lebar 1 kolom di layar besar
+            ])
+            ->columns(3); // Total Grid Layout adalah 3 Kolom
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                // Tampilkan Gambar Kecil
+                // Gambar Bulat
                 ImageColumn::make('image')
-                    ->label('Foto')
+                    ->label('')
+                    ->circular() // Membuat gambar bulat
                     ->visibility('public')
                     ->disk('public')
-                    ->square()
-                    ->size(60), // Ukuran thumbnail pas,
+                    ->size(50),
 
-                // Nama Menu & Kategori
+                // Nama & Slug (Stacked)
                 TextColumn::make('name')
+                    ->label('Nama Menu')
                     ->searchable()
                     ->sortable()
-                    ->description(fn (Menu $record): string => Str::limit($record->description, 30)),
+                    ->weight('bold')
+                    ->description(fn (Menu $record): string => $record->slug),
 
+                // Kategori Badge
                 TextColumn::make('category')
+                    ->label('Kategori')
                     ->badge()
+                    ->sortable()
                     ->color(fn (string $state): string => match ($state) {
-                        'makanan' => 'success',
-                        'minuman' => 'info',
-                        'snack' => 'warning',
+                        'makanan' => 'success', // Hijau
+                        'minuman' => 'info',    // Biru
+                        'snack' => 'warning',   // Kuning
                         default => 'gray',
+                    })
+                    ->icon(fn (string $state): string => match ($state) {
+                        'makanan' => 'heroicon-m-cake',
+                        'minuman' => 'heroicon-m-beaker',
+                        'snack' => 'heroicon-m-sparkles',
+                        default => 'heroicon-m-question-mark-circle',
                     }),
 
-                // Format Harga ke Rupiah
+                // Harga Bold
                 TextColumn::make('price')
-                    ->money('IDR')
-                    ->sortable(),
+                    ->label('Harga')
+                    ->money('IDR', locale: 'id') // Format Rp otomatis
+                    ->sortable()
+                    ->weight('bold')
+                    ->color('primary'),
 
-                // Toggle Status Langsung di Tabel
-                ToggleColumn::make('is_available')->label('Stok'),
+                // Toggle Switch
+                ToggleColumn::make('is_available')
+                    ->label('Stok')
+                    ->onColor('success')
+                    ->offColor('danger'),
             ])
             ->filters([
-                // Filter Kategori
                 SelectFilter::make('category')
+                    ->label('Filter Kategori')
                     ->options([
                         'makanan' => 'Makanan',
                         'minuman' => 'Minuman',
@@ -148,22 +201,19 @@ class MenuResource extends Resource
                     ]),
             ])
             ->actions([
-                EditAction::make(),
-                DeleteAction::make(),
+                EditAction::make()->iconButton(), // Jadi tombol ikon saja biar rapi
+                DeleteAction::make()->iconButton(),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
             ]);
-        // return MenusTable::configure($table);
     }
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array
