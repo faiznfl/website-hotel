@@ -58,7 +58,7 @@ class AdminPanelProvider extends PanelProvider
             
             ->widgets([
                 // Baris 1: Akun (Opsional, kalau mau dihapus boleh)
-                AccountWidget::class, 
+                // AccountWidget::class, 
                 // FilamentInfoWidget::class, // Saya disable biar bersih
                 
                 // Baris 2: Stats (Otomatis Full)
