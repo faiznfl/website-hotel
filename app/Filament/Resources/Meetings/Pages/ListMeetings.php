@@ -11,6 +11,10 @@ class ListMeetings extends ListRecords
     protected static string $resource = MeetingResource::class;
 
     protected ?string $heading = 'Data Meetings & Events';
+    public function getTitle(): string
+    {
+        return 'Meetings & Events'; // Muncul di tab browser
+    }
 
     protected function getHeaderActions(): array
     {

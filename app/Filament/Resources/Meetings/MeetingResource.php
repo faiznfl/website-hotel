@@ -64,7 +64,7 @@ class MeetingResource extends Resource
                         ]),
 
                         TextInput::make('kapasitas')
-                            ->label('Kapasitas Penumpang')
+                            ->label('Kapasitas')
                             ->placeholder('Masukan angka saja, contoh: 50')
                             ->numeric() // Validasi angka
                             ->suffix('Pax / Orang') // Pemanis di belakang input

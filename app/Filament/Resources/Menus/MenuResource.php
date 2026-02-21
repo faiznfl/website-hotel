@@ -36,7 +36,7 @@ class MenuResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-book-open';
 
-    protected static ?string $navigationLabel = "Restoran";
+    protected static ?string $navigationLabel = "Menu Restoran";
 
     protected static ?string $recordTitleAttribute = 'name';
     protected static string | \UnitEnum | null $navigationGroup = 'Data Master Hotel';
@@ -68,7 +68,7 @@ class MenuResource extends Resource
                                     Select::make('category')
                                         ->label('Kategori')
                                         ->options([
-                                            'makanan' => 'Makanan Berat',
+                                            'makanan' => 'Makanan',
                                             'minuman' => 'Minuman',
                                             'snack' => 'Cemilan / Dessert',
                                         ])

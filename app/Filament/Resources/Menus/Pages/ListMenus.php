@@ -10,6 +10,10 @@ class ListMenus extends ListRecords
 {
     protected static string $resource = MenuResource::class;
     protected ?string $heading = 'Data Menu Restoran';
+    public function getTitle(): string
+    {
+        return 'Menu Restorans'; // Muncul di tab browser
+    }
 
     protected function getHeaderActions(): array
     {
