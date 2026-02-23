@@ -13,17 +13,16 @@ return new class extends Migration
     {
         Schema::create('bookings', function (Blueprint $table) {
             $table->id();
-            $table->string('kode_booking')->unique()->nullable(); 
+            $table->string('kode_booking', 50)->unique()->nullable(); 
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->string('nama_tamu'); 
-            $table->string('nomor_hp');
+            $table->string('nama_tamu', 100); 
+            $table->string('nomor_hp', 20);
             $table->foreignId('kamar_id')->nullable()->constrained('kamars')->nullOnDelete();
             $table->date('check_in');
             $table->date('check_out');
-            $table->integer('jumlah_kamar')->default(1);
+            $table->integer('jumlah_kamar')->default(1); 
             $table->decimal('total_harga', 15, 2)->default(0); 
             $table->enum('status', ['pending', 'confirmed', 'cancelled'])->default('pending');
-            $table->text('catatan_admin')->nullable();
             $table->timestamps();
         });
     }

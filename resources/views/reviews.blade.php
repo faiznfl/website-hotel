@@ -16,7 +16,7 @@
             {{-- Tombol Kembali ke Home --}}
             <a href="{{ route('home') }}"
                 class="inline-flex items-center gap-2 mt-6 md:mt-8 text-yellow-400 hover:text-yellow-300 font-semibold transition text-sm md:text-base">
-                <i class="fa-solid fa-arrow-left"></i> Kembali ke Beranda
+                <i class="fa-solid fa-arrow-left"></i> Kembali ke Home
             </a>
         </div>
     </div>
@@ -45,7 +45,7 @@
 
                             {{-- Isi Review (flex-grow agar footer selalu di bawah) --}}
                             <p class="text-gray-600 italic mb-6 leading-relaxed text-sm relative z-10 flex-grow">
-                                "{{ $testi->content }}"
+                                "{{ $testi->review }}"
                             </p>
 
                             {{-- Profil Pengguna --}}

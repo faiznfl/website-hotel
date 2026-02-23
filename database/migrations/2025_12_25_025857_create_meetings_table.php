@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('meetings', function (Blueprint $table) {
             $table->id();
-            $table->string('judul');
-            $table->string('slug')->unique()->nullable();  
-            $table->string('gambar');       
-            $table->string('kapasitas');    
-            $table->text('deskripsi');   
-            $table->string('fasilitas')->nullable();
+            $table->string('judul', 150); // 150 karakter sudah sangat lega untuk nama ruangan/event
+            $table->string('slug', 150)->unique()->nullable(); // Samakan dengan judul
+            $table->string('gambar'); // Biarkan default 255 untuk panjang path gambar
+            $table->integer('kapasitas'); // DIUBAH: Dari string ke integer biasa
+            $table->text('deskripsi'); 
+            $table->text('fasilitas')->nullable(); // DIUBAH: Dari string ke text agar muat banyak
             $table->timestamps();
         });
     }

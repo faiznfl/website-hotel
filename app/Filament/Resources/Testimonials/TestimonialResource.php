@@ -66,7 +66,7 @@ class TestimonialResource extends Resource
                             ->disabled(), // Agar dropdown terkunci (tidak bisa diedit)
 
                         // INPUT KONTEN
-                        Textarea::make('content')
+                        Textarea::make('review')
                             ->label('Isi Review')
                             ->rows(3)
                             ->columnSpanFull()
@@ -94,7 +94,7 @@ class TestimonialResource extends Resource
                     ->formatStateUsing(fn (string $state): string => str_repeat('★', (int) $state))
                     ->color('warning'),
 
-                TextColumn::make('content')
+                TextColumn::make('review')
                     ->label('Isi Review')
                     ->limit(50)
                     ->wrap(),

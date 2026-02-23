@@ -14,13 +14,13 @@ return new class extends Migration
         Schema::create('kamars', function (Blueprint $table) {
             $table->id();
             $table->enum('tipe_kamar', ['Superior Room', 'Deluxe Room', 'Family Room']);
-            $table->string('slug')->unique();
+            $table->string('slug', 100)->unique();
             $table->string('foto')->nullable();
-            $table->string('max_dewasa');
-            $table->string('max_anak');
-            $table->string('beds');
-            $table->integer('baths');
-            $table->integer('harga');
+            $table->integer('max_dewasa')->default(2); 
+            $table->integer('max_anak')->default(0);   
+            $table->string('beds', 50);
+            $table->integer('baths')->default(1);      
+            $table->integer('harga');                  
             $table->text('deskripsi')->nullable();
             $table->text('fasilitas')->nullable();
             $table->timestamps();

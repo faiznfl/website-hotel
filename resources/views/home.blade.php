@@ -207,7 +207,7 @@
 
                                 {{-- Isi --}}
                                 <p class="text-gray-600 italic mb-6 leading-relaxed text-sm line-clamp-4 h-[72px] md:h-20">
-                                    "{{ $testi->content }}"
+                                    "{{ $testi->review }}"
                                 </p>
 
                                 {{-- Profil --}}
@@ -277,7 +277,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Cerita Pengalaman</label>
-                        <textarea name="content" rows="3" required
+                        <textarea name="review" rows="3" required
                             class="w-full border-gray-300 rounded-lg focus:ring-yellow-400 focus:border-yellow-400 text-sm p-2.5"
                             placeholder="Kamar bersih, pelayanan ramah..."></textarea>
                     </div>

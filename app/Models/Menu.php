@@ -10,12 +10,12 @@ class Menu extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name',
+        'nama',
         'slug',
-        'description',
-        'price',
-        'category',
-        'image',
+        'deskripsi',
+        'harga',
+        'kategori',
+        'foto',
         'is_available',
     ];
 }

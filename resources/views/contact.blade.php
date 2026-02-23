@@ -72,13 +72,13 @@
 
                         {{-- Input Name --}}
                         <div>
-                            <label for="name"
+                            <label for="nama"
                                 class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Full
                                 Name</label>
-                            <input type="text" id="name" name="name" value="{{ old('name') }}"
-                                class="w-full px-4 py-3 bg-gray-50 border {{ $errors->has('name') ? 'border-red-500' : 'border-gray-200' }} rounded-lg focus:bg-white focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 transition-all duration-300 placeholder-gray-300 text-sm"
+                            <input type="text" id="nama" name="nama" value="{{ old('nama') }}"
+                                class="w-full px-4 py-3 bg-gray-50 border {{ $errors->has('nama') ? 'border-red-500' : 'border-gray-200' }} rounded-lg focus:bg-white focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 transition-all duration-300 placeholder-gray-300 text-sm"
                                 placeholder="Enter your full name" required>
-                            @error('name') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                            @error('nama') <p class="text-red-500 text-xs mt-1">{{ $pesan }}</p> @enderror
                         </div>
 
                         {{-- Input Email --}}
@@ -89,7 +89,7 @@
                             <input type="email" id="email" name="email" value="{{ old('email') }}"
                                 class="w-full px-4 py-3 bg-gray-50 border {{ $errors->has('email') ? 'border-red-500' : 'border-gray-200' }} rounded-lg focus:bg-white focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 transition-all duration-300 placeholder-gray-300 text-sm"
                                 placeholder="name@example.com" required>
-                            @error('email') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                            @error('email') <p class="text-red-500 text-xs mt-1">{{ $pesan }}</p> @enderror
                         </div>
 
                         {{-- Input Phone --}}
@@ -100,18 +100,18 @@
                             <input type="tel" id="phone" name="phone" value="{{ old('phone') }}"
                                 class="w-full px-4 py-3 bg-gray-50 border {{ $errors->has('phone') ? 'border-red-500' : 'border-gray-200' }} rounded-lg focus:bg-white focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 transition-all duration-300 placeholder-gray-300 text-sm"
                                 placeholder="+62..." required>
-                            @error('phone') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                            @error('phone') <p class="text-red-500 text-xs mt-1">{{ $pesan }}</p> @enderror
                         </div>
 
                         {{-- Input Message --}}
                         <div>
-                            <label for="message"
+                            <label for="pesan"
                                 class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Your
                                 Message</label>
-                            <textarea id="message" name="message" rows="4"
-                                class="w-full px-4 py-3 bg-gray-50 border {{ $errors->has('message') ? 'border-red-500' : 'border-gray-200' }} rounded-lg focus:bg-white focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 transition-all duration-300 placeholder-gray-300 text-sm resize-none"
-                                placeholder="Write your inquiries here..." required>{{ old('message') }}</textarea>
-                            @error('message') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                            <textarea id="pesan" name="pesan" rows="4"
+                                class="w-full px-4 py-3 bg-gray-50 border {{ $errors->has('pesan') ? 'border-red-500' : 'border-gray-200' }} rounded-lg focus:bg-white focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 transition-all duration-300 placeholder-gray-300 text-sm resize-none"
+                                placeholder="Write your inquiries here..." required>{{ old('pesan') }}</textarea>
+                            @error('pesan') <p class="text-red-500 text-xs mt-1">{{ $pesan }}</p> @enderror
                         </div>
 
                         {{-- Submit Button --}}

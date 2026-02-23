@@ -6,5 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Testimonial extends Model
 {
-    protected $guarded = [];
+    protected $fillable = [
+    'name', 
+    'stars', 
+    'review', // <--- Ganti 'content' jadi 'review' di sini
+];
 }

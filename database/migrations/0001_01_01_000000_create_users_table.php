@@ -13,22 +13,13 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            
-            // --- TAMBAHAN KHUSUS HOTEL RUMAH RB ---
-            
-            // 1. Kolom Nomor HP (Wajib ada karena sudah ditambahkan di form Register)
-            $table->string('nomor_hp')->nullable(); 
-
-            // 2. Kolom Role (Untuk membedakan Admin dan Tamu biasa)
-            $table->string('role')->default('user'); 
-            
-            // --------------------------------------
-
+            $table->string('name', 100);
+            $table->string('email', 255)->unique();
+            $table->string('nomor_hp', 20)->nullable();
+            $table->string('role', 20)->default('user');
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->rememberToken();
+            $table->string('password', 255);
+            $table->rememberToken(); 
             $table->timestamps();
         });
 

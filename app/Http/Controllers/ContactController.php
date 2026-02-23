@@ -11,10 +11,10 @@ class ContactController extends Controller
 {
     // 1. Validasi input
     $validated = $request->validate([
-        'name'    => 'required|string|max:255',
+        'nama'    => 'required|string|max:255',
         'email'   => 'required|email|max:255',
         'phone'   => 'required|string|max:20', // Wajib diisi, maksimal 20 karakter
-        'message' => 'required|string',
+        'pesan' => 'required|string',
     ]);
 
     // 2. Simpan ke Database

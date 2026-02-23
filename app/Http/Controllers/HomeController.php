@@ -27,7 +27,7 @@ class HomeController extends Controller
         // 1. Validasi Input (Hanya Nama, Review, Bintang)
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'content' => 'required|string|max:500',
+            'review' => 'required|string|max:500',
             'stars' => 'required|integer|min:1|max:5',
         ]);
 

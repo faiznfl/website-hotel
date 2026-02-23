@@ -53,7 +53,7 @@ class ContactResource extends Resource
                     ->schema([
                         Section::make('Detail Pengirim')
                             ->schema([
-                                TextInput::make('name')
+                                TextInput::make('nama')
                                     ->label('Nama')
                                     ->disabled(), // <--- KITA DISABLE (ABU-ABU)
 
@@ -71,7 +71,7 @@ class ContactResource extends Resource
                     ->schema([
                         Section::make('Isi Pesan')
                             ->schema([
-                                Textarea::make('message')
+                                Textarea::make('pesan')
                                     ->hiddenLabel()
                                     ->rows(5)
                                     ->disabled()
@@ -85,7 +85,7 @@ class ContactResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')
+                TextColumn::make('nama')
                     ->label('Nama')
                     ->searchable()
                     ->sortable()

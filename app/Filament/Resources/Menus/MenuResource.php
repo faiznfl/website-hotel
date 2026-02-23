@@ -54,7 +54,7 @@ class MenuResource extends Resource
                             ->icon('heroicon-o-clipboard-document-list')
                             ->schema([
                                 // Nama Menu
-                                TextInput::make('name')
+                                TextInput::make('nama')
                                     ->label('Nama Menu')
                                     ->placeholder('Contoh: Nasi Goreng Spesial')
                                     ->required()
@@ -65,7 +65,7 @@ class MenuResource extends Resource
 
                                 Grid::make(2)->schema([
                                     // Kategori
-                                    Select::make('category')
+                                    Select::make('kategori')
                                         ->label('Kategori')
                                         ->options([
                                             'makanan' => 'Makanan',
@@ -78,7 +78,7 @@ class MenuResource extends Resource
                                         ->prefixIcon('heroicon-m-tag'),
 
                                     // Harga
-                                    TextInput::make('price')
+                                    TextInput::make('harga')
                                         ->label('Harga')
                                         ->placeholder('0')
                                         ->required()
@@ -88,7 +88,7 @@ class MenuResource extends Resource
                                 ]),
 
                                 // Deskripsi
-                                Textarea::make('description')
+                                Textarea::make('deskripsi')
                                     ->label('Deskripsi Singkat')
                                     ->placeholder('Jelaskan bahan utama dan rasa hidangan ini...')
                                     ->rows(4)
@@ -103,7 +103,7 @@ class MenuResource extends Resource
                         Section::make('Media & Status')
                             ->schema([
                                 // Upload Gambar
-                                FileUpload::make('image')
+                                FileUpload::make('foto')
                                     ->label('Foto Menu')
                                     ->image()
                                     ->imageEditor()
@@ -144,7 +144,7 @@ class MenuResource extends Resource
         return $table
             ->columns([
                 // Gambar Bulat
-                ImageColumn::make('image')
+                ImageColumn::make('foto')
                     ->label('')
                     ->circular() // Membuat gambar bulat
                     ->visibility('public')
@@ -152,7 +152,7 @@ class MenuResource extends Resource
                     ->size(50),
 
                 // Nama & Slug (Stacked)
-                TextColumn::make('name')
+                TextColumn::make('nama')
                     ->label('Nama Menu')
                     ->searchable()
                     ->sortable()
@@ -160,7 +160,7 @@ class MenuResource extends Resource
                     ->description(fn (Menu $record): string => $record->slug),
 
                 // Kategori Badge
-                TextColumn::make('category')
+                TextColumn::make('kategori')
                     ->label('Kategori')
                     ->badge()
                     ->sortable()
@@ -178,7 +178,7 @@ class MenuResource extends Resource
                     }),
 
                 // Harga Bold
-                TextColumn::make('price')
+                TextColumn::make('harga')
                     ->label('Harga')
                     ->money('IDR', locale: 'id') // Format Rp otomatis
                     ->sortable()
@@ -192,7 +192,7 @@ class MenuResource extends Resource
                     ->offColor('danger'),
             ])
             ->filters([
-                SelectFilter::make('category')
+                SelectFilter::make('kategori')
                     ->label('Filter Kategori')
                     ->options([
                         'makanan' => 'Makanan',

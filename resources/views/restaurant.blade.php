@@ -51,32 +51,32 @@
 
                         {{-- CARD ITEM --}}
                         <div class="menu-item bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:border-yellow-400 transition-all duration-300 flex flex-col h-full group"
-                             data-category="{{ $menu->category }}">
+                             data-category="{{ $menu->kategori }}">
 
                             {{-- Gambar Menu --}}
                             <div class="relative h-60 overflow-hidden bg-gray-200">
-                                @if($menu->image)
-                                    <img src="{{ asset('storage/' . $menu->image) }}" alt="{{ $menu->name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                                @if($menu->foto)
+                                    <img src="{{ asset('storage/' . $menu->foto) }}" alt="{{ $menu->nama }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                                 @else
                                     <div class="w-full h-full flex items-center justify-center text-gray-400"><i class="fa-solid fa-utensils text-4xl"></i></div>
                                 @endif
-                                <span class="absolute top-4 left-4 bg-black/70 backdrop-blur text-white text-[10px] font-bold px-3 py-1.5 rounded uppercase tracking-wider">{{ $menu->category }}</span>
+                                <span class="absolute top-4 left-4 bg-black/70 backdrop-blur text-white text-[10px] font-bold px-3 py-1.5 rounded uppercase tracking-wider">{{ $menu->kategori }}</span>
                             </div>
 
                             {{-- Info Menu --}}
                             <div class="p-6 flex flex-col flex-grow">
-                                <h3 class="text-lg font-bold text-gray-900 mb-2 leading-snug group-hover:text-yellow-600 transition-colors">{{ $menu->name }}</h3>
-                                <p class="text-gray-500 text-sm mb-6 line-clamp-2 flex-grow leading-relaxed">{{ $menu->description }}</p>
+                                <h3 class="text-lg font-bold text-gray-900 mb-2 leading-snug group-hover:text-yellow-600 transition-colors">{{ $menu->nama }}</h3>
+                                <p class="text-gray-500 text-sm mb-6 line-clamp-2 flex-grow leading-relaxed">{{ $menu->deskripsi }}</p>
 
                                 <div class="flex items-center justify-between pt-4 border-t border-gray-100 mt-auto">
                                     <div class="flex flex-col">
                                         <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">Harga</span>
-                                        <span class="text-lg font-bold text-gray-900">Rp {{ number_format($menu->price, 0, ',', '.') }}</span>
+                                        <span class="text-lg font-bold text-gray-900">Rp {{ number_format($menu->harga, 0, ',', '.') }}</span>
                                     </div>
 
                                     {{-- LOGIKA TOMBOL (Login vs Guest) --}}
                                     @auth
-                                        <button onclick="addToCart({{ $menu->id }}, '{{ $menu->name }}', {{ $menu->price }})" 
+                                        <button onclick="addToCart({{ $menu->id }}, '{{ $menu->nama }}', {{ $menu->harga }})" 
                                                 class="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-bold px-4 py-2.5 rounded-lg transition-transform transform active:scale-95 shadow-sm">
                                             <i class="fa-solid fa-plus"></i> Tambah
                                         </button>
