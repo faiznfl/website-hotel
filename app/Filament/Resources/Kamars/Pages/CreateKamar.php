@@ -36,4 +36,9 @@ class CreateKamar extends CreateRecord
         return parent::getCancelFormAction()
             ->label('Batal');
     }
+    protected function getRedirectUrl(): string
+    {
+        // Kode ini menyuruh Filament kembali ke halaman 'index' (List Tabel)
+        return $this->getResource()::getUrl('index'); 
+    }
 }

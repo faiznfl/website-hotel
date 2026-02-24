@@ -16,4 +16,10 @@ class EditGallery extends EditRecord
             DeleteAction::make(),
         ];
     }
+
+    protected function getRedirectUrl(): string
+    {
+        // Kode ini menyuruh Filament kembali ke halaman 'index' (List Tabel)
+        return $this->getResource()::getUrl('index'); 
+    }
 }

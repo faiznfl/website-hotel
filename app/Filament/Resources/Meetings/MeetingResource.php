@@ -147,6 +147,11 @@ class MeetingResource extends Resource
                     ->badge() 
                     ->color('info') 
                     ->formatStateUsing(fn (string $state): string => $state . ' Pax'),
+                    
+                TextColumn::make('fasilitas')
+                    ->label('Fasilitas')
+                    ->sortable()
+                    ->badge(),
 
                 TextColumn::make('created_at')
                     ->label('Dibuat')
