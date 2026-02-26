@@ -63,6 +63,8 @@ Route::get('/restaurant', function () {
     return view('restaurant', compact('menus'));
 })->name('restaurant');
 
+use App\Http\Controllers\LaporanController;
+Route::get('/cetak-laporan', [LaporanController::class, 'cetakPdf'])->name('cetak.laporan.pdf');
 /*
 |--------------------------------------------------------------------------
 | 2. API ROUTES
