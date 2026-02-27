@@ -13,7 +13,9 @@ return new class extends Migration
     {
         Schema::create('galleries', function (Blueprint $table) {
             $table->id();
-            $table->string('gambar');
+            $table->foreignId('kamar_id')->nullable()->constrained('kamars')->cascadeOnDelete();
+            $table->string('foto'); 
+            $table->string('keterangan')->nullable(); 
             $table->timestamps();
         });
     }

@@ -23,4 +23,9 @@ class Kamar extends Model
     {
         return $this->hasMany(Booking::class);
     }
+
+    public function galleries()
+    {
+        return $this->hasMany(Gallery::class);
+    }
 }

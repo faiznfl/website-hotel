@@ -23,6 +23,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Repeater; // <-- TAMBAHAN IMPORT REPEATER
 use App\Filament\Resources\Kamars\Pages\EditKamar;
 use App\Filament\Resources\Kamars\Pages\ListKamars;
 use App\Filament\Resources\Kamars\Pages\CreateKamar;
@@ -79,26 +80,27 @@ class KamarResource extends Resource
                                         ->unique(Kamar::class, 'slug', ignoreRecord: true),
                                 ]),
 
-                                RichEditor::make('deskripsi') // Pakai RichEditor biar bisa Bold/List
+                                RichEditor::make('deskripsi') 
                                     ->label('Deskripsi Lengkap')
                                     ->toolbarButtons([
                                         'bold', 'italic', 'bulletList', 'orderedList', 'undo', 'redo',
                                     ])
                                     ->columnSpanFull(),
 
-                                TagsInput::make('fasilitas') // UX BAGUS: Ketik koma/enter jadi tag
+                                TagsInput::make('fasilitas') 
                                     ->label('Fasilitas')
                                     ->placeholder('Ketik fasilitas lalu tekan Enter (Cth: Wifi, AC, TV)')
-                                    ->separator(',') // Simpan ke DB sebagai string dipisah koma
+                                    ->separator(',') 
                                     ->splitKeys(['Tab', ','])
                                     ->columnSpanFull(),
                             ]),
 
-                        // SECTION 2: MEDIA FOTO
-                        Section::make('Media')
+                        // SECTION 2: MEDIA FOTO UTAMA & GALERI (DIUPDATE)
+                        Section::make('Manajemen Foto')
                             ->schema([
+                                // A. Foto Utama / Cover
                                 FileUpload::make('foto')
-                                    ->hiddenLabel()
+                                    ->label('Foto Utama (Cover Depan)')
                                     ->image()
                                     ->imageEditor()
                                     ->imagePreviewHeight('250')
@@ -106,6 +108,26 @@ class KamarResource extends Resource
                                     ->directory('rooms')
                                     ->preserveFilenames()
                                     ->maxSize(10240) // 10MB
+                                    ->columnSpanFull(),
+
+                                // B. Foto Tambahan (Repeater ke tabel galleries)
+                                Repeater::make('galleries')
+                                    ->relationship() // Otomatis baca public function galleries() di Model Kamar
+                                    ->label('Foto Tambahan (Untuk Slider Galeri Kamar)')
+                                    ->schema([
+                                        FileUpload::make('foto')
+                                            ->label('Upload Foto Galeri')
+                                            ->image()
+                                            ->directory('gallery-images')
+                                            ->disk('public')
+                                            ->required(),
+                                            
+                                        TextInput::make('keterangan')
+                                            ->label('Keterangan (Cth: Balkon, Kasur)')
+                                            ->maxLength(255),
+                                    ])
+                                    ->columns(2)
+                                    ->addActionLabel('Tambah Foto Lainnya')
                                     ->columnSpanFull(),
                             ]),
                     ]),
@@ -146,13 +168,13 @@ class KamarResource extends Resource
                                 TextInput::make('beds')
                                     ->label('Jenis Kasur')
                                     ->placeholder('Cth: 1 King Bed')
-                                    ->prefixIcon('heroicon-m-archive-box'), // Ikon kasur/box
+                                    ->prefixIcon('heroicon-m-archive-box'), 
 
                                 TextInput::make('baths')
                                     ->label('Kamar Mandi')
                                     ->numeric()
                                     ->suffix('Unit')
-                                    ->prefixIcon('heroicon-m-beaker'), // Ikon bath/air
+                                    ->prefixIcon('heroicon-m-beaker'), 
                             ]),
                     ]),
             ]);
@@ -167,14 +189,14 @@ class KamarResource extends Resource
                     ->visibility('public')
                     ->disk('public')
                     ->square()
-                    ->size(60), // Ukuran thumbnail pas
+                    ->size(60), 
                 
                 TextColumn::make('tipe_kamar')
                     ->label('Tipe Kamar')
                     ->searchable()
                     ->sortable()
                     ->weight('bold')
-                    ->badge() // Tampil sebagai Badge warna-warni
+                    ->badge() 
                     ->color(fn (string $state): string => match ($state) {
                         'Superior Room' => 'info',
                         'Deluxe Room'   => 'warning',
@@ -184,7 +206,7 @@ class KamarResource extends Resource
                 
                 TextColumn::make('harga') 
                     ->label('Harga/Malam')
-                    ->money('IDR', locale: 'id') // Format Rp otomatis
+                    ->money('IDR', locale: 'id') 
                     ->sortable()
                     ->weight('bold')
                     ->color('success'),
@@ -198,12 +220,12 @@ class KamarResource extends Resource
                     ->label('Fasilitas')
                     ->limit(30)
                     ->icon('heroicon-m-sparkles')
-                    ->toggleable(isToggledHiddenByDefault: true), // Disembunyikan default biar tabel ga penuh
+                    ->toggleable(isToggledHiddenByDefault: true), 
             ])
             ->defaultSort('tipe_kamar', 'asc')
             ->actions([
-                EditAction::make()->iconButton(),   // Tombol jadi icon pencil
-                DeleteAction::make()->iconButton(), // Tombol jadi icon tong sampah
+                EditAction::make()->iconButton(),   
+                DeleteAction::make()->iconButton(), 
             ])
             ->bulkActions([
                 BulkActionGroup::make([

@@ -43,8 +43,8 @@ Route::get('/contact', function () {
 });
 
 Route::get('/rooms/{slug}', function ($slug) {
-    $room = Kamar::where('slug', $slug)->firstOrFail();
-    return view('room-detail', compact('room'));
+    $room = Kamar::with('galleries')->where('slug', $slug)->firstOrFail();
+    return view('room.detail', compact('room'));
 })->name('room.detail');
 
 Route::get('/meetings-events/{slug}', function ($slug) {
