@@ -251,17 +251,20 @@
                 x-transition.scale>
                 <div class="bg-gray-900 text-white p-4 flex justify-between items-center">
                     <h3 class="font-bold text-base md:text-lg">Bagikan Pengalaman Anda</h3>
-                    <button @click="openModal = false" class="text-gray-400 hover:text-white"><i
-                            class="fa-solid fa-xmark text-lg md:text-xl"></i></button>
+                    <button @click="openModal = false" class="text-gray-400 hover:text-white">
+                        <i class="fa-solid fa-xmark text-lg md:text-xl"></i>
+                    </button>
                 </div>
+
                 <form action="{{ route('testimoni.store') }}" method="POST" class="p-6 space-y-4">
                     @csrf
+
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
-                        <input type="text" name="name" value="{{ auth()->user()->name ?? '' }}" required
-                            class="w-full border-gray-300 rounded-lg text-sm focus:ring-yellow-400 focus:border-yellow-400 p-2.5"
-                            placeholder="Contoh: Budi Santoso">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Dikirim Sebagai</label>
+                        <input type="text" value="{{ auth()->user()->name ?? 'Tamu (Harus Login)' }}" readonly
+                            class="w-full border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed rounded-lg text-sm p-2.5">
                     </div>
+
                     <div x-data="{ rating: 5, hoverRating: 0 }">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Rating</label>
                         <input type="hidden" name="stars" :value="rating">
@@ -269,21 +272,23 @@
                             <template x-for="star in 5">
                                 <i class="fa-star text-2xl transition-colors duration-200"
                                     :class="(star <= (hoverRating || rating)) ? 'fa-solid text-yellow-400' : 'fa-regular text-gray-300'"
-                                    @click="rating = star" @mouseenter="hoverRating = star"
-                                    @mouseleave="hoverRating = 0"></i>
+                                    @click="rating = star" @mouseenter="hoverRating = star" @mouseleave="hoverRating = 0"></i>
                             </template>
                             <span class="ml-2 text-sm text-gray-500 font-medium" x-text="rating + ' Bintang'"></span>
                         </div>
                     </div>
+
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Cerita Pengalaman</label>
                         <textarea name="review" rows="3" required
                             class="w-full border-gray-300 rounded-lg focus:ring-yellow-400 focus:border-yellow-400 text-sm p-2.5"
                             placeholder="Kamar bersih, pelayanan ramah..."></textarea>
                     </div>
+
                     <button type="submit"
-                        class="w-full bg-yellow-400 text-white font-bold py-3 rounded-lg hover:bg-yellow-500 transition shadow-md text-sm">Kirim
-                        Review</button>
+                        class="w-full bg-yellow-400 text-white font-bold py-3 rounded-lg hover:bg-yellow-500 transition shadow-md text-sm">
+                        Kirim Review
+                    </button>
                 </form>
             </div>
         </div>

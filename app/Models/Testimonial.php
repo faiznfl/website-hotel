@@ -6,9 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Testimonial extends Model
 {
-    protected $fillable = [
-    'name', 
-    'stars', 
-    'review', // <--- Ganti 'content' jadi 'review' di sini
-];
+    protected $fillable = ['user_id', 'stars', 'review'];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

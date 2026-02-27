@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('testimonials', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 100);             // 100 karakter sudah sangat pas untuk nama
-            $table->integer('stars')->default(5);    // Pakai integer biasa
-            $table->text('review');                 // Tipe text untuk ulasan panjang
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->integer('stars')->default(5);    
+            $table->text('review');                 
             $table->timestamps();
         });
     }

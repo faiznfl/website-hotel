@@ -44,12 +44,10 @@ class TestimonialResource extends Resource
                 Section::make('Detail Testimoni')
                     ->schema([
                         // INPUT NAMA
-                        TextInput::make('name')
-                            ->label('Nama Tamu')
-                            ->required()
-                            ->maxLength(255)
-                            ->prefixIcon('heroicon-m-user')
-                            ->readOnly(), // Agar tidak bisa diedit
+                        Select::make('user_id')
+                        ->relationship('user', 'name') // Mengambil nama dari relasi tabel user
+                        ->label('Nama Tamu (User)')
+                        ->required(),
 
                         // INPUT BINTANG
                         Select::make('stars')
@@ -81,7 +79,7 @@ class TestimonialResource extends Resource
         return $table
             ->columns([
                 // GANTI IMAGE JADI ICON USER BIASA
-                TextColumn::make('name')
+                TextColumn::make('user.name')
                     ->label('Nama Tamu')
                     ->icon('heroicon-m-user-circle') 
                     ->searchable()
