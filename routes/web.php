@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\RestaurantOrderController;
 use App\Models\Kamar;
 use App\Models\Gallery;
 use App\Models\Meeting;
@@ -65,6 +66,10 @@ Route::get('/restaurant', function () {
 
 use App\Http\Controllers\LaporanController;
 Route::get('/cetak-laporan', [LaporanController::class, 'cetakPdf'])->name('cetak.laporan.pdf');
+
+Route::middleware('auth')->group(function () {
+    Route::post('/restaurant-order/store', [RestaurantOrderController::class, 'store'])->name('restaurant.order.store');
+});
 /*
 |--------------------------------------------------------------------------
 | 2. API ROUTES
