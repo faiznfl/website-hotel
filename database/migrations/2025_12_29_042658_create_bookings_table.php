@@ -23,6 +23,7 @@ return new class extends Migration
             $table->integer('jumlah_kamar')->default(1); 
             $table->decimal('total_harga', 15, 2)->default(0); 
             $table->enum('status', ['pending', 'confirmed', 'cancelled'])->default('pending');
+            $table->string('snap_token')->nullable();
             $table->timestamps();
         });
     }

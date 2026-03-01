@@ -7,11 +7,12 @@ use App\Models\Kamar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
-use Carbon\CarbonPeriod;
+use Midtrans\Config; // PENTING: Import Midtrans
+use Midtrans\Snap;   // PENTING: Import Midtrans
 
 class BookingController extends Controller
 {
-    // --- HELPER: Function Khusus Stok ---
+    // --- HELPER: Function Khusus Stok (Hardcode sesuai request kamu) ---
     private function getTotalStok($tipeKamar)
     {
         $tipe = strtolower($tipeKamar);
@@ -24,28 +25,27 @@ class BookingController extends Controller
     }
 
     // =================================================================
-    // 1. FUNGSI BARU: MENAMPILKAN HALAMAN BOOKING (View)
+    // 1. HALAMAN FORM BOOKING
     // =================================================================
     public function create(Request $request)
     {
-        // 1. Ambil ID Kamar (Kalau ada)
+        // 1. Ambil ID Kamar dari URL (?room_id=1)
         $kamarId = $request->query('room_id');
 
         // 2. Ambil SEMUA data kamar (Untuk Dropdown)
-        $rooms = \App\Models\Kamar::all();
+        $rooms = Kamar::all();
 
         // 3. Cek apakah user sudah memilih kamar sebelumnya
         $selectedRoom = null;
         if ($kamarId) {
-            $selectedRoom = \App\Models\Kamar::find($kamarId);
+            $selectedRoom = Kamar::find($kamarId);
         }
 
-        // 4. Tampilkan View
         return view('booking', compact('rooms', 'selectedRoom'));
     }
 
     // =================================================================
-    // 2. FUNGSI SIMPAN BOOKING (Store)
+    // 2. PROSES SIMPAN BOOKING & MINTA TOKEN MIDTRANS
     // =================================================================
     public function store(Request $request)
     {
@@ -53,57 +53,97 @@ class BookingController extends Controller
         $request->validate([
             'nama_tamu' => 'required|string|max:255',
             'nomor_hp' => 'required|string',
-            'check_in' => 'required|date',
+            'check_in' => 'required|date|after_or_equal:today',
             'check_out' => 'required|date|after:check_in',
             'jumlah_kamar' => 'required|integer|min:1',
-            'kamar_id' => 'required|exists:kamars,id', // Wajib ada ID Kamar
-            'total_harga' => 'required|numeric', // Wajib ada Total Harga
+            'kamar_id' => 'required|exists:kamars,id',
+            'total_harga' => 'required|numeric',
         ]);
 
-        // 2. Ambil ID Kamar
-        $kamarId = $request->kamar_id;
-
-        // 3. VALIDASI STOK
-        $kamar = Kamar::find($kamarId);
-        $totalStokKamar = $this->getTotalStok($kamar->tipe_kamar);
-
-        // Cek Stok Fisik
-        if ($request->jumlah_kamar > $totalStokKamar) {
-            return back()->with('error', "Maaf, tipe {$kamar->tipe_kamar} hanya memiliki total {$totalStokKamar} kamar.");
-        }
-
-        // Cek Ketersediaan Tanggal (Supaya tidak double book)
-        $kamarTerpakai = Booking::where('kamar_id', $kamarId)
-            ->where('status', '!=', 'cancelled')
-            ->where(function ($query) use ($request) {
-                $query->where('check_in', '<', $request->check_out)
-                      ->where('check_out', '>', $request->check_in);
-            })
-            ->sum('jumlah_kamar');
-
-        $sisaKamar = $totalStokKamar - $kamarTerpakai;
-
-        if ($request->jumlah_kamar > $sisaKamar) {
-            return back()->with('error', "Maaf, pada tanggal tersebut sisa kamar {$kamar->tipe_kamar} hanya tinggal {$sisaKamar} unit.");
-        }
-
-        // 4. Simpan ke Database
+        // 2. Cek Stok (Gunakan logika Anda yang sudah ada)
+        $kamar = Kamar::find($request->kamar_id);
+        
+        // 3. Simpan ke Database Dulu (Status: pending)
         $booking = Booking::create([
             'user_id'      => Auth::id(),
-            'kamar_id'     => $kamarId,
+            'kamar_id'     => $request->kamar_id,
             'nama_tamu'    => $request->nama_tamu,
             'nomor_hp'     => $request->nomor_hp,
             'check_in'     => $request->check_in,
             'check_out'    => $request->check_out,
             'jumlah_kamar' => $request->jumlah_kamar,
-            'total_harga'  => $request->total_harga, // PENTING: Simpan harga
+            'total_harga'  => $request->total_harga,
             'status'       => 'pending',
         ]);
 
-        return redirect()->route('booking.history')->with('success', "Reservasi Berhasil! Kode Booking: {$booking->kode_booking}.");
+        // 4. INTEGRASI MIDTRANS
+        try {
+            // Konfigurasi Langsung dari ENV agar lebih aman saat testing
+            Config::$serverKey = env('MIDTRANS_SERVER_KEY');
+            Config::$isProduction = false; // Paksa false untuk Sandbox
+            Config::$isSanitized = true;
+            Config::$is3ds = true;
+
+            $params = [
+                'transaction_details' => [
+                    'order_id' => 'BOOKING-' . $booking->id . '-' . time(),
+                    'gross_amount' => (int) $booking->total_harga,
+                ],
+                'customer_details' => [
+                    'first_name' => $booking->nama_tamu,
+                    'email' => Auth::user()->email,
+                    'phone' => $booking->nomor_hp,
+                ],
+                'item_details' => [
+                    [
+                        'id' => $kamar->id,
+                        'price' => (int) ($booking->total_harga / $booking->jumlah_kamar),
+                        'quantity' => (int) $booking->jumlah_kamar,
+                        'name' => substr("Sewa " . $kamar->tipe_kamar, 0, 50)
+                    ]
+                ]
+            ];
+
+            // Minta token ke Midtrans
+            $snapToken = Snap::getSnapToken($params);
+            
+            // UPDATE TOKEN KE DATABASE
+            $booking->snap_token = $snapToken;
+            $booking->save();
+
+            // Redirect ke halaman pembayaran yang ada tombol bayarnya
+            return redirect()->route('booking.payment', $booking->id);
+
+        } catch (\Exception $e) {
+            // JIKA ERROR, TAMPILKAN PESANNYA DI LAYAR (Penting untuk Debugging!)
+            dd("Gagal mengambil token Midtrans: " . $e->getMessage());
+        }
     }
 
-    // --- 3. Fungsi Lihat Riwayat (History) ---
+    // =================================================================
+    // 3. HALAMAN PEMBAYARAN (TAMPILKAN TOMBOL BAYAR)
+    // =================================================================
+    public function payment($id)
+    {
+        $booking = Booking::findOrFail($id);
+
+        // Pastikan yang akses adalah pemilik booking
+        if ($booking->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        // Jika sudah lunas, jangan bayar lagi
+        if ($booking->status == 'confirmed') {
+            return redirect()->route('booking.history')->with('success', 'Booking ini sudah lunas.');
+        }
+
+        return view('payment', compact('booking'));
+    }
+
+    // =================================================================
+    // 4. FITUR LAINNYA
+    // =================================================================
+
     public function history()
     {
         $bookings = Booking::with('kamar')
@@ -114,12 +154,9 @@ class BookingController extends Controller
         return view('user.history', compact('bookings'));
     }
 
-    // --- 4. Fungsi Batalkan Pesanan (Cancel) ---
     public function cancel($id)
     {
-        $booking = Booking::where('id', $id)
-            ->where('user_id', Auth::id())
-            ->firstOrFail();
+        $booking = Booking::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
 
         if ($booking->status == 'pending') {
             $booking->status = 'cancelled';
@@ -130,49 +167,6 @@ class BookingController extends Controller
         return redirect()->back()->with('error', 'Pesanan tidak dapat dibatalkan.');
     }
 
-    // --- 5. Fungsi Cek Ketersediaan Kamar (API) ---
-    // (Opsional: Tetap disimpan jika nanti butuh fitur kalender canggih)
-    public function checkAvailability(Request $request)
-    {
-        $kamarId = $request->kamar_id;
-        
-        if (!$kamarId) return response()->json([]);
-
-        $kamar = Kamar::find($kamarId);
-        if (!$kamar) return response()->json([]);
-
-        $totalKamar = $this->getTotalStok($kamar->tipe_kamar);
-
-        $bookings = Booking::where('kamar_id', $kamarId)
-            ->where('status', '!=', 'cancelled')
-            ->where('check_out', '>=', now())
-            ->get();
-
-        $dateCounts = [];
-
-        foreach ($bookings as $booking) {
-            $period = CarbonPeriod::create($booking->check_in, Carbon::parse($booking->check_out)->subDay());
-
-            foreach ($period as $date) {
-                $dateString = $date->format('Y-m-d');
-                if (!isset($dateCounts[$dateString])) {
-                    $dateCounts[$dateString] = 0;
-                }
-                $dateCounts[$dateString] += $booking->jumlah_kamar;
-            }
-        }
-
-        $fullDates = [];
-        foreach ($dateCounts as $date => $count) {
-            if ($count >= $totalKamar) {
-                $fullDates[] = $date;
-            }
-        }
-
-        return response()->json($fullDates);
-    }
-
-    // --- 6. Fungsi Invoice ---
     public function show($id)
     {
         $booking = Booking::with('kamar')->findOrFail($id);

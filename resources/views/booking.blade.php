@@ -323,7 +323,7 @@
                                 {{-- hidden lg:flex artinya: Sembunyi Default, Muncul Flexbox kalau layar Besar --}}
                                 <button type="submit" form="bookingForm" id="btnSubmitDesktop" disabled
                                     class="hidden lg:flex w-full bg-yellow-500 hover:bg-yellow-400 text-black font-extrabold py-4 rounded-2xl shadow-lg shadow-yellow-500/20 transform hover:-translate-y-1 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none justify-center items-center gap-2">
-                                    <span>Konfirmasi & Bayar</span>
+                                    <span>Lanjut ke Pembayaran</span>
                                     <i class="fa-solid fa-arrow-right"></i>
                                 </button>
                                 
@@ -526,8 +526,8 @@
                 btns.forEach(btn => {
                     btn.disabled = !enable;
                     if(enable) {
-                        if(btn === btnSubmitDesktop) btn.innerHTML = `<span>Konfirmasi & Bayar</span> <i class="fa-solid fa-arrow-right"></i>`;
-                        else btn.innerText = "Konfirmasi & Bayar";
+                        if(btn === btnSubmitDesktop) btn.innerHTML = `<span>Lanjut ke Pembayaran</span> <i class="fa-solid fa-arrow-right"></i>`;
+                        else btn.innerText = "Lanjut ke Pembayaran";
                     } else {
                         btn.innerText = "Lengkapi Data Dulu";
                     }
