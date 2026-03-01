@@ -10,10 +10,12 @@ class ListOrders extends ListRecords
 {
     protected static string $resource = OrderResource::class;
 
+    protected ?string $heading = 'Data Menu Customer';
+
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            // CreateAction::make(),
         ];
     }
 }

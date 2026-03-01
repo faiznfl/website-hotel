@@ -17,7 +17,7 @@ class CreateMenu extends CreateRecord
     {
         return 'Tambah Menu'; // Muncul di tab browser
     }
-     protected function getCreateFormAction(): \Filament\Actions\Action
+    protected function getCreateFormAction(): \Filament\Actions\Action
     {
         return parent::getCreateFormAction()
             ->label('Simpan');
