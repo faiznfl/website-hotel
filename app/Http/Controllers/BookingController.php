@@ -7,21 +7,19 @@ use App\Models\Kamar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
-use Midtrans\Config; // PENTING: Import Midtrans
-use Midtrans\Snap;   // PENTING: Import Midtrans
+use Midtrans\Config; 
+use Midtrans\Snap;   
 
 class BookingController extends Controller
 {
-    // --- HELPER: Function Khusus Stok (Hardcode sesuai request kamu) ---
+    // --- HELPER: Function Khusus Stok ---
     private function getTotalStok($tipeKamar)
     {
         $tipe = strtolower($tipeKamar);
-        
         if (str_contains($tipe, 'superior')) return 9;
         if (str_contains($tipe, 'deluxe')) return 14;
         if (str_contains($tipe, 'family')) return 2;
-        
-        return 5; // Default
+        return 5; 
     }
 
     // =================================================================
@@ -29,17 +27,9 @@ class BookingController extends Controller
     // =================================================================
     public function create(Request $request)
     {
-        // 1. Ambil ID Kamar dari URL (?room_id=1)
         $kamarId = $request->query('room_id');
-
-        // 2. Ambil SEMUA data kamar (Untuk Dropdown)
         $rooms = Kamar::all();
-
-        // 3. Cek apakah user sudah memilih kamar sebelumnya
-        $selectedRoom = null;
-        if ($kamarId) {
-            $selectedRoom = Kamar::find($kamarId);
-        }
+        $selectedRoom = $kamarId ? Kamar::find($kamarId) : null;
 
         return view('booking', compact('rooms', 'selectedRoom'));
     }
@@ -49,7 +39,6 @@ class BookingController extends Controller
     // =================================================================
     public function store(Request $request)
     {
-        // 1. Validasi Input
         $request->validate([
             'nama_tamu' => 'required|string|max:255',
             'nomor_hp' => 'required|string',
@@ -60,10 +49,9 @@ class BookingController extends Controller
             'total_harga' => 'required|numeric',
         ]);
 
-        // 2. Cek Stok (Gunakan logika Anda yang sudah ada)
         $kamar = Kamar::find($request->kamar_id);
         
-        // 3. Simpan ke Database Dulu (Status: pending)
+        // Simpan Booking dengan waktu expired (24 jam)
         $booking = Booking::create([
             'user_id'      => Auth::id(),
             'kamar_id'     => $request->kamar_id,
@@ -74,13 +62,12 @@ class BookingController extends Controller
             'jumlah_kamar' => $request->jumlah_kamar,
             'total_harga'  => $request->total_harga,
             'status'       => 'pending',
+            'expires_at'   => now()->addHours(24), // Set expired di DB
         ]);
 
-        // 4. INTEGRASI MIDTRANS
         try {
-            // Konfigurasi Langsung dari ENV agar lebih aman saat testing
             Config::$serverKey = env('MIDTRANS_SERVER_KEY');
-            Config::$isProduction = false; // Paksa false untuk Sandbox
+            Config::$isProduction = false; 
             Config::$isSanitized = true;
             Config::$is3ds = true;
 
@@ -88,6 +75,12 @@ class BookingController extends Controller
                 'transaction_details' => [
                     'order_id' => 'BOOKING-' . $booking->id . '-' . time(),
                     'gross_amount' => (int) $booking->total_harga,
+                ],
+                // TAMBAHKAN INI: Sinkronisasi Expired ke Midtrans
+                'expiry' => [
+                    'start_time' => date("Y-m-d H:i:s O", strtotime($booking->created_at)),
+                    'unit' => 'hour',
+                    'duration' => 24
                 ],
                 'customer_details' => [
                     'first_name' => $booking->nama_tamu,
@@ -104,35 +97,26 @@ class BookingController extends Controller
                 ]
             ];
 
-            // Minta token ke Midtrans
             $snapToken = Snap::getSnapToken($params);
-            
-            // UPDATE TOKEN KE DATABASE
             $booking->snap_token = $snapToken;
             $booking->save();
 
-            // Redirect ke halaman pembayaran yang ada tombol bayarnya
             return redirect()->route('booking.payment', $booking->id);
 
         } catch (\Exception $e) {
-            // JIKA ERROR, TAMPILKAN PESANNYA DI LAYAR (Penting untuk Debugging!)
-            dd("Gagal mengambil token Midtrans: " . $e->getMessage());
+            return back()->with('error', 'Gagal terhubung ke Midtrans: ' . $e->getMessage());
         }
     }
 
     // =================================================================
-    // 3. HALAMAN PEMBAYARAN (TAMPILKAN TOMBOL BAYAR)
+    // 3. HALAMAN PEMBAYARAN
     // =================================================================
     public function payment($id)
     {
         $booking = Booking::findOrFail($id);
 
-        // Pastikan yang akses adalah pemilik booking
-        if ($booking->user_id !== Auth::id()) {
-            abort(403);
-        }
+        if ($booking->user_id !== Auth::id()) { abort(403); }
 
-        // Jika sudah lunas, jangan bayar lagi
         if ($booking->status == 'confirmed') {
             return redirect()->route('booking.history')->with('success', 'Booking ini sudah lunas.');
         }
@@ -141,17 +125,43 @@ class BookingController extends Controller
     }
 
     // =================================================================
-    // 4. FITUR LAINNYA
+    // 4. FITUR RIWAYAT & DETAIL (USER SIDE)
     // =================================================================
 
     public function history()
     {
+        $sekarang = Carbon::now('Asia/Jakarta');
+
+        // 1. Eksekusi pembatalan instan sebelum data ditarik
+        Booking::where('user_id', Auth::id())
+            ->where('status', 'pending')
+            ->where('expires_at', '<', $sekarang)
+            ->update(['status' => 'cancelled']);
+
+        // 2. Ambil data terbaru
         $bookings = Booking::with('kamar')
             ->where('user_id', Auth::id())
             ->latest()
             ->get();
-            
+                
         return view('user.history', compact('bookings'));
+    }
+
+    public function show($id)
+    {
+        $booking = Booking::with('kamar')->findOrFail($id);
+
+        if ($booking->user_id !== Auth::id()) {
+            abort(403, 'Akses ditolak.');
+        }
+
+        // Proteksi: Tidak bisa lihat invoice jika belum bayar
+        if ($booking->status == 'pending') {
+            return redirect()->route('booking.history')
+                ->with('error', 'Selesaikan pembayaran terlebih dahulu untuk melihat detail reservasi.');
+        }
+
+        return view('user.invoice', compact('booking'));
     }
 
     public function cancel($id)
@@ -165,16 +175,5 @@ class BookingController extends Controller
         }
 
         return redirect()->back()->with('error', 'Pesanan tidak dapat dibatalkan.');
-    }
-
-    public function show($id)
-    {
-        $booking = Booking::with('kamar')->findOrFail($id);
-
-        if ($booking->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        return view('user.invoice', compact('booking'));
     }
 }
