@@ -10,40 +10,37 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class DashboardStatsOverview extends BaseWidget
 {
-    protected static ?int $sort = 1; // Posisi paling atas
+    protected static ?int $sort = 1; // Tetap di paling atas
 
     protected function getStats(): array
     {
-        // 1. Hitung Booking Pending (Orderan yang perlu diproses segera)
+        // 1. Booking Pending (Urgensi Tinggi)
         $pendingBookings = Booking::where('status', 'pending')->count();
         
-        // 2. Hitung Total Pesan Masuk
+        // 2. Total Pesan (Komunikasi)
         $totalContacts = Contact::count();
 
-        // 3. Hitung Rata-rata Rating Review
-        $avgRating = Testimonial::avg('stars') ?? 0; // Jika kosong, set 0
+        // 3. Rata-rata Rating (Reputasi)
+        $avgRating = Testimonial::avg('stars') ?? 0;
 
         return [
-            // KARTU 1: BOOKING PENDING (PENTING!)
-            Stat::make('Menunggu Konfirmasi', $pendingBookings . ' Order')
-                ->description($pendingBookings > 0 ? 'Segera proses orderan ini' : 'Semua aman')
-                ->descriptionIcon($pendingBookings > 0 ? 'heroicon-m-exclamation-circle' : 'heroicon-m-check-circle')
-                ->color($pendingBookings > 0 ? 'warning' : 'success') // Kuning kalau ada kerjaan, Hijau kalau santai
-                ->icon('heroicon-o-ticket'),
+            Stat::make('Antrean Konfirmasi', $pendingBookings . ' Reservasi')
+                ->description($pendingBookings > 0 ? 'Ada orderan yang perlu diproses' : 'Semua pesanan sudah diproses')
+                ->descriptionIcon($pendingBookings > 0 ? 'heroicon-m-exclamation-triangle' : 'heroicon-m-check-badge')
+                ->color($pendingBookings > 0 ? 'danger' : 'success') 
+                ->icon('heroicon-o-clipboard-document-check'),
 
-            // KARTU 2: INBOX PESAN
-            Stat::make('Total Pesan Masuk', $totalContacts)
-                ->description('Pertanyaan dari tamu')
-                ->descriptionIcon('heroicon-m-chat-bubble-left-right')
-                ->color('primary')
-                ->chart([5, 10, 8, 12, $totalContacts]) // Dummy chart kecil
-                ->icon('heroicon-o-envelope'),
+            Stat::make('Pesan Masuk (Inbox)', $totalContacts . ' Pesan')
+                ->description('Total interaksi tamu lewat kontak')
+                ->descriptionIcon('heroicon-m-chat-bubble-bottom-center-text')
+                ->color('info')
+                ->chart([3, 7, 5, 12, 9, 15, $totalContacts]),
 
-            // KARTU 3: KEPUASAN PELANGGAN
-            Stat::make('Rata-rata Rating', number_format($avgRating, 1) . ' / 5.0')
-                ->description('Berdasarkan ulasan tamu')
-                ->color('warning') // Warna Emas/Kuning
-                ->icon('heroicon-o-star'),
+            Stat::make('Kepuasan Tamu', number_format($avgRating, 1) . ' / 5.0')
+                ->description($avgRating >= 4 ? 'Reputasi Sangat Baik' : 'Perlu ditingkatkan')
+                ->descriptionIcon('heroicon-m-sparkles')
+                ->color($avgRating >= 4 ? 'warning' : 'gray')
+                ->icon('heroicon-o-face-smile'),
         ];
     }
 }

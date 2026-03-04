@@ -3,26 +3,30 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Booking;
+use Filament\Actions\Action;
 use Filament\Tables;
+use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
-use Filament\Tables\Columns\TextColumn;
 
 class UpcomingSchedule extends BaseWidget
 {
-    protected static ?string $heading = 'Jadwal Check-in / Check-out Terdekat';
-    protected static ?int $sort = 3;
-    protected int | string | array $columnSpan = 'full'; // LEBAR PENUH
+    protected static ?string $heading = 'Agenda Check-in / Check-out Terdekat';
+    
+    // Kita taruh di paling bawah agar data angka & grafik terlihat lebih dulu
+    protected static ?int $sort = 4; 
+    
+    protected int | string | array $columnSpan = 'full';
 
     public function table(Table $table): Table
     {
         return $table
             ->query(
-                // Filter: Booking Confirmed & Tanggalnya hari ini/masa depan
                 Booking::query()
                     ->where('status', 'confirmed')
                     ->where(function($query) {
-                        $query->whereDate('check_in', '>=', now())
+                        $query->whereDate('check_in', '>=', now()->subDay()) // Ambil yang baru masuk
                               ->orWhereDate('check_out', '>=', now());
                     })
                     ->orderBy('check_in', 'asc')
@@ -30,26 +34,41 @@ class UpcomingSchedule extends BaseWidget
             )
             ->columns([
                 TextColumn::make('nama_tamu')
+                    ->label('Nama Tamu')
                     ->weight('bold')
-                    ->icon('heroicon-m-user'),
+                    ->searchable()
+                    ->icon('heroicon-m-user-circle'),
 
                 TextColumn::make('kamar.tipe_kamar')
-                    ->label('Kamar')
+                    ->label('Tipe Kamar')
+                    ->badge()
                     ->color('gray'),
 
                 TextColumn::make('check_in')
-                    ->label('Check In')
-                    ->date('d M')
-                    ->description(fn($record) => $record->check_in <= now() ? 'HARI INI' : ''),
+                    ->label('Jadwal Masuk')
+                    ->date('d F Y')
+                    ->icon('heroicon-m-arrow-right-circle')
+                    ->color(fn($record) => $record->check_in->isToday() ? 'success' : 'primary')
+                    ->description(fn($record) => $record->check_in->isToday() ? 'HARI INI' : ''),
 
                 TextColumn::make('check_out')
-                    ->label('Check Out')
-                    ->date('d M')
-                    ->color('danger'),
+                    ->label('Jadwal Keluar')
+                    ->date('d F Y')
+                    ->icon('heroicon-m-arrow-left-circle')
+                    ->color(fn($record) => $record->check_out->isToday() ? 'danger' : 'gray')
+                    ->description(fn($record) => $record->check_out->isToday() ? 'Waktunya Check-out!' : ''),
 
-                TextColumn::make('status')
-                    ->badge()
-                    ->color('success'),
+                TextColumn::make('nomor_hp')
+                    ->label('Kontak')
+                    ->copyable()
+                    ->icon('heroicon-m-phone')
+                    ->color('info'),
+            ])
+            ->actions([
+                // Tambahkan aksi cepat untuk melihat detail tanpa pindah halaman
+                Action::make('Lihat')
+                    ->url(fn (Booking $record): string => "/admin/bookings/{$record->id}")
+                    ->icon('heroicon-m-eye')
             ]);
     }
 }
