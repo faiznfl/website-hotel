@@ -8,6 +8,7 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Utilities\Get;
 use Maatwebsite\Excel\Facades\Excel; 
 
@@ -27,8 +28,20 @@ class Laporan extends Page
                 ->color('success')
                 ->modalWidth('md')
                 ->form([
+                    // 1. Pilih Kategori Laporan
+                    Select::make('kategori_laporan')
+                        ->label('Kategori Laporan')
+                        ->options([
+                            'hotel' => '🏨 Reservasi Hotel',
+                            'restoran' => '🍴 Pesanan Restoran',
+                            'semua' => '📊 Gabungan (Hotel & Resto)',
+                        ])
+                        ->default('hotel')
+                        ->required()
+                        ->live(),
+
                     Select::make('format')
-                        ->label('Format Laporan')
+                        ->label('Format Dokumen')
                         ->options([
                             'pdf' => 'PDF Dokumen (.pdf)',
                             'excel' => 'Microsoft Excel (.xlsx)',
@@ -36,20 +49,30 @@ class Laporan extends Page
                         ->default('pdf')
                         ->required(),
                     
-                    // --- TAMBAHAN BARU: FILTER STATUS ---
+                    // 2. Filter Status (Dinamis sesuai kategori)
                     Select::make('status')
-                        ->label('Status Reservasi')
-                        ->options([
-                            'semua' => 'Semua Status',
-                            'confirmed' => 'Confirmed (Selesai/Pasti)',
-                            'pending' => 'Pending (Belum Dibayar)',
-                            'cancelled' => 'Cancelled (Batal)',
-                        ])
+                        ->label('Status Data')
+                        ->options(function (Get $get) {
+                            $kategori = $get('kategori_laporan');
+                            if ($kategori === 'restoran') {
+                                return [
+                                    'semua' => 'Semua Status Bayar',
+                                    'Lunas' => 'Lunas (Sudah Bayar)',
+                                    'Belum Bayar' => 'Belum Bayar',
+                                ];
+                            }
+                            return [
+                                'semua' => 'Semua Status Reservasi',
+                                'confirmed' => 'Confirmed (Lunas)',
+                                'pending' => 'Pending (Belum Bayar)',
+                                'cancelled' => 'Cancelled (Batal)',
+                            ];
+                        })
                         ->default('semua')
                         ->required(),
                     
                     Select::make('jenis_laporan')
-                        ->label('Pilih Rentang Waktu')
+                        ->label('Rentang Waktu')
                         ->options([
                             'harian' => 'Harian',
                             'bulanan' => 'Bulanan',
@@ -58,71 +81,51 @@ class Laporan extends Page
                         ->required()
                         ->live(),
 
+                    // 3. Input Tanggal Dinamis
                     DatePicker::make('tanggal_harian')
                         ->label('Pilih Tanggal')
-                        ->required(fn (Get $get) => $get('jenis_laporan') === 'harian')
-                        ->visible(fn (Get $get) => $get('jenis_laporan') === 'harian'),
+                        ->visible(fn (Get $get) => $get('jenis_laporan') === 'harian')
+                        ->required(fn (Get $get) => $get('jenis_laporan') === 'harian'),
 
-                    Select::make('bulan')
-                        ->label('Pilih Bulan')
-                        ->options([
-                            '01' => 'Januari', '02' => 'Februari', '03' => 'Maret',
-                            '04' => 'April', '05' => 'Mei', '06' => 'Juni',
-                            '07' => 'Juli', '08' => 'Agustus', '09' => 'September',
-                            '10' => 'Oktober', '11' => 'November', '12' => 'Desember',
-                        ])
-                        ->required(fn (Get $get) => $get('jenis_laporan') === 'bulanan')
-                        ->visible(fn (Get $get) => $get('jenis_laporan') === 'bulanan'),
+                    Group::make([
+                        Select::make('bulan')
+                            ->options(['01'=>'Jan','02'=>'Feb','03'=>'Mar','04'=>'Apr','05'=>'Mei','06'=>'Jun','07'=>'Jul','08'=>'Agu','09'=>'Sep','10'=>'Okt','11'=>'Nov','12'=>'Des'])
+                            ->label('Bulan')->required(),
+                        Select::make('tahun')
+                            ->options(array_combine(range(date('Y'), date('Y')-5), range(date('Y'), date('Y')-5)))
+                            ->label('Tahun')->required(),
+                    ])->columns(2)->visible(fn (Get $get) => $get('jenis_laporan') === 'bulanan'),
 
-                    Select::make('tahun')
-                        ->label('Pilih Tahun')
-                        ->options(function () {
-                            $years = [];
-                            $currentYear = date('Y');
-                            for ($i = $currentYear; $i >= $currentYear - 5; $i--) {
-                                $years[$i] = $i;
-                            }
-                            return $years;
-                        })
-                        ->required(fn (Get $get) => $get('jenis_laporan') === 'bulanan')
-                        ->visible(fn (Get $get) => $get('jenis_laporan') === 'bulanan'),
-
-                    DatePicker::make('tanggal_awal')
-                        ->label('Dari Tanggal')
-                        ->required(fn (Get $get) => $get('jenis_laporan') === 'rentang')
-                        ->visible(fn (Get $get) => $get('jenis_laporan') === 'rentang'),
-
-                    DatePicker::make('tanggal_akhir')
-                        ->label('Sampai Tanggal')
-                        ->required(fn (Get $get) => $get('jenis_laporan') === 'rentang')
-                        ->visible(fn (Get $get) => $get('jenis_laporan') === 'rentang'),
+                    Group::make([
+                        DatePicker::make('tanggal_awal')->label('Mulai Tanggal')->required(),
+                        DatePicker::make('tanggal_akhir')->label('Sampai Tanggal')->required(),
+                    ])->columns(2)->visible(fn (Get $get) => $get('jenis_laporan') === 'rentang'),
                 ])
                 ->action(function (array $data) {
-                    $awal = null;
-                    $akhir = null;
-                    $status = $data['status']; // Tangkap inputan status
+                    $awal = null; $akhir = null;
+                    $status = $data['status'];
+                    $kategori = $data['kategori_laporan'];
 
+                    // Penentuan Range Tanggal
                     if ($data['jenis_laporan'] === 'harian') {
-                        $awal = $data['tanggal_harian'];
-                        $akhir = $data['tanggal_harian'];
+                        $awal = $akhir = $data['tanggal_harian'];
                     } elseif ($data['jenis_laporan'] === 'bulanan') {
-                        $awal = Carbon::createFromDate($data['tahun'], $data['bulan'], 1)->startOfMonth()->toDateString();
-                        $akhir = Carbon::createFromDate($data['tahun'], $data['bulan'], 1)->endOfMonth()->toDateString();
-                    } elseif ($data['jenis_laporan'] === 'rentang') {
-                        $awal = $data['tanggal_awal'];
-                        $akhir = $data['tanggal_akhir'];
+                        $awal = Carbon::create($data['tahun'], $data['bulan'], 1)->startOfMonth()->toDateString();
+                        $akhir = Carbon::create($data['tahun'], $data['bulan'], 1)->endOfMonth()->toDateString();
+                    } else {
+                        $awal = $data['tanggal_awal']; $akhir = $data['tanggal_akhir'];
                     }
 
+                    // Eksekusi Export
                     if ($data['format'] === 'excel') {
-                        // Kirim juga parameter $status ke Excel
-                        return Excel::download(new LaporanExport($awal, $akhir, $status), 'Laporan_Reservasi_'.$awal.'_sd_'.$akhir.'.xlsx');
+                        return Excel::download(new LaporanExport($awal, $akhir, $status, $kategori), "Laporan_{$kategori}_{$awal}.xlsx");
                     }
 
-                    // Kirim juga parameter $status ke PDF
                     return redirect()->route('cetak.laporan.pdf', [
-                        'awal' => $awal,
-                        'akhir' => $akhir,
-                        'status' => $status
+                        'awal' => $awal, 
+                        'akhir' => $akhir, 
+                        'status' => $status,
+                        'kategori' => $kategori
                     ]);
                 })
         ];

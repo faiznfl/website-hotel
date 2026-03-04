@@ -12,20 +12,40 @@ class LaporanController extends Controller
     {
         $awal = $request->awal;
         $akhir = $request->akhir;
-        $status = $request->status ?? 'semua'; // Tangkap status
+        $status = $request->status ?? 'semua';
+        $kategori = $request->kategori ?? 'hotel'; // Ambil parameter kategori dari URL
 
-        // Query dasar (Filter Tanggal)
-        $query = Booking::whereDate('check_in', '>=', $awal)
-                        ->whereDate('check_in', '<=', $akhir);
+        // Siapkan koleksi kosong agar tidak error di Blade
+        $bookings = collect();
+        $orders = collect();
 
-        // Jika status BUKAN 'semua', tambahkan filter status
-        if ($status !== 'semua') {
-            $query->where('status', $status);
+        // 1. Ambil data Hotel (Jika kategori 'hotel' atau 'semua')
+        if ($kategori === 'hotel' || $kategori === 'semua') {
+            $queryHotel = \App\Models\Booking::whereDate('check_in', '>=', $awal)
+                            ->whereDate('check_in', '<=', $akhir);
+            
+            // Filter status khusus hotel (confirmed, pending, dll)
+            if ($status !== 'semua' && $kategori === 'hotel') {
+                $queryHotel->where('status', $status);
+            }
+            $bookings = $queryHotel->orderBy('check_in', 'asc')->get();
         }
 
-        $bookings = $query->orderBy('check_in', 'asc')->get();
+        // 2. Ambil data Restoran (Jika kategori 'restoran' atau 'semua')
+        if ($kategori === 'restoran' || $kategori === 'semua') {
+            $queryResto = \App\Models\Order::whereDate('created_at', '>=', $awal)
+                            ->whereDate('created_at', '<=', $akhir);
+            
+            // Filter status khusus resto (Lunas, Belum Bayar)
+            if ($status !== 'semua' && $kategori === 'restoran') {
+                $queryResto->where('status_pembayaran', $status);
+            }
+            $orders = $queryResto->orderBy('created_at', 'asc')->get();
+        }
 
-        $pdf = Pdf::loadView('laporan.pdf', compact('bookings', 'awal', 'akhir', 'status'));
-        return $pdf->setPaper('A4', 'landscape')->download('Laporan_Reservasi_'.$awal.'_sd_'.$akhir.'.pdf');
+        // Gabungkan semua data ke view
+        $pdf = Pdf::loadView('laporan.pdf', compact('bookings', 'orders', 'awal', 'akhir', 'status', 'kategori'));
+        
+        return $pdf->setPaper('A4', 'landscape')->download("Laporan_{$kategori}_{$awal}.pdf");
     }
 }

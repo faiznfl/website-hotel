@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Laporan Reservasi - Hotel Rumah RB</title>
+    <title>Laporan Terpadu - Rumah RB</title>
     <style>
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -11,7 +11,6 @@
             color: #333;
         }
 
-        /* KOP SURAT */
         .kop-surat {
             width: 100%;
             border-bottom: 3px solid #000;
@@ -19,30 +18,19 @@
             margin-bottom: 20px;
         }
 
-        .kop-surat table {
-            width: 100%;
-            border: none;
-        }
-
-        .kop-surat td {
-            border: none;
-            text-align: center;
-        }
-
         .hotel-name {
             font-size: 24px;
             font-weight: bold;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 5px;
+            text-align: center;
         }
 
         .hotel-address {
-            font-size: 12px;
+            font-size: 11px;
             color: #555;
+            text-align: center;
         }
 
-        /* JUDUL LAPORAN */
         .judul-laporan {
             text-align: center;
             margin-bottom: 20px;
@@ -54,12 +42,6 @@
             text-transform: uppercase;
         }
 
-        .judul-laporan p {
-            margin: 5px 0 0 0;
-            font-size: 12px;
-        }
-
-        /* TABEL DATA */
         .table-data {
             width: 100%;
             border-collapse: collapse;
@@ -69,23 +51,23 @@
         .table-data th,
         .table-data td {
             border: 1px solid #ddd;
-            padding: 8px;
+            padding: 6px;
         }
 
         .table-data th {
             background-color: #f4f4f4;
-            color: #333;
-            text-align: center;
-            font-weight: bold;
             text-transform: uppercase;
-            font-size: 10px;
+            font-size: 9px;
         }
 
-        .table-data tbody tr:nth-child(even) {
-            background-color: #fdfdfd;
+        .section-title {
+            background-color: #eee;
+            padding: 5px;
+            font-weight: bold;
+            margin-top: 10px;
+            border: 1px solid #ddd;
         }
 
-        /* UTILITIES */
         .text-center {
             text-align: center;
         }
@@ -98,16 +80,8 @@
             font-weight: bold;
         }
 
-        /* WARNA STATUS */
-        .status {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: bold;
-            font-size: 9px;
-            text-transform: uppercase;
-        }
-
-        .status-confirmed {
+        /* Status Styles */
+        .status-lunas {
             color: #155724;
         }
 
@@ -115,35 +89,23 @@
             color: #856404;
         }
 
-        .status-cancelled {
+        .status-batal {
             color: #721c24;
         }
 
-        /* TANDA TANGAN */
         .signature-container {
+            margin-top: 30px;
             width: 100%;
-            margin-top: 40px;
         }
 
         .signature {
             float: right;
-            width: 250px;
+            width: 200px;
             text-align: center;
         }
 
-        .signature p {
-            margin: 0;
-            padding: 2px 0;
-        }
-
         .signature-space {
-            height: 70px;
-            /* Jarak untuk tanda tangan asli */
-        }
-
-        .signature-name {
-            font-weight: bold;
-            text-decoration: underline;
+            height: 60px;
         }
     </style>
 </head>
@@ -151,93 +113,111 @@
 <body>
 
     <div class="kop-surat">
-        <table>
-            <tr>
-                <td>
-                    <div class="hotel-name">HOTEL RUMAH RB</div>
-                    <div class="hotel-address">
-                        Jl. Contoh Alamat Skripsi No. 123, Kota Tangerang Selatan, Banten<br>
-                        Telp: (021) 1234567 | Email: info@hotelrumahrb.com | Website: www.hotelrumahrb.com
-                    </div>
-                </td>
-            </tr>
-        </table>
+        <div class="hotel-name">HOTEL & RESTO RUMAH RB</div>
+        <div class="hotel-address">
+            Jl. Contoh Alamat No. 123, Kota Tangerang Selatan, Banten<br>
+            Telp: (021) 1234567 | info@hotelrumahrb.com
+        </div>
     </div>
 
     <div class="judul-laporan">
-        <h3>Laporan Data Reservasi</h3>
+        <h3>Laporan Transaksi {{ ucfirst($kategori) }}</h3>
         <p>Periode: <b>{{ \Carbon\Carbon::parse($awal)->translatedFormat('d F Y') }}</b> s/d
-            <b>{{ \Carbon\Carbon::parse($akhir)->translatedFormat('d F Y') }}</b></p>
+            <b>{{ \Carbon\Carbon::parse($akhir)->translatedFormat('d F Y') }}</b>
+        </p>
     </div>
 
-    <table class="table-data">
-        <thead>
-            <tr>
-                <th width="3%">No</th>
-                <th width="12%">Kode Booking</th>
-                <th width="16%">Nama Tamu</th>
-                <th width="12%">No. HP</th>
-                <th width="10%">Check In</th>
-                <th width="10%">Check Out</th>
-                <th width="15%">Total Harga</th>
-                <th width="12%">Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            @php $total_pendapatan = 0; @endphp
+    @php $grand_total_semua = 0; @endphp
 
-            @forelse($bookings as $index => $b)
-                @php
-    // Hitung total harga hanya untuk yang statusnya confirmed
-    if ($b->status == 'confirmed') {
-        $total_pendapatan += $b->total_harga;
-    }
-                @endphp
+    {{-- SECTION A: DATA HOTEL --}}
+    @if(($kategori === 'hotel' || $kategori === 'semua') && count($bookings) > 0)
+        <div class="section-title">A. DATA RESERVASI HOTEL</div>
+        <table class="table-data">
+            <thead>
                 <tr>
-                    <td class="text-center">{{ $index + 1 }}</td>
-                    <td class="text-center">{{ $b->kode_booking ?? '-' }}</td>
-                    <td>{{ $b->nama_tamu }}</td>
-                    <td class="text-center">{{ $b->nomor_hp }}</td>
-                    <td class="text-center">{{ \Carbon\Carbon::parse($b->check_in)->format('d/m/Y') }}</td>
-                    <td class="text-center">{{ \Carbon\Carbon::parse($b->check_out)->format('d/m/Y') }}</td>
-                    <td class="text-right">Rp {{ number_format($b->total_harga, 0, ',', '.') }}</td>
-                    <td class="text-center text-bold">
-                        @if($b->status == 'confirmed')
-                            <span class="status status-confirmed">Confirmed</span>
-                        @elseif($b->status == 'pending')
-                            <span class="status status-pending">Pending</span>
-                        @else
-                            <span class="status status-cancelled">Cancelled</span>
-                        @endif
-                    </td>
+                    <th>No</th>
+                    <th>Kode</th>
+                    <th>Nama Tamu</th>
+                    <th>Check In</th>
+                    <th>Check Out</th>
+                    <th>Total Harga</th>
+                    <th>Status</th>
                 </tr>
-            @empty
-                <tr>
-                    <td colspan="8" class="text-center" style="padding: 20px;">Tidak ada data reservasi pada periode tanggal
-                        ini.</td>
-                </tr>
-            @endforelse
-        </tbody>
+            </thead>
+            <tbody>
+                @foreach($bookings as $index => $b)
+                    @php if ($b->status == 'confirmed')
+                    $grand_total_semua += $b->total_harga; @endphp
+                    <tr>
+                        <td class="text-center">{{ $index + 1 }}</td>
+                        <td class="text-center">{{ $b->kode_booking }}</td>
+                        <td>{{ $b->nama_tamu }}</td>
+                        <td class="text-center">{{ \Carbon\Carbon::parse($b->check_in)->format('d/m/Y') }}</td>
+                        <td class="text-center">{{ \Carbon\Carbon::parse($b->check_out)->format('d/m/Y') }}</td>
+                        <td class="text-right">Rp {{ number_format($b->total_harga, 0, ',', '.') }}</td>
+                        <td class="text-center text-bold {{ $b->status == 'confirmed' ? 'status-lunas' : '' }}">
+                            {{ ucfirst($b->status) }}
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    @endif
 
-        @if(count($bookings) > 0)
-            <tfoot>
+    {{-- SECTION B: DATA RESTORAN --}}
+    @if(($kategori === 'restoran' || $kategori === 'semua') && count($orders) > 0)
+        <div class="section-title">B. DATA PESANAN RESTORAN</div>
+        <table class="table-data">
+            <thead>
                 <tr>
-                    <td colspan="6" class="text-right text-bold" style="padding: 10px;">Total Pendapatan (Confirmed):</td>
-                    <td colspan="2" class="text-bold text-left" style="background-color: #f4f4f4; padding: 10px;">
-                        Rp {{ number_format($total_pendapatan, 0, ',', '.') }}
-                    </td>
+                    <th>No</th>
+                    <th>ID Order</th>
+                    <th>Customer</th>
+                    <th>Tanggal</th>
+                    <th>Lokasi/Kamar</th>
+                    <th>Total Harga</th>
+                    <th>Status</th>
                 </tr>
-            </tfoot>
-        @endif
+            </thead>
+            <tbody>
+                @foreach($orders as $index => $o)
+                    @php if ($o->status_pembayaran == 'Lunas')
+                    $grand_total_semua += $o->total_harga; @endphp
+                    <tr>
+                        <td class="text-center">{{ $index + 1 }}</td>
+                        <td class="text-center">FOOD-{{ $o->id }}</td>
+                        <td>{{ $o->nama_pemesan }}</td>
+                        <td class="text-center">{{ $o->created_at->format('d/m/Y H:i') }}</td>
+                        <td class="text-center">{{ $o->info_pemesan }}</td>
+                        <td class="text-right">Rp {{ number_format($o->total_harga, 0, ',', '.') }}</td>
+                        <td class="text-center text-bold {{ $o->status_pembayaran == 'Lunas' ? 'status-lunas' : '' }}">
+                            {{ $o->status_pembayaran }}
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    @endif
+
+    {{-- RINGKASAN TOTAL --}}
+    <table class="table-data" style="margin-top: 10px;">
+        <tr>
+            <td class="text-right text-bold" style="width: 70%; padding: 10px; background-color: #f9f9f9;">
+                TOTAL PENDAPATAN BERSIH (CONFIRMED / LUNAS):
+            </td>
+            <td class="text-right text-bold" style="font-size: 14px; padding: 10px; background-color: #f4f4f4;">
+                Rp {{ number_format($grand_total_semua, 0, ',', '.') }}
+            </td>
+        </tr>
     </table>
 
     <div class="signature-container">
         <div class="signature">
             <p>Tangerang Selatan, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
-            <p>Mengetahui,</p>
+            <p>Admin Operasional,</p>
             <div class="signature-space"></div>
-            <p class="signature-name">Nama Manajer Hotel</p>
-            <p>General Manager</p>
+            <p class="text-bold">____________________</p>
+            <p>Manajer Rumah RB</p>
         </div>
         <div style="clear: both;"></div>
     </div>
