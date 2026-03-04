@@ -5,8 +5,6 @@ namespace App\Filament\Resources\Orders;
 use App\Filament\Resources\Orders\Pages\CreateOrder;
 use App\Filament\Resources\Orders\Pages\EditOrder;
 use App\Filament\Resources\Orders\Pages\ListOrders;
-use App\Filament\Resources\Orders\Schemas\OrderForm;
-use App\Filament\Resources\Orders\Tables\OrdersTable;
 use App\Models\Menu;
 use App\Models\Order;
 use BackedEnum;
@@ -26,7 +24,6 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
@@ -48,115 +45,103 @@ class OrderResource extends Resource
     {
         return $schema
             ->schema([
-                // === KOLOM KIRI: DATA PELANGGAN (Lebar 2/3) ===
                 Group::make()
                     ->schema([
                         Section::make('Data Pelanggan')
-                            ->description('Masukkan identitas pemesan di sini.')
-                            ->icon(Heroicon::OutlinedUser) // Tambah Ikon
+                            ->description('Informasi identitas dan metode pembayaran.')
+                            ->icon('heroicon-o-user')
                             ->schema([
                                 TextInput::make('nama_pemesan')
                                     ->label('Nama Tamu')
                                     ->required()
-                                    ->maxLength(255)
-                                    ->prefixIcon(Heroicon::OutlinedUser), // Ikon di dalam input
+                                    ->prefixIcon('heroicon-o-user'),
 
                                 TextInput::make('info_pemesan')
                                     ->label('Nomor Kamar / Meja')
-                                    ->placeholder('Cth: 104')
-                                    ->maxLength(255)
-                                    ->prefixIcon(Heroicon::OutlinedHomeModern),
+                                    ->prefixIcon('heroicon-o-home-modern'),
+
+                                // TAMBAHAN: KETERANGAN METODE BAYAR DI FORM
+                                TextInput::make('metode_pembayaran')
+                                    ->label('Metode Pembayaran')
+                                    ->formatStateUsing(fn ($state) => $state === 'online' ? '💳 QRIS / Online' : '💵 Tunai (Cash)')
+                                    ->disabled() // Supaya tidak diubah manual oleh admin
+                                    ->dehydrated(false), // Tidak perlu dikirim saat save jika hanya display
 
                                 Select::make('status_pembayaran')
                                     ->label('Status Bayar')
                                     ->options([
                                         'Belum Bayar' => 'Belum Bayar',
                                         'Lunas' => 'Lunas',
+                                        'Dibatalkan' => 'Dibatalkan',
                                     ])
-                                    ->default('Belum Bayar')
                                     ->required()
                                     ->native(false),
 
                                 Textarea::make('catatan')
                                     ->label('Catatan Dapur')
-                                    ->placeholder('Cth: Jangan pedas, es dipisah...')
                                     ->columnSpanFull(),
-                            ])->columns(2), // Dibagi 2 kolom biar rapi
-                    ])->columnSpan(['lg' => 2]), // Di layar besar makan 2 kolom
+                            ])->columns(2),
+                    ])->columnSpan(['lg' => 2]),
 
-                // === KOLOM KANAN: KERANJANG (Lebar 1/3) ===
                 Group::make()
                     ->schema([
                         Section::make('Keranjang')
-                            ->icon(Heroicon::OutlinedShoppingCart)
+                            ->icon('heroicon-o-shopping-cart')
                             ->schema([
                                 Repeater::make('items')
                                     ->relationship('items')
-                                    ->hiddenLabel() // Sembunyikan label "Items" biar bersih
+                                    ->hiddenLabel()
                                     ->live()
                                     ->schema([
                                         Select::make('menu_id')
                                             ->label('Menu')
-                                            ->relationship('menu', 'nama') // Sesuai kode Anda
+                                            ->relationship('menu', 'nama')
                                             ->searchable()
                                             ->preload()
                                             ->required()
                                             ->live(onBlur: true)
-                                            ->afterStateUpdated(function ($state, callable $set) {
+                                            ->afterStateUpdated(function ($state, Set $set) {
                                                 $menu = Menu::find($state);
                                                 if ($menu) {
                                                     $set('harga_satuan', $menu->harga);
                                                     $set('subtotal', $menu->harga);
                                                 }
                                             })
-                                            ->columnSpanFull(), // Menu ambil 1 baris penuh
+                                            ->columnSpanFull(),
 
                                         TextInput::make('jumlah')
                                             ->label('Qty')
                                             ->numeric()
                                             ->default(1)
-                                            ->minValue(1)
                                             ->required()
                                             ->live(onBlur: true)
-                                            ->afterStateUpdated(function ($state, callable $get, callable $set) {
-                                                $harga = floatval($get('harga_satuan'));
-                                                $jumlah = floatval($state);
-                                                $set('subtotal', $harga * $jumlah);
-                                            })
-                                            ->columnSpan(1), // Kecil
+                                            ->afterStateUpdated(fn ($state, Get $get, Set $set) => 
+                                                $set('subtotal', floatval($get('harga_satuan')) * floatval($state))
+                                            )
+                                            ->columnSpan(1),
 
                                         TextInput::make('subtotal')
                                             ->label('Subtotal')
                                             ->numeric()
                                             ->readOnly()
                                             ->prefix('Rp')
-                                            ->columnSpan(2), // Agak lebar
-                                            
-                                        // Harga satuan kita sembunyikan saja (Hidden) biar rapi, 
-                                        // tapi tetap ada buat hitungan
+                                            ->columnSpan(2),
+
                                         Hidden::make('harga_satuan'), 
                                     ])
                                     ->columns(3)
                                     ->addActionLabel('Tambah Item'),
 
-                                // TOTAL BESAR
                                 Group::make()
                                     ->schema([
                                         Placeholder::make('grand_total_placeholder')
                                             ->hiddenLabel()
                                             ->content(function (Get $get, Set $set) {
-                                                $total = 0;
-                                                if (!empty($get('items'))) {
-                                                    foreach ($get('items') as $item) {
-                                                        $total += (int) ($item['subtotal'] ?? 0);
-                                                    }
-                                                }
+                                                $total = collect($get('items'))->sum('subtotal');
                                                 $set('total_harga', $total);
-                                                
-                                                // Tampilan Angka Besar
                                                 return new HtmlString('
                                                     <div class="text-right">
-                                                        <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Total Tagihan</span>
+                                                        <span class="text-xs font-bold text-gray-500 uppercase">Total Tagihan</span>
                                                         <div class="text-3xl font-extrabold text-primary-600 mt-1">
                                                             Rp ' . number_format($total, 0, ',', '.') . '
                                                         </div>
@@ -167,8 +152,8 @@ class OrderResource extends Resource
                                     ])
                                     ->extraAttributes(['class' => 'bg-gray-50 p-4 rounded-xl border border-gray-200 mt-4']),
                             ]),
-                    ])->columnSpan(['lg' => 1]), // Di layar besar makan 1 kolom
-            ])->columns(3); // Total Grid Layout 3 Bagian
+                    ])->columnSpan(['lg' => 1]),
+            ])->columns(3);
     }
 
     public static function table(Table $table): Table
@@ -177,46 +162,56 @@ class OrderResource extends Resource
             ->columns([
                 TextColumn::make('created_at')
                     ->label('Tanggal')
-                    ->dateTime('d M Y, H:i')
-                    ->sortable()
-                    ->toggleable(),
+                    ->dateTime('d M, H:i')
+                    ->sortable(),
 
                 TextColumn::make('nama_pemesan')
                     ->label('Pelanggan')
                     ->searchable()
-                    ->description(fn (Order $record): string => $record->info_pemesan ?? '-') // Info kamar jadi deskripsi kecil di bawah nama
+                    ->description(fn (Order $record): string => $record->info_pemesan ?? '-')
                     ->weight('bold'),
 
-                // SAYA TAMBAHKAN KOLOM TOTAL DI SINI BIAR KELIHATAN
+                // TAMBAHAN: KOLOM METODE PEMBAYARAN DI TABEL
+                TextColumn::make('metode_pembayaran')
+                    ->label('Metode Bayar')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'online' => 'success',
+                        'cash' => 'warning',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'online' => '💳 Digital',
+                        'cash' => '💵 Tunai',
+                        default => $state,
+                    }),
+
                 TextColumn::make('total_harga')
                     ->label('Total')
                     ->money('IDR')
                     ->sortable()
-                    ->weight('bold')
-                    ->color('primary'),
+                    ->weight('bold'),
 
                 TextColumn::make('status_pembayaran')
+                    ->label('Status')
                     ->badge()
-                    ->colors([
-                        'danger' => 'Belum Bayar',
-                        'success' => 'Lunas',
-                    ]),
+                    ->color(fn (string $state): string => match ($state) {
+                        'Lunas' => 'success',
+                        'Belum Bayar' => 'danger',
+                        'Dibatalkan' => 'gray',
+                        default => 'gray',
+                    }),
             ])
             ->defaultSort('created_at', 'desc')
             ->actions([
-                EditAction::make()->iconButton(), // Jadi tombol ikon kecil
+                EditAction::make()->iconButton(),
                 DeleteAction::make()->iconButton(),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);;
-    }
-
-    public static function getRelations(): array
-    {
-        return [];
+            ]);
     }
 
     public static function getPages(): array

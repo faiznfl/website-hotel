@@ -4,27 +4,22 @@
 
 @section('content')
 
-    {{-- 1. LIBRARY TOASTIFY (Untuk Notif Error Kecil di Atas) --}}
+    {{-- LIBRARY & CSS --}}
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script>
 
-    {{-- ======================================================================= --}}
-    {{-- 2. HERO SECTION --}}
-    {{-- ======================================================================= --}}
+    {{-- HERO SECTION --}}
     <div class="relative w-full h-[300px] md:h-[350px]">
         <img src="{{ asset('img/hotel-luar.png') }}" alt="Restoran Hotel" class="w-full h-full object-cover">
         <div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-center px-4">
             <h1 class="text-3xl md:text-5xl font-bold text-white mb-2 shadow-sm">Restoran & Dining</h1>
             <div class="w-20 h-1 bg-yellow-500 rounded-full mb-4"></div>
-            <p class="text-gray-200 text-sm md:text-base max-w-2xl">
-                Nikmati hidangan lezat kami dari kenyamanan kamar Anda.
-            </p>
+            <p class="text-gray-200 text-sm md:text-base max-w-2xl">Nikmati hidangan lezat kami dari kenyamanan kamar Anda.</p>
         </div>
     </div>
 
-    {{-- ======================================================================= --}}
-    {{-- 3. MAIN CONTENT --}}
-    {{-- ======================================================================= --}}
+    {{-- MAIN CONTENT --}}
     <div class="bg-gray-50 min-h-screen py-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -79,9 +74,6 @@
         </div>
     </div>
 
-    {{-- ======================================================================= --}}
-    {{-- 4. MODAL & POPUPS --}}
-    {{-- ======================================================================= --}}
     @auth
         {{-- Floating Cart Button --}}
         <button onclick="toggleModal()" class="fixed bottom-6 right-6 z-40 bg-yellow-500 hover:bg-yellow-600 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-105 active:scale-95">
@@ -94,7 +86,7 @@
         {{-- KERANJANG MODAL --}}
         <div id="cart-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center px-4">
             <div class="absolute inset-0 bg-black/50 transition-opacity" onclick="toggleModal()"></div>
-            <div class="bg-white w-full max-w-md rounded-lg shadow-xl relative z-10 overflow-hidden flex flex-col max-h-[80vh]">
+            <div class="bg-white w-full max-w-md rounded-lg shadow-xl relative z-10 overflow-hidden flex flex-col max-h-[85vh]">
                 <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                     <h3 class="font-bold text-gray-900">Keranjang Pesanan</h3>
                     <button onclick="toggleModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-times"></i></button>
@@ -105,10 +97,35 @@
                         <span>Total:</span>
                         <span id="cart-total">Rp 0</span>
                     </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Nomor Kamar</label>
-                        <input type="text" id="room-number" placeholder="Contoh: 101" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-yellow-500">
+
+                    {{-- PEMILIHAN NOMOR & PEMBAYARAN --}}
+                    <div class="space-y-4 mb-6">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Nomor Kamar</label>
+                            <input type="text" id="room-number" placeholder="Contoh: 101" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-yellow-500 text-sm">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Metode Pembayaran</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <label class="payment-option relative flex items-center justify-center p-3 border-2 rounded-xl cursor-pointer transition-all border-gray-100 bg-white">
+                                    <input type="radio" name="payment_method" value="cash" checked class="hidden">
+                                    <div class="text-center">
+                                        <i class="fa-solid fa-money-bill-wave block text-gray-300 mb-1"></i>
+                                        <span class="text-[10px] font-bold uppercase text-gray-400">Tunai</span>
+                                    </div>
+                                </label>
+                                <label class="payment-option relative flex items-center justify-center p-3 border-2 rounded-xl cursor-pointer transition-all border-gray-100 bg-white">
+                                    <input type="radio" name="payment_method" value="online" class="hidden">
+                                    <div class="text-center">
+                                        <i class="fa-solid fa-credit-card block text-gray-300 mb-1"></i>
+                                        <span class="text-[10px] font-bold uppercase text-gray-400">QRIS / Online</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
                     </div>
+
                     <button onclick="showConfirm()" class="w-full bg-gray-900 text-white py-3 rounded-md font-bold hover:bg-gray-800 transition shadow-sm">
                         Konfirmasi Pesanan
                     </button>
@@ -116,10 +133,10 @@
             </div>
         </div>
 
-        {{-- 1. KONFIRMASI MODAL (Kecil) --}}
+        {{-- KONFIRMASI MODAL --}}
         <div id="confirm-modal" class="fixed inset-0 z-[60] hidden flex items-center justify-center px-4">
-            <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity"></div>
-            <div class="bg-white w-full max-w-sm rounded-xl shadow-2xl relative z-10 p-6 text-center transform scale-100 transition-transform">
+            <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm"></div>
+            <div class="bg-white w-full max-w-sm rounded-xl shadow-2xl relative z-10 p-6 text-center">
                 <div class="w-12 h-12 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mx-auto mb-3">
                     <i class="fa-solid fa-question text-xl"></i>
                 </div>
@@ -127,35 +144,26 @@
                 <p class="text-gray-500 text-sm mb-5">Pesanan akan diteruskan ke dapur.</p>
                 <div class="flex gap-3">
                     <button onclick="closeConfirm()" class="flex-1 py-2.5 bg-gray-100 text-gray-700 font-bold rounded-lg hover:bg-gray-200 transition text-sm">Batal</button>
-                    <button onclick="finalProcess()" id="btn-final-send" class="flex-1 py-2.5 bg-gray-900 text-white font-bold rounded-lg hover:bg-black transition text-sm flex justify-center items-center gap-2">
-                        <span>Ya, Kirim</span>
-                    </button>
+                    <button onclick="finalProcess()" id="btn-final-send" class="flex-1 py-2.5 bg-gray-900 text-white font-bold rounded-lg hover:bg-black transition text-sm">Ya, Kirim</button>
                 </div>
             </div>
         </div>
 
-        {{-- 2. SUKSES POPUP (Kecil & Rapi) --}}
+        {{-- SUKSES POPUP --}}
         <div id="success-popup" class="fixed inset-0 z-[70] hidden flex items-center justify-center px-4">
-            {{-- Backdrop Ringan --}}
-            <div class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"></div>
-            
-            {{-- Card Kecil --}}
+            <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
             <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl relative z-10 p-6 text-center animate-bounce-in">
                 <div class="w-16 h-16 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-sm">
                     <i class="fa-solid fa-check text-2xl"></i>
                 </div>
                 <h3 class="text-xl font-extrabold text-gray-900 mb-1">Berhasil!</h3>
-                <p class="text-gray-500 text-sm mb-6">Pesanan Anda telah diterima.</p>
-                <button onclick="closeSuccess()" class="w-full py-3 bg-gray-900 text-white font-bold rounded-xl hover:bg-black transition shadow-lg">
-                    Oke, Siap
-                </button>
+                <p id="success-msg" class="text-gray-500 text-sm mb-6 text-center px-2">Pesanan Anda telah diterima.</p>
+                <button onclick="closeSuccess()" class="w-full py-3 bg-gray-900 text-white font-bold rounded-xl hover:bg-black transition shadow-lg">Oke, Siap</button>
             </div>
         </div>
     @endauth
 
-    {{-- ======================================================================= --}}
-    {{-- 5. JAVASCRIPT --}}
-    {{-- ======================================================================= --}}
+    {{-- SCRIPT --}}
     <script>
         function filterMenu(category) {
             document.querySelectorAll('.menu-item').forEach(item => item.style.display = (category === 'all' || item.dataset.category === category) ? 'flex' : 'none');
@@ -180,10 +188,9 @@
                 const item = cart.find(i => i.id === id);
                 if(item) item.qty++; else cart.push({id, name, price, qty: 1});
                 saveCart();
-                // Button Effect
-                const btn = event.currentTarget; const icon = btn.querySelector('i'); const oldClass = btn.className; const oldIcon = icon.className;
+                const btn = event.currentTarget; const icon = btn.querySelector('i');
                 btn.className = "bg-green-600 text-white w-9 h-9 rounded flex items-center justify-center transition-colors shadow-sm"; icon.className = "fa-solid fa-check";
-                setTimeout(() => { btn.className = oldClass; icon.className = oldIcon; }, 800);
+                setTimeout(() => { btn.className = "bg-gray-900 text-white w-9 h-9 rounded flex items-center justify-center hover:bg-yellow-500 transition-colors shadow-sm"; icon.className = "fa-solid fa-plus"; }, 800);
             }
 
             function updateUI() {
@@ -201,68 +208,67 @@
 
             function changeQty(id, delta) { const item = cart.find(i => i.id === id); if(item) { item.qty += delta; if(item.qty <= 0) cart = cart.filter(i => i.id !== id); saveCart(); } }
             function toggleModal() { document.getElementById('cart-modal').classList.toggle('hidden'); }
-            
-            // --- NOTIFIKASI ---
-            function showToast(msg) {
-                Toastify({ text: msg, duration: 3000, gravity: "top", position: "center", style: { background: "#1f2937", borderRadius: "8px", fontSize: "12px" } }).showToast();
-            }
+            function showToast(msg) { Toastify({ text: msg, duration: 3000, gravity: "top", position: "center", style: { background: "#1f2937", borderRadius: "8px", fontSize: "12px" } }).showToast(); }
 
             function showConfirm() {
                 const room = document.getElementById('room-number').value.trim();
-                if(!room) { showToast("⚠️ Mohon isi Nomor Kamar!"); document.getElementById('room-number').focus(); return; }
+                if(!room) { showToast("⚠️ Isi Nomor Kamar!"); return; }
+                if(cart.length === 0) { showToast("⚠️ Keranjang masih kosong!"); return; }
                 toggleModal();
                 document.getElementById('confirm-modal').classList.remove('hidden');
             }
 
-            function closeConfirm() {
-                document.getElementById('confirm-modal').classList.add('hidden');
-                toggleModal(); // Buka lagi keranjang
-            }
-
-            function closeSuccess() {
-                document.getElementById('success-popup').classList.add('hidden');
-                document.getElementById('room-number').value = '';
-            }
+            function closeConfirm() { document.getElementById('confirm-modal').classList.add('hidden'); toggleModal(); }
+            function closeSuccess() { document.getElementById('success-popup').classList.add('hidden'); location.reload(); }
 
             async function finalProcess() {
                 const room = document.getElementById('room-number').value.trim();
+                const method = document.querySelector('input[name="payment_method"]:checked').value;
                 const btn = document.getElementById('btn-final-send');
+                
                 btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i>`; btn.disabled = true;
 
                 try {
                     const response = await fetch("{{ route('restaurant.order.store') }}", {
                         method: "POST", headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": "{{ csrf_token() }}" },
-                        body: JSON.stringify({ room_number: room, cart: cart })
+                        body: JSON.stringify({ room_number: room, payment_method: method, cart: cart })
                     });
                     
+                    const result = await response.json();
                     if(response.ok) {
-                        cart = []; saveCart();
-                        document.getElementById('confirm-modal').classList.add('hidden');
-                        document.getElementById('success-popup').classList.remove('hidden'); // Tampilkan Popup Kecil
+                        if(result.payment_method === 'online') {
+                            window.snap.pay(result.snap_token, {
+                                onSuccess: () => showFinishPopup(true),
+                                onPending: () => showFinishPopup(true),
+                                onError: () => { showToast("❌ Pembayaran Gagal."); resetBtn(); },
+                                onClose: () => { showToast("⚠️ Silakan selesaikan pembayaran."); resetBtn(); }
+                            });
+                        } else {
+                            showFinishPopup(false);
+                        }
                     } else {
-                        showToast("❌ Gagal mengirim pesanan.");
-                        btn.innerHTML = `<span>Ya, Kirim</span>`; btn.disabled = false;
+                        showToast("❌ " + result.message); resetBtn();
                     }
-                } catch(e) {
-                    showToast("❌ Error koneksi internet.");
-                    btn.innerHTML = `<span>Ya, Kirim</span>`; btn.disabled = false;
-                }
+                } catch(e) { showToast("❌ Koneksi Error."); resetBtn(); }
             }
 
+            function showFinishPopup(isOnline) {
+                cart = []; saveCart();
+                document.getElementById('confirm-modal').classList.add('hidden');
+                document.getElementById('success-msg').innerText = isOnline ? "Terima kasih, pembayaran telah kami terima. Pesanan sedang diproses!" : "Pesanan diterima! Silakan siapkan uang tunai saat pesanan tiba.";
+                document.getElementById('success-popup').classList.remove('hidden');
+            }
+
+            function resetBtn() { const btn = document.getElementById('btn-final-send'); btn.innerHTML = "Ya, Kirim"; btn.disabled = false; }
             document.addEventListener('DOMContentLoaded', () => { updateUI(); filterMenu('all'); });
         @endauth
-        document.addEventListener('DOMContentLoaded', () => { if(typeof updateUI === 'undefined') filterMenu('all'); });
     </script>
 
     <style>
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        @keyframes bounce-in {
-            0% { transform: scale(0.8); opacity: 0; }
-            50% { transform: scale(1.05); opacity: 1; }
-            100% { transform: scale(1); }
-        }
+        label.payment-option:has(input:checked) { border-color: #eab308; background-color: #fefce8; box-shadow: 0 0 0 1px #eab308; }
+        label.payment-option:has(input:checked) i, label.payment-option:has(input:checked) span { color: #ca8a04; }
+        @keyframes bounce-in { 0% { transform: scale(0.8); opacity: 0; } 50% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(1); } }
         .animate-bounce-in { animation: bounce-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     </style>
-
 @endsection

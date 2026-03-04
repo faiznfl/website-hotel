@@ -11,47 +11,53 @@ class MidtransWebhookController extends Controller
 {
     public function handler(Request $request)
     {
-        // Konfigurasi Midtrans
         Config::$serverKey = env('MIDTRANS_SERVER_KEY');
         Config::$isProduction = env('MIDTRANS_IS_PRODUCTION', false);
 
         try {
             $notification = new Notification();
-            
-            // Ambil Order ID (Contoh: BOOKING-12-171000)
-            // Kita ambil ID booking-nya saja (angka di tengah)
             $orderIdRaw = $notification->order_id; 
-            $orderIdParts = explode('-', $orderIdRaw);
-            $bookingId = $orderIdParts[1]; // Mengambil angka '12'
-
-            $booking = Booking::find($bookingId);
-
-            if (!$booking) {
-                return response()->json(['message' => 'Booking not found'], 404);
-            }
-
             $transactionStatus = $notification->transaction_status;
-            $type = $notification->payment_type;
-            $fraud = $notification->fraud_status;
 
-            // Logika Perubahan Status
-            if ($transactionStatus == 'capture') {
-                if ($type == 'credit_card') {
-                    if ($fraud == 'challenge') {
-                        $booking->update(['status' => 'pending']);
-                    } else {
-                        $booking->update(['status' => 'confirmed']);
+            // 1. LOGIKA UNTUK PESANAN MAKANAN (RESTO)
+            if (str_contains($orderIdRaw, 'FOOD-')) {
+                $orderIdParts = explode('-', $orderIdRaw);
+                $orderId = $orderIdParts[1]; // Ambil angka di tengah
+
+                $order = \App\Models\Order::find($orderId);
+
+                if ($order) {
+                    if ($transactionStatus == 'settlement' || $transactionStatus == 'capture') {
+                        // Update sesuai status di migrasi resto kamu: 'Lunas'
+                        $order->update(['status_pembayaran' => 'Lunas']);
+                    } elseif ($transactionStatus == 'deny' || $transactionStatus == 'expire' || $transactionStatus == 'cancel') {
+                        $order->update(['status_pembayaran' => 'Dibatalkan']);
                     }
                 }
-            } elseif ($transactionStatus == 'settlement') {
-                $booking->update(['status' => 'confirmed']);
-            } elseif ($transactionStatus == 'pending') {
-                $booking->update(['status' => 'pending']);
-            } elseif ($transactionStatus == 'deny' || $transactionStatus == 'expire' || $transactionStatus == 'cancel') {
-                $booking->update(['status' => 'cancelled']);
-            }
+                return response()->json(['message' => 'Food Order Webhook Success']);
+            } 
 
-            return response()->json(['message' => 'Webhook success']);
+            // 2. LOGIKA UNTUK HOTEL (BOOKING)
+            else {
+                $orderIdParts = explode('-', $orderIdRaw);
+                // Cek apakah ada dash, jika tidak pakai ID asli (tergantung format ID hotel kamu)
+                $bookingId = isset($orderIdParts[1]) ? $orderIdParts[1] : $orderIdRaw;
+
+                $booking = Booking::find($bookingId);
+
+                if (!$booking) {
+                    return response()->json(['message' => 'Booking not found'], 404);
+                }
+
+                // Logika status hotel kamu
+                if ($transactionStatus == 'settlement' || $transactionStatus == 'capture') {
+                    $booking->update(['status' => 'confirmed']);
+                } elseif ($transactionStatus == 'deny' || $transactionStatus == 'expire' || $transactionStatus == 'cancel') {
+                    $booking->update(['status' => 'cancelled']);
+                }
+                
+                return response()->json(['message' => 'Hotel Webhook Success']);
+            }
 
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
