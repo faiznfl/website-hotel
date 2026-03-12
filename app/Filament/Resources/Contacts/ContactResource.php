@@ -2,31 +2,33 @@
 
 namespace App\Filament\Resources\Contacts;
 
-use BackedEnum;
-use App\Models\Contact;
-use Filament\Tables\Table;
-use Filament\Actions\Action;
-use Filament\Schemas\Schema;
-use Filament\Actions\ViewAction;
-use Filament\Infolists\Infolist;
-use Filament\Resources\Resource;
-use Filament\Actions\DeleteAction;
-use Filament\Support\Icons\Heroicon;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Schemas\Components\Group;
-use Filament\Forms\Components\Textarea;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Section;
-use Filament\Tables\Columns\Layout\Grid;
-use Filament\Forms\Components\Placeholder;
-use Filament\Infolists\Components\TextEntry;
+use App\Filament\Resources\Contacts\Pages\CreateContact;
 use App\Filament\Resources\Contacts\Pages\EditContact;
 use App\Filament\Resources\Contacts\Pages\ListContacts;
-use App\Filament\Resources\Contacts\Pages\CreateContact;
 use App\Filament\Resources\Contacts\Schemas\ContactForm;
 use App\Filament\Resources\Contacts\Tables\ContactsTable;
+use App\Models\Contact;
+use BackedEnum;
+use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Resource;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\Layout\Grid;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 
 class ContactResource extends Resource
 {
@@ -84,26 +86,28 @@ class ContactResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->columns([
-                TextColumn::make('nama')
-                    ->label('Nama')
-                    ->searchable()
-                    ->sortable()
-                    ->weight('bold'),
+        ->columns([
+            // Kolom Status Otomatis
+            TextColumn::make('user_id')
+            ->label('Status')
+            ->badge()
+            ->state(fn ($record) => $record->user_id ? 'DIBALAS' : 'PENDING') // Deteksi manual
+            ->color(fn ($state) => $state === 'DIBALAS' ? 'success' : 'danger'),
 
-                TextColumn::make('email')
-                    ->icon('heroicon-m-envelope')
-                    ->searchable(),
+            TextColumn::make('nama')
+                ->label('Pengirim')
+                ->weight('bold'),
 
-                TextColumn::make('phone')
-                    ->label('WhatsApp')
-                    ->icon('heroicon-m-phone'),
+            // Menampilkan Nama Admin yang membalas
+            TextColumn::make('admin.name') // Ini mengambil relasi dari Model Contact
+                ->label('Ditangani Oleh')
+                ->placeholder('Menunggu respon...') // Muncul jika user_id masih kosong
+                ->color('info'),
 
-                TextColumn::make('created_at')
-                    ->label('Masuk')
-                    ->dateTime('d M Y, H:i')
-                    ->sortable(),
-            ])
+            TextColumn::make('created_at')
+                ->label('Tgl Masuk')
+                ->dateTime('d M Y, H:i'),
+        ])
             ->defaultSort('created_at', 'desc')
             ->actions([
                 // INI TOMBOL STANDARD FILAMENT
@@ -112,9 +116,34 @@ class ContactResource extends Resource
 
                 // Tombol Balas WA (Tetap saya pertahankan karena aman & berguna)
                 Action::make('reply_wa')
-                    ->icon('heroicon-o-chat-bubble-left-right')
-                    ->color('success')
-                    ->url(fn (Contact $record) => "https://wa.me/{$record->phone}", true),
+                ->label('Balas WA')
+                ->icon('heroicon-o-chat-bubble-left-right')
+                ->color('success')
+                ->requiresConfirmation()
+                ->action(function (Contact $record, \Filament\Resources\Pages\ListRecords $livewire) {
+                    // 1. Update Database (Ini sudah jalan di log tadi)
+                    $record->update([
+                        'user_id' => Auth::id(),
+                    ]);
+
+                    // 2. Format Nomor HP
+                    $phone = preg_replace('/[^0-9]/', '', $record->phone);
+                    if (str_starts_with($phone, '0')) {
+                        $phone = '62' . substr($phone, 1);
+                    }
+
+                    // 3. Eksekusi JS via $livewire (Ini pengganti $this agar tidak error)
+                    $livewire->js("window.open('https://api.whatsapp.com/send?phone={$phone}', '_blank')");
+                    
+                    // 4. Notifikasi
+                    \Filament\Notifications\Notification::make()
+                        ->title('Status Berhasil Diperbarui!')
+                        ->success()
+                        ->send();
+                })
+                ->requiresConfirmation()
+                ->modalHeading('Balas via WhatsApp?')
+                ->modalDescription('Setelah klik tombol ini, status akan berubah menjadi "Sudah Dibalas".'),
 
                 DeleteAction::make(),
             ])

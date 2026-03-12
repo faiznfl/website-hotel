@@ -13,10 +13,11 @@ return new class extends Migration
     {
         Schema::create('contacts', function (Blueprint $table) {
             $table->id();
-            $table->string('nama', 100);       // 100 karakter sudah standar baku untuk nama
-            $table->string('email', 255);      // Biarkan 255 sesuai standar maksimal format email
-            $table->string('phone', 20);       // 20 karakter pas untuk nomor HP (+62...)
-            $table->text('pesan');           // Tipe text sangat tepat agar tamu bebas nulis panjang
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
+            $table->string('nama', 100);
+            $table->string('email', 255);      
+            $table->string('phone', 20);       
+            $table->text('pesan');           
             $table->timestamps();
         });
     }
