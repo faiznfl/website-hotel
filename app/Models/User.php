@@ -16,6 +16,8 @@ class User extends Authenticatable implements FilamentUser
 {
     use HasFactory, Notifiable;
 
+    protected $table = 'users'; // Pastikan ini sesuai dengan nama di phpMyAdmin
+
     /**
      * The attributes that are mass assignable.
      *
@@ -62,5 +64,11 @@ class User extends Authenticatable implements FilamentUser
     public function testimonials()
     {
         return $this->hasMany(Testimonial::class);
+    }
+
+    // User (sebagai customer) bisa punya banyak reservasi
+    public function reservations()
+    {
+        return $this->hasMany(MeetingReservation::class, 'customer_id');
     }
 }

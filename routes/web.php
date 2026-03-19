@@ -6,7 +6,8 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\RestaurantOrderController;
-use App\Http\Controllers\LaporanController; // Pastikan ini ada
+use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\MeetingReservationController;
 use App\Models\Kamar;
 use App\Models\Gallery;
 use App\Models\Meeting;
@@ -61,6 +62,10 @@ Route::get('/restaurant', function () {
     $menus = Menu::where('is_available', true)->latest()->get();
     return view('restaurant', compact('menus'));
 })->name('restaurant');
+
+Route::post('/meeting-reservation/{id}', [MeetingReservationController::class, 'store'])
+    ->name('meeting.reserve')
+    ->middleware('auth');
 
 // Cetak Laporan
 Route::get('/cetak-laporan', [LaporanController::class, 'cetakPdf'])->name('cetak.laporan.pdf');
