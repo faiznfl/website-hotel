@@ -10,10 +10,12 @@ class ListMeetingReservations extends ListRecords
 {
     protected static string $resource = MeetingReservationResource::class;
 
+    protected ?string $heading = 'Data Booking Ruangan Customer';
+
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            // CreateAction::make(),
         ];
     }
 }

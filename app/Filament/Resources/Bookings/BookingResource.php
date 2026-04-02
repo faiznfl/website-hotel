@@ -34,8 +34,8 @@ class BookingResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-calendar-days';
 
-    protected static ?string $navigationLabel = 'Booking';
-
+    protected static ?string $navigationLabel = 'Booking Kamar';
+    protected static ?string $pluralModelLabel = 'Booking Kamar';
     protected static ?string $recordTitleAttribute = 'nama_tamu';
 
     protected static string | \UnitEnum | null $navigationGroup = 'Manajemen Reservasi';

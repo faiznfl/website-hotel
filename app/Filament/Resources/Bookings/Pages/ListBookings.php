@@ -10,7 +10,7 @@ class ListBookings extends ListRecords
 {
     protected static string $resource = BookingResource::class;
 
-    protected ?string $heading = 'Data Booking Customer';
+    protected ?string $heading = 'Data Booking Kamar Customer';
 
     protected function getHeaderActions(): array
     {

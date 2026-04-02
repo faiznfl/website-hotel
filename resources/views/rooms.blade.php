@@ -19,7 +19,7 @@
 
             <div class="text-center mb-8 md:mb-12">
                 {{-- Judul Responsif --}}
-                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">ROOMS & SUITE</h2>
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">ROOMS</h2>
                 <div class="w-16 md:w-20 h-1 bg-yellow-400 mx-auto mt-3 md:mt-4 rounded"></div>
             </div>
 

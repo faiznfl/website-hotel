@@ -25,13 +25,27 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Notification;
+use Filament\Notifications\Notification;
 
 class MeetingReservationResource extends Resource
 {
     protected static ?string $model = MeetingReservation::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-clipboard-document-check';
+
+    protected static ?string $navigationLabel = 'Booking Ruangan';
+
+    protected static ?string $recordTitleAttribute = 'nama_tamu';
+
+    protected static string | \UnitEnum | null $navigationGroup = 'Manajemen Reservasi';
+    protected static ?string $modelLabel = 'Booking Ruangan';
+    protected static ?string $pluralModelLabel = 'Booking Ruangan';
+    protected static ?int $navigationSort = 2; // Supaya paling atas
+
+    public static function getNavigationBadge(): ?string
+    {
+        return (string) static::getModel()::count();
+    }
 
     public static function form(Schema $schema): Schema
     {

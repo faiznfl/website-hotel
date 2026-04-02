@@ -36,6 +36,7 @@ class KamarResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-home-modern';
 
     protected static ?string $navigationLabel = 'Kamar';
+    protected static ?string $pluralModelLabel = 'Kamar';
 
     protected static ?string $recordTitleAttribute = 'tipe_kamar';
 

@@ -32,6 +32,7 @@ class OrderResource extends Resource
 {
     protected static ?string $model = Order::class;
     protected static ?string $navigationLabel = 'Order Menu';
+    protected static ?string $pluralModelLabel = 'Order Menu';
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-clipboard-document-list';
     protected static string | \UnitEnum | null $navigationGroup = 'Manajemen Reservasi';
     protected static ?int $navigationSort = 2; // Supaya paling atas
