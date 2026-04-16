@@ -9,6 +9,7 @@ use App\Filament\Resources\MeetingReservations\Schemas\MeetingReservationForm;
 use App\Filament\Resources\MeetingReservations\Tables\MeetingReservationsTable;
 use App\Models\MeetingReservation;
 use BackedEnum;
+use Closure;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -16,16 +17,18 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TimePicker;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
-use Filament\Notifications\Notification;
 
 class MeetingReservationResource extends Resource
 {
@@ -50,43 +53,86 @@ class MeetingReservationResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema
-        ->schema([
-                Section::make('Detail Perubahan Jadwal')
-                    ->description('Sesuaikan waktu dan status reservasi di bawah ini.')
+            ->schema([
+                Section::make('Informasi Utama')
+                    ->description('Kelola detail reservasi dan ketersediaan waktu.')
                     ->schema([
-                        Select::make('meeting_id')
-                            ->relationship('ruangan', 'judul')
-                            ->label('Ruangan')
-                            ->required()
-                            ->searchable(),
-
-                        Select::make('customer_id')
-                            ->relationship('customer', 'name')
-                            ->label('Pemesan')
-                            ->required()
-                            ->searchable(),
-
-                        DatePicker::make('tanggal_booking')
-                            ->label('Tanggal Booking')
-                            ->required()
-                            ->native(false) // Ini sudah cukup untuk memunculkan kalender cantik
-                            ->displayFormat('d M Y')
-                            ->prefixIcon('heroicon-m-calendar')
-                            ->minDate(now()),
-
+                        // Baris 1: Ruangan & Pemesan (Dibuat lebar)
                         Grid::make(2)
                             ->schema([
+                                Select::make('meeting_id')
+                                    ->relationship('ruangan', 'judul')
+                                    ->label('Ruangan')
+                                    ->required()
+                                    ->preload()
+                                    ->searchable()
+                                    ->prefixIcon('heroicon-m-home-modern'),
+
+                                Select::make('customer_id')
+                                    ->relationship('customer', 'name')
+                                    ->label('Pemesan')
+                                    ->required()
+                                    ->searchable()
+                                    ->prefixIcon('heroicon-m-user'),
+                            ]),
+
+                        // Baris 2: Tanggal, Jam, dan Status
+                        Grid::make(3)
+                            ->schema([
+                                DatePicker::make('tanggal_booking')
+                                    ->label('Tanggal Booking')
+                                    ->required()
+                                    ->native(false)
+                                    ->displayFormat('d M Y')
+                                    ->prefixIcon('heroicon-m-calendar')
+                                    ->minDate(now())
+                                    ->rules([
+                                        fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
+                                            $mulai = $get('jam_mulai');
+                                            $selesai = $get('jam_selesai');
+                                            $ruanganId = $get('meeting_id');
+
+                                            if (!$mulai || !$selesai || !$ruanganId) return;
+
+                                            $bentrok = MeetingReservation::where('meeting_id', $ruanganId)
+                                                ->where('tanggal_booking', $value)
+                                                ->where('status', 'confirmed') // Hanya cek yang sudah fix
+                                                ->where(function ($query) use ($mulai, $selesai) {
+                                                    $query->where(function ($q) use ($mulai, $selesai) {
+                                                        $q->where('jam_mulai', '<', $selesai)
+                                                        ->where('jam_selesai', '>', $mulai);
+                                                    });
+                                                })
+                                                // Jika sedang EDIT, abaikan data milik sendiri agar tidak bentrok dengan diri sendiri
+                                                ->when($get('id'), fn ($q) => $q->where('id', '!=', $get('id')))
+                                                ->exists();
+
+                                            if ($bentrok) {
+                                                $fail('Maaf, Ruangan ini sudah terisi pada jam tersebut. Silakan cari waktu lain.');
+                                            }
+                                        },
+                                    ]),
+
                                 TimePicker::make('jam_mulai')
                                     ->label('Jam Mulai')
                                     ->required()
-                                    ->seconds(false),
-                                
+                                    ->seconds(false)
+                                    ->minutesStep(15)
+                                    ->prefixIcon('heroicon-m-clock')
+                                    ->reactive()
+                                    ->afterStateUpdated(fn($set) => $set('jam_selesai', null)),
+
                                 TimePicker::make('jam_selesai')
                                     ->label('Jam Selesai')
                                     ->required()
-                                    ->seconds(false),
+                                    ->seconds(false)
+                                    ->minutesStep(15)
+                                    ->prefixIcon('heroicon-m-stop-circle')
+                                    ->after('jam_mulai')
+                                    ->helperText('Minimal durasi 30 menit.'),
                             ]),
 
+                        // Baris 3: Status (Dibuat Full Width atau ditaruh di bawah)
                         Select::make('status')
                             ->options([
                                 'pending' => 'Pending',
@@ -94,8 +140,9 @@ class MeetingReservationResource extends Resource
                                 'canceled' => 'Canceled',
                             ])
                             ->required()
-                            ->native(false),
-                    ])->columns(2),
+                            ->native(false)
+                            ->prefixIcon('heroicon-m-arrow-path'),
+                    ])
             ]);
     }
 
@@ -111,16 +158,25 @@ class MeetingReservationResource extends Resource
 
                 TextColumn::make('customer.name')
                     ->label('Pemesan')
+                    ->description(fn ($record) => $record->customer?->nomor_hp ?? 'No Phone')
                     ->searchable(),
 
                 TextColumn::make('tanggal_booking')
-                    ->label('Tanggal')
-                    ->date('d M Y')
+                    ->label('Jadwal Meeting')
+                    ->formatStateUsing(function ($state) {
+                        return \Carbon\Carbon::parse($state)
+                            ->locale('id')
+                            ->translatedFormat('l, d M Y'); 
+                    })
                     ->sortable(),
 
                 TextColumn::make('jam_mulai')
                     ->label('Waktu')
-                    ->formatStateUsing(fn ($record) => "{$record->jam_mulai} - {$record->jam_selesai}")
+                    ->formatStateUsing(function ($record) {
+                        $mulai = \Carbon\Carbon::parse($record->jam_mulai)->format('H:i');
+                        $selesai = \Carbon\Carbon::parse($record->jam_selesai)->format('H:i');
+                        return "{$mulai} - {$selesai}";
+                    })
                     ->icon('heroicon-m-clock'),
 
                 TextColumn::make('status')

@@ -118,8 +118,8 @@
                                                 <i class="fa-regular fa-clock"></i>
                                             </span>
                                             <input type="text" id="start_time" name="jam_mulai" value="{{ old('jam_mulai') }}" required
-                                                placeholder="09:00"
-                                                class="timepicker w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:outline-none text-sm">
+                                                placeholder="09:00" maxlength="5" {{-- SESUAIKAN CLASS DI SINI --}}
+                                                class="time-mask w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:outline-none text-sm">
                                         </div>
                                     </div>
 
@@ -132,86 +132,44 @@
                                                 <i class="fa-regular fa-clock"></i>
                                             </span>
                                             <input type="text" id="end_time" name="jam_selesai" value="{{ old('jam_selesai') }}" required
-                                                placeholder="17:00"
-                                                class="timepicker w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:outline-none text-sm">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {{-- BOX TOTAL DURASI --}}
-                                <div id="duration_wrapper" class="mt-4 hidden" style="display: none;">
-                                    <div class="flex items-center justify-between p-4 bg-gray-900 rounded-2xl border border-gray-800 shadow-lg">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-10 h-10 rounded-xl bg-yellow-500/20 flex items-center justify-center text-yellow-500">
-                                                <i class="fa-solid fa-hourglass-half text-lg"></i>
-                                            </div>
-                                            <div>
-                                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Estimasi Durasi</p>
-                                                <p id="total_duration_text" class="text-sm font-bold text-white">0 Jam</p>
-                                            </div>
-                                        </div>
-                                        <div class="text-right">
-                                            <span
-                                                class="text-[10px] px-2 py-1 bg-green-500/20 text-green-400 rounded-full font-bold uppercase">Ready</span>
+                                                placeholder="17:00" maxlength="5" {{-- SESUAIKAN CLASS DI SINI --}}
+                                                class="time-mask w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-yellow-400 focus:outline-none text-sm">
                                         </div>
                                     </div>
                                 </div>
 
                                 <script>
+                                    // Memastikan script berjalan setelah DOM siap
                                     document.addEventListener('DOMContentLoaded', function () {
-                                        // Fungsi Hitung Durasi
-                                        function updateDuration() {
-                                            const startStr = document.getElementById('start_time').value;
-                                            const endStr = document.getElementById('end_time').value;
-                                            const wrapper = document.getElementById('duration_wrapper');
-                                            const text = document.getElementById('total_duration_text');
+                                        document.querySelectorAll('.time-mask').forEach(input => {
+                                            input.addEventListener('input', function (e) {
+                                                // Ambil hanya angka
+                                                let value = e.target.value.replace(/[^0-9]/g, '');
 
-                                            if (startStr && endStr) {
-                                                const start = startStr.split(':');
-                                                const end = endStr.split(':');
-
-                                                const startDate = new Date(0, 0, 0, start[0], start[1], 0);
-                                                const endDate = new Date(0, 0, 0, end[0], end[1], 0);
-
-                                                let diff = endDate - startDate;
-
-                                                // Jika jam selesai di hari berikutnya (misal mulai 23:00 selesai 01:00)
-                                                if (diff < 0) {
-                                                    diff += 86400000; // tambah 24 jam dalam milidetik
+                                                if (value.length > 2) {
+                                                    // Otomatis sisipkan ":" setelah angka kedua
+                                                    value = value.slice(0, 2) + ':' + value.slice(2, 4);
                                                 }
 
-                                                const hours = Math.floor(diff / 1000 / 60 / 60);
-                                                const minutes = Math.floor((diff / 1000 / 60) % 60);
+                                                e.target.value = value;
+                                            });
 
-                                                let result = "";
-                                                if (hours > 0) result += hours + " Jam ";
-                                                if (minutes > 0) result += minutes + " Menit";
-                                                if (hours === 0 && minutes === 0) result = "0 Menit";
+                                            input.addEventListener('blur', function (e) {
+                                                let val = e.target.value;
+                                                if (val.includes(':')) {
+                                                    let parts = val.split(':');
+                                                    // Validasi logika jam (00-23) dan menit (00-59)
+                                                    if (parseInt(parts[0]) > 23) parts[0] = '23';
+                                                    if (parseInt(parts[1]) > 59) parts[1] = '59';
 
-                                                text.innerText = result;
-                                                wrapper.style.display = 'block'; // Paksa muncul pakai style inline
-                                                wrapper.classList.remove('hidden');
-                                            }
-                                        }
+                                                    // Pastikan format selalu 2 digit (misal: 9:00 jadi 09:00)
+                                                    if (parts[0].length === 1) parts[0] = '0' + parts[0];
+                                                    if (parts[1] && parts[1].length === 1) parts[1] = '0' + parts[1];
 
-                                        // Konfigurasi Flatpickr
-                                        const fpConfig = {
-                                            enableTime: true,
-                                            noCalendar: true,
-                                            dateFormat: "H:i",
-                                            time_24hr: true,
-                                            disableMobile: "true",
-                                            onClose: function (selectedDates, dateStr, instance) {
-                                                updateDuration(); // Hitung saat popup ditutup
-                                            },
-                                            onChange: function (selectedDates, dateStr, instance) {
-                                                updateDuration(); // Hitung saat nilai berubah
-                                            }
-                                        };
-
-                                        // Inisialisasi ke ID masing-masing
-                                        flatpickr("#start_time", fpConfig);
-                                        flatpickr("#end_time", fpConfig);
+                                                    e.target.value = parts[1] !== undefined ? parts.join(':') : parts[0] + ':00';
+                                                }
+                                            });
+                                        });
                                     });
                                 </script>
 
