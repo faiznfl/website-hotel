@@ -28,6 +28,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class MenuResource extends Resource
@@ -224,5 +225,10 @@ class MenuResource extends Resource
             'create' => CreateMenu::route('/create'),
             'edit' => EditMenu::route('/{record}/edit'),
         ];
+    }
+
+    public static function canViewAny(): bool
+    {
+        return Auth::user()->role === 'admin';
     }
 }

@@ -28,6 +28,7 @@ use App\Filament\Resources\Kamars\Pages\EditKamar;
 use App\Filament\Resources\Kamars\Pages\ListKamars;
 use App\Filament\Resources\Kamars\Pages\CreateKamar;
 use Filament\Schemas\Components\Utilities\Set as set;
+use Illuminate\Support\Facades\Auth;
 
 class KamarResource extends Resource
 {
@@ -247,5 +248,10 @@ class KamarResource extends Resource
             'create' => CreateKamar::route('/create'),
             'edit' => EditKamar::route('/{record}/edit'),
         ];
+    }
+
+    public static function canViewAny(): bool
+    {
+        return Auth::user()->role === 'admin';
     }
 }

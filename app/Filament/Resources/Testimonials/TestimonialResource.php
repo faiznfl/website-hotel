@@ -19,6 +19,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
 class TestimonialResource extends Resource
 {
@@ -128,5 +129,10 @@ class TestimonialResource extends Resource
             'create' => CreateTestimonial::route('/create'),
             // 'edit' => EditTestimonial::route('/{record}/edit'), 
         ];
+    }
+
+    public static function canViewAny(): bool
+    {
+        return Auth::user()->role === 'admin';
     }
 }

@@ -167,4 +167,9 @@ class ContactResource extends Resource
             'index' => ListContacts::route('/'),
         ];
     }
+
+    public static function canViewAny(): bool
+    {
+        return Auth::user()->role === 'admin';
+    }
 }

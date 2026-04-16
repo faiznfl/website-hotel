@@ -10,6 +10,7 @@ use Filament\Forms\Components\Select;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Utilities\Get;
+use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel; 
 
 class Laporan extends Page
@@ -130,4 +131,10 @@ class Laporan extends Page
                 })
         ];
     }
+
+    public static function canViewAny(): bool
+{
+    // Admin DAN Manager diperbolehkan melihat menu ini
+    return in_array(Auth::user()->role, ['admin', 'manager']);
+}
 }

@@ -57,7 +57,7 @@ class User extends Authenticatable implements FilamentUser
     // 3. LOGIKA SATPAM (Hanya Admin yang Boleh Masuk Filament)
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->role === 'admin';
+        return in_array($this->role, ['admin', 'manager']);
     }
 
     // Relasi: 1 User BISA PUNYA BANYAK Testimoni

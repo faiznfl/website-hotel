@@ -2,28 +2,29 @@
 
 namespace App\Filament\Resources\Meetings;
 
-use BackedEnum;
-use App\Models\Meeting;
-use Filament\Tables\Table;
-use Illuminate\Support\Str;
-use Filament\Schemas\Schema;
-use Filament\Actions\EditAction;
-use Filament\Resources\Resource;
-use Filament\Actions\DeleteAction;
-use Filament\Support\Icons\Heroicon;
-use Filament\Schemas\Components\Grid;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Forms\Components\Textarea;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Section;
-use Filament\Tables\Columns\ImageColumn;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\RichEditor;
-use Filament\Schemas\Components\Utilities\Set as set;
+use App\Filament\Resources\Meetings\Pages\CreateMeeting;
 use App\Filament\Resources\Meetings\Pages\EditMeeting;
 use App\Filament\Resources\Meetings\Pages\ListMeetings;
-use App\Filament\Resources\Meetings\Pages\CreateMeeting;
+use App\Models\Meeting;
+use BackedEnum;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Resource;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Set as set;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class MeetingResource extends Resource
 {
@@ -181,5 +182,10 @@ class MeetingResource extends Resource
             'create' => CreateMeeting::route('/create'),
             'edit' => EditMeeting::route('/{record}/edit'),
         ];
+    }
+
+    public static function canViewAny(): bool
+    {
+        return Auth::user()->role === 'admin';
     }
 }

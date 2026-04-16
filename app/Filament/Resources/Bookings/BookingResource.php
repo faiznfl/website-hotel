@@ -2,31 +2,32 @@
 
 namespace App\Filament\Resources\Bookings;
 
-use BackedEnum;
-use Carbon\Carbon;
-use App\Models\Kamar;
-use App\Models\Booking;
-use Filament\Tables\Table;
-use Filament\Schemas\Schema;
-use Filament\Actions\EditAction;
-use Filament\Resources\Resource;
-use Filament\Actions\Action as enter;
-use Filament\Actions\BulkActionGroup;
-use Filament\Schemas\Components\Grid;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Schemas\Components\Group;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\DatePicker;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Forms\Components\ToggleButtons;
-use Filament\Schemas\Components\Utilities\Get;
-use Illuminate\Database\Eloquent\Builder; // Tambahan penting biar ringan
+use App\Filament\Resources\Bookings\Pages\CreateBooking;
 use App\Filament\Resources\Bookings\Pages\EditBooking;
 use App\Filament\Resources\Bookings\Pages\ListBookings;
-use App\Filament\Resources\Bookings\Pages\CreateBooking;
+use App\Models\Booking;
+use App\Models\Kamar;
+use BackedEnum;
+use Carbon\Carbon;
+use Filament\Actions\Action as enter;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ToggleButtons;
+use Filament\Resources\Resource;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder; // Tambahan penting biar ringan
+use Illuminate\Support\Facades\Auth;
 
 class BookingResource extends Resource
 {
@@ -351,5 +352,10 @@ class BookingResource extends Resource
     public static function canCreate(): bool
     {
         return false;
+    }
+
+    public static function canViewAny(): bool
+    {
+        return Auth::user()->role === 'admin';
     }
 }

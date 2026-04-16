@@ -276,4 +276,9 @@ class MeetingReservationResource extends Resource
             'edit' => EditMeetingReservation::route('/{record}/edit'),
         ];
     }
+
+    public static function canViewAny(): bool
+    {
+        return Auth::user()->role === 'admin';
+    }
 }

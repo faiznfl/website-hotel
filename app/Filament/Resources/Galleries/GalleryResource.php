@@ -2,24 +2,25 @@
 
 namespace App\Filament\Resources\Galleries;
 
-use BackedEnum;
+use App\Filament\Resources\Galleries\Pages\CreateGallery;
+use App\Filament\Resources\Galleries\Pages\EditGallery;
+use App\Filament\Resources\Galleries\Pages\ListGalleries;
 use App\Models\Gallery;
-use Filament\Tables\Table;
-use Filament\Schemas\Schema;
-use Filament\Actions\EditAction;
-use Filament\Resources\Resource;
-use Filament\Actions\DeleteAction;
+use BackedEnum;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\ImageColumn;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\FileUpload;
-use App\Filament\Resources\Galleries\Pages\EditGallery;
-use App\Filament\Resources\Galleries\Pages\CreateGallery;
-use App\Filament\Resources\Galleries\Pages\ListGalleries;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
 class GalleryResource extends Resource
 {
@@ -132,5 +133,10 @@ class GalleryResource extends Resource
             'create' => CreateGallery::route('/create'),
             'edit' => EditGallery::route('/{record}/edit'),
         ];
+    }
+
+    public static function canViewAny(): bool
+    {
+        return Auth::user()->role === 'admin';
     }
 }
