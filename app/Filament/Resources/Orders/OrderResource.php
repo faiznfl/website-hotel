@@ -36,7 +36,7 @@ class OrderResource extends Resource
     protected static ?string $pluralModelLabel = 'Order Menu';
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-clipboard-document-list';
     protected static string | \UnitEnum | null $navigationGroup = 'Manajemen Reservasi';
-    protected static ?int $navigationSort = 2; // Supaya paling atas
+    protected static ?int $navigationSort = 3; // Supaya paling atas
 
     public static function getNavigationBadge(): ?string
     {
@@ -227,6 +227,6 @@ class OrderResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return Auth::user()->role === 'admin';
+        return in_array(Auth::user()->role, ['admin', 'receptionist']);
     }
 }

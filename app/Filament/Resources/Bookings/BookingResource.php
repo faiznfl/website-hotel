@@ -356,6 +356,6 @@ class BookingResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return Auth::user()->role === 'admin';
+        return in_array(Auth::user()->role, ['admin', 'receptionist']);
     }
 }

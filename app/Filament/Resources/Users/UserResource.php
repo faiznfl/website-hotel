@@ -31,6 +31,7 @@ class UserResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-users';
     protected static ?string $navigationLabel = 'Manajemen Staff & Manager';
    protected static string | \UnitEnum | null $navigationGroup = 'Data Master Hotel';
+   protected static ?int $navigationSort = 4;
 
     public static function form(Schema $schema): Schema
     {
@@ -52,6 +53,7 @@ class UserResource extends Resource
                         ->options([
                             'admin' => 'Administrator',
                             'manager' => 'Manager',
+                            'receptionist' => 'Resepsionis',
                         ])
                         ->required()
                         ->native(false),
@@ -78,10 +80,15 @@ class UserResource extends Resource
             TextColumn::make('name')->searchable(),
             TextColumn::make('email')->searchable(),
             BadgeColumn::make('role')
-                ->colors([
-                    'danger' => 'admin',
-                    'info' => 'manager',
-                ]),
+                ->badge() // Mengubah tampilan jadi kotak berwarna (badge)
+                ->color(fn (string $state): string => match ($state) {
+                    'admin' => 'danger',      // Merah
+                    'manager' => 'info',      // Biru muda
+                    'receptionist' => 'warning', // Oranye/Kuning
+                    default => 'gray',        // Abu-abu (untuk customer/lainnya)
+                })
+                ->formatStateUsing(fn (string $state): string => ucfirst($state)) // Huruf depan jadi Kapital
+                ->sortable(),
             TextColumn::make('created_at')
                 ->dateTime('d M Y'),
         ])
@@ -120,6 +127,6 @@ class UserResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->whereIn('role', ['admin', 'manager']);
+            ->whereIn('role', ['admin', 'manager', 'receptionist']);
     }
 }

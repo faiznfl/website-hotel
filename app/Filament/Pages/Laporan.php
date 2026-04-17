@@ -132,9 +132,13 @@ class Laporan extends Page
         ];
     }
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return in_array(Auth::user()->role, ['admin', 'manager']);
+    }
+
     public static function canViewAny(): bool
-{
-    // Admin DAN Manager diperbolehkan melihat menu ini
-    return in_array(Auth::user()->role, ['admin', 'manager']);
-}
+    {
+        return in_array(Auth::user()->role, ['admin', 'manager']);
+    }
 }
