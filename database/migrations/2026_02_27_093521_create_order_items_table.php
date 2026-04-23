@@ -16,8 +16,8 @@ return new class extends Migration
             $table->foreignId('order_id')->constrained('orders')->cascadeOnDelete();
             $table->foreignId('menu_id')->constrained('menus')->cascadeOnDelete();
             $table->integer('jumlah')->default(1);
-            $table->integer('harga_satuan'); // Harga saat dipesan (berjaga-jaga jika harga menu naik di masa depan)
-            $table->integer('subtotal'); // jumlah x harga_satuan
+            $table->integer('harga_satuan');
+            $table->integer('subtotal'); 
             $table->timestamps();
         });
     }

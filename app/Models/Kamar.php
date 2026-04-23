@@ -28,4 +28,9 @@ class Kamar extends Model
     {
         return $this->hasMany(Gallery::class);
     }
+
+    public function units()
+    {
+        return $this->hasMany(RoomUnit::class, 'kamar_id');
+    }
 }

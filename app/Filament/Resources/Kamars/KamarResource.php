@@ -2,33 +2,34 @@
 
 namespace App\Filament\Resources\Kamars;
 
-use BackedEnum;
-use App\Models\Kamar;
-use Filament\Tables\Table;
-use Illuminate\Support\Str;
-use Filament\Schemas\Schema;
-use Filament\Actions\EditAction;
-use Filament\Resources\Resource;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Forms\Components\Select;
-use Filament\Schemas\Components\Grid;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Schemas\Components\Group;
-use Filament\Forms\Components\Textarea;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\TagsInput;
-use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Section;
-use Filament\Tables\Columns\ImageColumn;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\Repeater; // <-- TAMBAHAN IMPORT REPEATER
+use App\Filament\Resources\Kamars\Pages\CreateKamar;
 use App\Filament\Resources\Kamars\Pages\EditKamar;
 use App\Filament\Resources\Kamars\Pages\ListKamars;
-use App\Filament\Resources\Kamars\Pages\CreateKamar;
+use App\Filament\Resources\Kamars\RelationManagers\UnitsRelationManager;
+use App\Models\Kamar;
+use BackedEnum;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Repeater; // <-- TAMBAHAN IMPORT REPEATER
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TagsInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Resource;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Set as set;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class KamarResource extends Resource
 {
@@ -41,7 +42,7 @@ class KamarResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'tipe_kamar';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Data Master Hotel';
+    protected static string | \UnitEnum | null $navigationGroup = 'Data Master Hotel';  
     protected static ?int $navigationSort = 2;
 
     public static function form(Schema $schema): Schema
@@ -238,7 +239,9 @@ class KamarResource extends Resource
 
     public static function getRelations(): array
     {
-        return [];
+        return [
+            UnitsRelationManager::class,
+        ];
     }
 
     public static function getPages(): array

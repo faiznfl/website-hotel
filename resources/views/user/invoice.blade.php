@@ -32,15 +32,21 @@
                     </div>
 
                     <div class="w-full md:w-auto text-left md:text-right">
-                        <p class="text-gray-400 text-[10px] md:text-xs uppercase mb-1">Status Booking</p>
+                        <p class="text-gray-400 text-[10px] uppercase font-bold mb-1 tracking-wider">Status Booking</p>
+
                         @if($booking->status == 'confirmed')
                             <span
                                 class="inline-block bg-white text-gray-900 px-3 py-1 rounded text-[10px] md:text-xs font-bold uppercase tracking-wider border border-white">
                                 Confirmed
                             </span>
+                        @elseif($booking->status == 'checked_out')
+                            <span
+                                class="inline-block bg-blue-500 text-white px-3 py-1 rounded text-[10px] md:text-xs font-bold uppercase tracking-wider">
+                                Checked Out
+                            </span>
                         @elseif($booking->status == 'pending')
                             <span
-                                class="inline-block bg-yellow-500 text-yellow-900 px-3 py-1 rounded text-[10px] md:text-xs font-bold uppercase tracking-wider border border-yellow-500">
+                                class="inline-block bg-yellow-500 text-yellow-900 px-3 py-1 rounded text-[10px] md:text-xs font-bold uppercase tracking-wider">
                                 Menunggu
                             </span>
                         @else

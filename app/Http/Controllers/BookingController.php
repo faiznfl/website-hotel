@@ -49,12 +49,26 @@ class BookingController extends Controller
             'total_harga' => 'required|numeric',
         ]);
 
+        // --- MULAI LOGIKA BARU ---
+        // 1. Cari unit yang tersedia untuk tipe kamar ini
+        // Kita pakai model RoomUnit (Pastikan sudah di-import di atas: use App\Models\RoomUnit;)
+        $unit = \App\Models\RoomUnit::where('kamar_id', $request->kamar_id)
+                        ->where('status', 'available')
+                        ->first();
+
+        // 2. Cek apakah unit ditemukan
+        if (!$unit) {
+            return back()->with('error', 'Maaf, semua unit kamar untuk tipe ini sudah penuh atau sedang dalam perbaikan.');
+        }
+        // --- SELESAI LOGIKA BARU ---
+
         $kamar = Kamar::find($request->kamar_id);
         
-        // Simpan Booking dengan waktu expired (24 jam)
+        // 3. Simpan Booking dengan menyertakan room_unit_id
         $booking = Booking::create([
             'user_id'      => Auth::id(),
             'kamar_id'     => $request->kamar_id,
+            'room_unit_id' => $unit->id, // <--- INI KUNCINYA!
             'nama_tamu'    => $request->nama_tamu,
             'nomor_hp'     => $request->nomor_hp,
             'check_in'     => $request->check_in,
@@ -62,8 +76,11 @@ class BookingController extends Controller
             'jumlah_kamar' => $request->jumlah_kamar,
             'total_harga'  => $request->total_harga,
             'status'       => 'pending',
-            'expires_at'   => now()->addHours(24), // Set expired di DB
+            'expires_at'   => now()->addHours(24),
         ]);
+
+    // Sisanya (Midtrans) tetap sama...
+    // ...
 
         try {
             Config::$serverKey = env('MIDTRANS_SERVER_KEY');
@@ -132,18 +149,18 @@ class BookingController extends Controller
     {
         $sekarang = Carbon::now('Asia/Jakarta');
 
-        // 1. Eksekusi pembatalan instan sebelum data ditarik
+        // 1. Cek pembatalan (HANYA untuk yang masih pending dan sudah lewat waktu)
         Booking::where('user_id', Auth::id())
             ->where('status', 'pending')
             ->where('expires_at', '<', $sekarang)
             ->update(['status' => 'cancelled']);
 
-        // 2. Ambil data terbaru
-        $bookings = Booking::with('kamar')
+        // 2. Ambil data (Sertakan status checked_out agar tidak hilang dari list)
+        $bookings = Booking::with(['kamar', 'roomUnit'])
             ->where('user_id', Auth::id())
             ->latest()
             ->get();
-                
+                    
         return view('user.history', compact('bookings'));
     }
 

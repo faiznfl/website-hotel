@@ -15,10 +15,10 @@ return new class extends Migration
             $table->id();
             $table->enum('tipe_kamar', ['Superior Room', 'Deluxe Room', 'Family Room']);
             $table->string('slug', 100)->unique();
-            $table->string('foto')->nullable();
+            $table->string('foto', 255)->nullable();
             $table->integer('max_dewasa')->default(2); 
             $table->integer('max_anak')->default(0);   
-            $table->string('beds', 50);
+            $table->string('beds', 15);
             $table->integer('baths')->default(1);      
             $table->integer('harga');                  
             $table->text('deskripsi')->nullable();

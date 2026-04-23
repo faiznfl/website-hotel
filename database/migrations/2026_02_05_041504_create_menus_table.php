@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('menus', function (Blueprint $table) {
         $table->id();
-        $table->string('nama', 100);          // 100 karakter cukup panjang untuk nama makanan
-        $table->string('slug', 100)->unique(); // Samakan dengan nama
+        $table->string('nama', 25);
+        $table->string('slug', 100)->unique();
         $table->text('deskripsi');      
-        $table->integer('harga');             // Integer biasa aman untuk harga (terutama Rupiah)
-        $table->string('kategori', 50);       // Kategori cukup 50 (Makanan, Minuman, Dessert, dll)
-        $table->string('foto')->nullable();  // Biarkan default 255 untuk panjang URL/path gambar
+        $table->integer('harga');            
+        $table->string('kategori', 25);      
+        $table->string('foto', 255)->nullable(); 
         $table->boolean('is_available')->default(true); 
         $table->timestamps();
     });

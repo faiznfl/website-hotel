@@ -9,7 +9,7 @@ use App\Models\Booking;
 use App\Models\Kamar;
 use BackedEnum;
 use Carbon\Carbon;
-use Filament\Actions\Action as enter;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -17,6 +17,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
@@ -87,6 +88,13 @@ class BookingResource extends Resource
                                         ->required()
                                         ->reactive() 
                                         ->afterStateUpdated(fn ($state, callable $set) => $set('check_in', null)),
+                                    
+                                    Select::make('room_unit_id')
+                                        ->label('Nomor Kamar')
+                                        ->relationship('roomUnit', 'nomor_kamar')
+                                        ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->nomor_kamar}") // Paksa ambil kolom nomor_kamar
+                                        ->required()
+                                        ->searchable(),
 
                                     // 2. JUMLAH KAMAR
                                     TextInput::make('jumlah_kamar')
@@ -219,16 +227,19 @@ class BookingResource extends Resource
                                     ->options([
                                         'pending'   => 'Pending',
                                         'confirmed' => 'Confirm',
+                                        'checked_out' => 'Checked Out',
                                         'cancelled' => 'Cancel',
                                     ])
                                     ->colors([
                                         'pending'   => 'warning',
                                         'confirmed' => 'success',
+                                        'checked_out' => 'info',
                                         'cancelled' => 'danger',
                                     ])
                                     ->icons([
                                         'pending'   => 'heroicon-m-clock',
                                         'confirmed' => 'heroicon-m-check-badge',
+                                        'checked_out' => 'heroicon-m-arrow-left-on-rectangle',
                                         'cancelled' => 'heroicon-m-x-circle',
                                     ])
                                     ->inline()
@@ -285,6 +296,13 @@ class BookingResource extends Resource
                         'Family Room'   => 'success',
                         default         => 'gray',
                     }),
+
+                TextColumn::make('roomUnit.nomor_kamar')
+                    ->label('Nomor Kamar')
+                    ->badge()
+                    ->color('info')
+                    ->sortable()
+                    ->searchable(),
                 
                 TextColumn::make('jumlah_kamar')
                     ->label('Qty')
@@ -295,18 +313,20 @@ class BookingResource extends Resource
                     ->label('Durasi')
                     ->date('d M')
                     ->icon('heroicon-m-calendar-days')           
-                    ->description(fn (Booking $record) => 's/d ' . \Carbon\Carbon::parse($record->check_out)->format('d M')),
+                    ->description(fn (Booking $record) => 's/d ' . Carbon::parse($record->check_out)->format('d M')),
 
                 TextColumn::make('status')
                     ->badge()
                     ->icon(fn (string $state): string => match ($state) {
                         'pending'   => 'heroicon-m-arrow-path',
                         'confirmed' => 'heroicon-m-check',
+                        'checked_out' => 'heroicon-m-arrow-left-on-rectangle',
                         'cancelled' => 'heroicon-m-x-mark',
                     })
                     ->color(fn (string $state): string => match ($state) {
                         'pending'   => 'warning',
                         'confirmed' => 'success',
+                        'checked_out' => 'info',
                         'cancelled' => 'danger',
                     }),
             ])
@@ -316,12 +336,42 @@ class BookingResource extends Resource
                     ->options([
                         'pending'   => 'Menunggu',
                         'confirmed' => 'Confirmed',
+                        'checked_out' => 'Checked Out',
                         'cancelled' => 'Cancelled',
                     ]),
             ])
             ->actions([
+                Action::make('check_out_tamu')
+                ->label('Check-out')
+                ->icon('heroicon-m-arrow-left-on-rectangle')
+                ->color('info')
+                ->requiresConfirmation() // Biar ada konfirmasi dulu, gak asal klik
+                ->modalHeading('Selesaikan Reservasi?')
+                ->modalDescription('Apakah Kakak yakin tamu ini sudah check-out? Status kamar akan otomatis kembali menjadi "Tersedia".')
+                ->modalSubmitActionLabel('Ya, Check-out')
+                ->visible(fn (Booking $record) => $record->status === 'confirmed') // Tombol cuma muncul kalau statusnya sudah confirm
+                ->action(function (Booking $record) {
+                    // 1. Ubah status booking menjadi checked_out
+                    $record->update([
+                        'status' => 'checked_out'
+                    ]);
+
+                    // 2. Ubah status unit kamar menjadi available kembali
+                    if ($record->roomUnit) {
+                        $record->roomUnit->update([
+                            'status' => 'available'
+                        ]);
+                    }
+
+                    // 3. Kirim notifikasi sukses di pojok kanan atas
+                    Notification::make()
+                        ->title('Berhasil Check-out')
+                        ->body("Kamar {$record->roomUnit->nomor_kamar} sekarang tersedia kembali.")
+                        ->success()
+                        ->send();
+                }),
                 EditAction::make()->iconButton(),
-                enter::make('hubungi')
+                Action::make('hubungi')
                     ->label('Chat')
                     ->icon('heroicon-m-chat-bubble-left-ellipsis')
                     ->color('success')

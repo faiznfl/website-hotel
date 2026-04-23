@@ -37,6 +37,7 @@
                             {{-- Warna Status Kiri --}}
                             <div class="absolute left-0 top-0 bottom-0 w-1.5 
                                 {{ $booking->status == 'confirmed' ? 'bg-green-500' : '' }}
+                                {{ $booking->status == 'checked_out' ? 'bg-blue-500' : '' }} {{-- Tambahkan ini --}}
                                 {{ $booking->status == 'pending' ? 'bg-yellow-500' : '' }}
                                 {{ $booking->status == 'cancelled' ? 'bg-red-500' : '' }}">
                             </div>
@@ -60,9 +61,12 @@
                                             </span>
 
                                             @if($booking->status == 'pending')
-                                                <span class="text-[10px] bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded font-bold uppercase animate-pulse">Menunggu Pembayaran</span>
+                                                <span class="text-[10px] bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded font-bold uppercase animate-pulse">Menunggu
+                                                    Pembayaran</span>
                                             @elseif($booking->status == 'confirmed')
-                                                <span class="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded font-bold uppercase">Lunas</span>
+                                                <span class="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded font-bold uppercase">Lunas & Menginap</span>
+                                            @elseif($booking->status == 'checked_out')
+                                                <span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold uppercase">Checked Out</span>
                                             @else
                                                 <span class="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded font-bold uppercase">Dibatalkan</span>
                                             @endif
@@ -113,15 +117,25 @@
                                     @elseif($booking->status == 'confirmed')
                                         <a href="{{ route('booking.show', $booking->id) }}"
                                             class="flex-1 text-center bg-gray-900 text-white hover:bg-gray-800 px-4 py-2 rounded-xl text-xs md:text-sm font-bold transition shadow-md">
-                                            <i class="fa-solid fa-circle-info mr-1"></i> Lihat Detail
+                                            <i class="fa-solid fa-circle-info mr-1"></i> Detail
                                         </a>
-
-                                        <div class="flex-1 text-center bg-green-50 text-green-600 border border-green-200 px-4 py-2 rounded-xl text-xs md:text-sm font-bold cursor-default">
+                                        <div
+                                            class="flex-1 text-center bg-green-50 text-green-600 border border-green-200 px-4 py-2 rounded-xl text-xs md:text-sm font-bold cursor-default">
                                             <i class="fa-solid fa-check"></i> Lunas
                                         </div>
 
-                                    @else
-                                        <div class="flex-1 text-center bg-red-50 text-red-400 px-4 py-2 rounded-xl text-xs md:text-sm font-bold cursor-default italic">
+                                    @elseif($booking->status == 'checked_out') {{-- Tambahkan blok ini --}}
+                                        <a href="{{ route('booking.show', $booking->id) }}"
+                                            class="flex-1 text-center bg-blue-50 text-blue-600 hover:bg-blue-100 px-4 py-2 rounded-xl text-xs md:text-sm font-bold transition">
+                                            <i class="fa-solid fa-file-invoice mr-1"></i> Invoice
+                                        </a>
+                                        <div class="flex-1 text-center text-gray-400 px-4 py-2 text-xs md:text-sm font-bold italic">
+                                            Selesai
+                                        </div>
+
+                                    @else {{-- Ini baru untuk yang Cancelled --}}
+                                        <div
+                                            class="flex-1 text-center bg-red-50 text-red-400 px-4 py-2 rounded-xl text-xs md:text-sm font-bold cursor-default italic">
                                             Pesanan Hangus
                                         </div>
                                     @endif

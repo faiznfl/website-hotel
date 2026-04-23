@@ -19,7 +19,7 @@ return new class extends Migration
         $table->date('tanggal_booking');
         $table->time('jam_mulai');
         $table->time('jam_selesai');
-        $table->string('status')->default('pending'); // pending, confirmed, canceled
+        $table->string('status', 25)->default('pending');
         $table->timestamps();
     });
 }

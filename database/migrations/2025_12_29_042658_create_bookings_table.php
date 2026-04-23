@@ -13,16 +13,17 @@ return new class extends Migration
     {
         Schema::create('bookings', function (Blueprint $table) {
             $table->id();
-            $table->string('kode_booking', 50)->unique()->nullable(); 
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->string('nama_tamu', 100); 
-            $table->string('nomor_hp', 20);
             $table->foreignId('kamar_id')->nullable()->constrained('kamars')->nullOnDelete();
+            $table->foreignId('room_unit_id')->nullable()->constrained('room_units')->nullOnDelete();
+            $table->string('kode_booking', 15)->unique()->nullable(); 
+            $table->string('nama_tamu', 30);
+            $table->string('nomor_hp', 15);
             $table->date('check_in');
             $table->date('check_out');
             $table->integer('jumlah_kamar')->default(1); 
             $table->decimal('total_harga', 15, 2)->default(0); 
-            $table->enum('status', ['pending', 'confirmed', 'cancelled'])->default('pending');
+            $table->enum('status', ['pending', 'confirmed', 'cancelled', 'checked_out'])->default('pending');
             $table->string('snap_token')->nullable();
             $table->dateTime('expires_at')->nullable();
             $table->timestamps();
