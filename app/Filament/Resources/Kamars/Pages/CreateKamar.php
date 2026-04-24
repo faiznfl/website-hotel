@@ -38,7 +38,11 @@ class CreateKamar extends CreateRecord
     }
     protected function getRedirectUrl(): string
     {
-        // Kode ini menyuruh Filament kembali ke halaman 'index' (List Tabel)
-        return $this->getResource()::getUrl('index'); 
+        return $this->getResource()::getUrl('edit', ['record' => $this->record]);
+    }
+
+    protected function getCreatedNotificationTitle(): ?string
+    {
+        return 'Tipe Kamar berhasil dibuat. Silakan tambahkan nomor unit di bawah.';
     }
 }

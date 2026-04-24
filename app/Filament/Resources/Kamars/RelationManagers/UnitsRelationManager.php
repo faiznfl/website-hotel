@@ -39,6 +39,7 @@ class UnitsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
+            ->heading('Daftar Nomor Kamar')
             ->poll('5s')
             ->recordTitleAttribute('nomor_kamar')
             ->columns([
@@ -54,10 +55,17 @@ class UnitsRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                CreateAction::make(),
+                CreateAction::make()
+                ->label('Tambah Unit Baru')
+                ->modalHeading('Buat Unit Kamar Baru')
+                ->modalSubmitActionLabel('Simpan Unit')
+                ->modalCancelActionLabel('Batal')
+                ->createAnother(false),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                ->modalSubmitActionLabel('Simpan Perubahan')
+                ->modalCancelActionLabel('Batal'),
                 DeleteAction::make(),
             ])
             ->toolbarActions([
