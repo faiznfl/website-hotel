@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use App\Models\Kamar;
+use App\Models\RoomUnit;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
 use Midtrans\Config; 
 use Midtrans\Snap;   
 
@@ -44,43 +45,41 @@ class BookingController extends Controller
             'nomor_hp' => 'required|string',
             'check_in' => 'required|date|after_or_equal:today',
             'check_out' => 'required|date|after:check_in',
-            'jumlah_kamar' => 'required|integer|min:1',
             'kamar_id' => 'required|exists:kamars,id',
             'total_harga' => 'required|numeric',
         ]);
 
-        // --- MULAI LOGIKA BARU ---
-        // 1. Cari unit yang tersedia untuk tipe kamar ini
-        // Kita pakai model RoomUnit (Pastikan sudah di-import di atas: use App\Models\RoomUnit;)
-        $unit = \App\Models\RoomUnit::where('kamar_id', $request->kamar_id)
-                        ->where('status', 'available')
-                        ->first();
+        // 1. Paksa jumlah_kamar menjadi 1 (karena UI counter sudah dihapus)
+        $jumlah_kamar = 1;
 
-        // 2. Cek apakah unit ditemukan
+        // 2. Cari unit yang tersedia (Available)
+        $unit = \App\Models\RoomUnit::where('kamar_id', $request->kamar_id)
+                    ->where('status', 'available')
+                    ->first();
+
         if (!$unit) {
-            return back()->with('error', 'Maaf, semua unit kamar untuk tipe ini sudah penuh atau sedang dalam perbaikan.');
+            return back()->with('error', 'Maaf, unit kamar untuk tipe ini sudah penuh.');
         }
-        // --- SELESAI LOGIKA BARU ---
 
         $kamar = Kamar::find($request->kamar_id);
         
-        // 3. Simpan Booking dengan menyertakan room_unit_id
+        // 3. Simpan Booking
         $booking = Booking::create([
             'user_id'      => Auth::id(),
             'kamar_id'     => $request->kamar_id,
-            'room_unit_id' => $unit->id, // <--- INI KUNCINYA!
+            'room_unit_id' => $unit->id, 
             'nama_tamu'    => $request->nama_tamu,
             'nomor_hp'     => $request->nomor_hp,
             'check_in'     => $request->check_in,
             'check_out'    => $request->check_out,
-            'jumlah_kamar' => $request->jumlah_kamar,
+            'jumlah_kamar' => $jumlah_kamar, // Pakai variabel lokal
             'total_harga'  => $request->total_harga,
             'status'       => 'pending',
             'expires_at'   => now()->addHours(24),
         ]);
 
-    // Sisanya (Midtrans) tetap sama...
-    // ...
+        // 4. Update status unit menjadi booked (Agar tidak diambil orang lain saat pending)
+        $unit->update(['status' => 'booked']);
 
         try {
             Config::$serverKey = env('MIDTRANS_SERVER_KEY');
@@ -93,7 +92,6 @@ class BookingController extends Controller
                     'order_id' => 'BOOKING-' . $booking->id . '-' . time(),
                     'gross_amount' => (int) $booking->total_harga,
                 ],
-                // TAMBAHKAN INI: Sinkronisasi Expired ke Midtrans
                 'expiry' => [
                     'start_time' => date("Y-m-d H:i:s O", strtotime($booking->created_at)),
                     'unit' => 'hour',
@@ -107,8 +105,8 @@ class BookingController extends Controller
                 'item_details' => [
                     [
                         'id' => $kamar->id,
-                        'price' => (int) ($booking->total_harga / $booking->jumlah_kamar),
-                        'quantity' => (int) $booking->jumlah_kamar,
+                        'price' => (int) $booking->total_harga, // Karena cuma 1 unit, harga item = total harga
+                        'quantity' => 1,
                         'name' => substr("Sewa " . $kamar->tipe_kamar, 0, 50)
                     ]
                 ]
@@ -121,6 +119,8 @@ class BookingController extends Controller
             return redirect()->route('booking.payment', $booking->id);
 
         } catch (\Exception $e) {
+            // Jika Midtrans gagal, kembalikan status unit jadi available lagi
+            $unit->update(['status' => 'available']);
             return back()->with('error', 'Gagal terhubung ke Midtrans: ' . $e->getMessage());
         }
     }
@@ -188,6 +188,12 @@ class BookingController extends Controller
         if ($booking->status == 'pending') {
             $booking->status = 'cancelled';
             $booking->save();
+
+            // KEMBALIKAN STATUS KAMAR JADI AVAILABLE
+            if ($booking->room_unit_id) {
+                RoomUnit::where('id', $booking->room_unit_id)->update(['status' => 'available']);
+            }
+
             return redirect()->back()->with('success', 'Pesanan berhasil dibatalkan.');
         }
 

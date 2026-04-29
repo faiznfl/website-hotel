@@ -5,7 +5,7 @@
 @section('content')
     {{-- 1. LOAD LIBRARY & CUSTOM CSS --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    
+
     <style>
         /* --- CUSTOM SCROLLBAR --- */
         ::-webkit-scrollbar { width: 8px; }
@@ -25,7 +25,7 @@
             width: auto !important;
         }
         .flatpickr-innerContainer { overflow: visible !important; }
-        
+
         .flatpickr-months .flatpickr-month {
             color: #111827 !important;
             fill: #111827 !important;
@@ -67,7 +67,7 @@
         .flatpickr-day:not(.flatpickr-disabled):hover {
             background: #FEF9C3 !important;
         }
-        
+
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { 
             -webkit-appearance: none; margin: 0; 
@@ -93,7 +93,7 @@
 
     {{-- 2. BACKGROUND & LAYOUT --}}
     <div class="min-h-screen bg-gray-50 pb-24">
-        
+
         {{-- Header Background --}}
         <div class="bg-[#0f172a] pb-32 pt-32 md:pt-40">
             <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -115,7 +115,7 @@
 
                 {{-- KOLOM KIRI: FORMULIR --}}
                 <div class="lg:col-span-2 space-y-6">
-                    
+
                     <form action="{{ route('booking.store') }}" method="POST" id="bookingForm">
                         @csrf
                         <input type="hidden" name="total_harga" id="input_total_harga">
@@ -123,22 +123,20 @@
 
                         {{-- SECTION 1: DETAIL MENGINAP --}}
                         <div class="bg-white rounded-3xl shadow-xl p-6 md:p-8 mb-6 relative overflow-visible z-20">
-                            
-                            {{-- Judul --}}
+
                             <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
                                 <span class="w-2 h-6 bg-yellow-500 rounded-full"></span>
                                 Detail Menginap
                             </h3>
 
                             <div class="space-y-6">
-                                
-                                {{-- ROW 1: CUSTOM DROPDOWN KAMAR & JUMLAH --}}
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    
-                                    {{-- Custom Dropdown Kamar (Lebar 2/3) --}}
-                                    <div class="md:col-span-2 relative z-50">
+
+                                {{-- ROW 1: CUSTOM DROPDOWN KAMAR (FULL WIDTH) --}}
+                                <div class="grid grid-cols-1 gap-4">
+
+                                    <div class="relative z-50">
                                         <label class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">Pilih Tipe Kamar</label>
-                                        
+
                                         {{-- Hidden Select (Untuk Backend) --}}
                                         <select name="kamar_id" id="kamar_select" class="hidden" required>
                                             <option value="" data-harga="0" data-foto="">-- Pilih Kamar --</option>
@@ -171,7 +169,7 @@
                                             <div id="custom_options" class="custom-options absolute top-full left-0 w-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden max-h-60 overflow-y-auto z-[9999]">
                                                 @foreach($rooms as $r)
                                                     <div class="option-item p-4 cursor-pointer border-b border-gray-50 last:border-0 flex items-center justify-between group transition-colors"
-                                                         onclick="selectOption('{{ $r->id }}', '{{ $r->tipe_kamar }}', '{{ $r->harga }}')">
+                                                        onclick="selectOption('{{ $r->id }}', '{{ $r->tipe_kamar }}', '{{ $r->harga }}')">
                                                         <div>
                                                             <div class="font-bold text-gray-800 group-hover:text-yellow-700">{{ $r->tipe_kamar }}</div>
                                                             <div class="text-xs text-gray-500">Rp {{ number_format($r->harga, 0, ',', '.') }} <span class="text-gray-300">/ malam</span></div>
@@ -182,28 +180,10 @@
                                             </div>
                                         </div>
                                     </div>
-
-                                    {{-- Jumlah Kamar (Lebar 1/3) --}}
-                                    <div class="md:col-span-1">
-                                        <label class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">Jml. Unit</label>
-                                        <div class="flex items-center bg-gray-50 rounded-2xl shadow-sm h-[60px] px-2 border border-transparent hover:border-yellow-200 transition-colors">
-                                            <button type="button" id="btnMinus" class="w-10 h-full flex items-center justify-center text-gray-500 hover:text-yellow-600 transition-colors disabled:opacity-30">
-                                                <i class="fa-solid fa-minus"></i>
-                                            </button>
-                                            
-                                            <input type="number" id="jumlah_kamar_display" value="1" min="1" max="5" readonly
-                                                class="flex-1 text-center border-0 bg-transparent text-lg font-bold text-gray-900 focus:ring-0 p-0 h-full">
-                                            
-                                            <button type="button" id="btnPlus" class="w-10 h-full flex items-center justify-center text-gray-500 hover:text-yellow-600 transition-colors disabled:opacity-30">
-                                                <i class="fa-solid fa-plus"></i>
-                                            </button>
-                                        </div>
-                                    </div>
                                 </div>
 
                                 {{-- ROW 2: TANGGAL --}}
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                                    {{-- Check-in Container --}}
                                     <div id="check_in_container" class="relative group cursor-pointer transition-transform active:scale-95">
                                         <div class="absolute inset-0 bg-gray-50 rounded-2xl transition-colors group-hover:bg-gray-100 border border-transparent group-hover:border-yellow-200"></div>
                                         <div class="relative p-4 flex items-center gap-4 h-[70px]">
@@ -218,7 +198,6 @@
                                         </div>
                                     </div>
 
-                                    {{-- Check-out Container --}}
                                     <div id="check_out_container" class="relative group cursor-not-allowed transition-transform active:scale-95">
                                         <div id="check_out_bg" class="absolute inset-0 bg-gray-50 rounded-2xl transition-colors border border-transparent"></div>
                                         <div class="relative p-4 flex items-center gap-4 h-[70px]">
@@ -233,7 +212,6 @@
                                         </div>
                                     </div>
                                 </div>
-
                             </div>
                         </div>
 
@@ -243,7 +221,7 @@
                                 <span class="w-2 h-6 bg-gray-900 rounded-full"></span>
                                 Data Pemesan
                             </h3>
-                            
+
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">Nama Lengkap</label>
@@ -273,12 +251,12 @@
                 <div class="lg:col-span-1">
                     <div class="sticky top-24">
                         <div class="bg-white rounded-3xl shadow-2xl overflow-hidden ring-1 ring-gray-100">
-                            
+
                             {{-- Image Area --}}
                             <div class="h-56 relative bg-gray-200">
                                 <img id="preview_foto" src="{{ isset($selectedRoom) ? asset('storage/' . $selectedRoom->foto) : '' }}" 
                                     class="w-full h-full object-cover transition-opacity duration-500 {{ isset($selectedRoom) ? 'opacity-100' : 'opacity-0' }}">
-                                
+
                                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
                                 <div class="absolute bottom-5 left-6 right-6">
                                     <span class="text-yellow-400 text-xs font-bold uppercase tracking-wider mb-1 block">Pilihan Anda</span>
@@ -300,15 +278,11 @@
                                         {{ isset($selectedRoom) ? 'Rp ' . number_format($selectedRoom->harga, 0, ',', '.') : '-' }}
                                     </span>
                                 </div>
-                                <div class="flex justify-between items-center mb-4">
-                                    <span class="text-gray-500 text-sm">Jumlah Unit</span>
-                                    <span class="font-bold text-gray-900 bg-yellow-100 text-yellow-800 px-3 py-1 rounded-lg text-sm" id="txt_qty">1 Unit</span>
-                                </div>
                                 <div class="flex justify-between items-center mb-6">
                                     <span class="text-gray-500 text-sm">Durasi</span>
                                     <span class="font-bold text-gray-900 bg-gray-100 px-3 py-1 rounded-lg text-sm" id="txt_durasi">0 Malam</span>
                                 </div>
-                                
+
                                 <div class="border-t border-dashed border-gray-200 my-4"></div>
 
                                 <div class="flex justify-between items-end mb-6">
@@ -326,7 +300,7 @@
                                     <span>Lanjut ke Pembayaran</span>
                                     <i class="fa-solid fa-arrow-right"></i>
                                 </button>
-                                
+
                                 <p class="text-center text-[10px] text-gray-400 mt-4 flex justify-center gap-2">
                                     <i class="fa-solid fa-shield-halved"></i> Transaksi Aman & Terenkripsi
                                 </p>
@@ -342,21 +316,20 @@
     {{-- 3. JAVASCRIPT --}}
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
-        // FUNCTION: Custom Dropdown Logic
+        // FUNCTION: Custom Dropdown Logic (Tetap Diperlukan)
         function selectOption(id, nama, harga) {
             const select = document.getElementById('kamar_select');
             select.value = id;
-            // Trigger change event manual agar JS utama mendeteksi perubahan
             const event = new Event('change');
             select.dispatchEvent(event);
-            
+
             document.getElementById('trigger_label').innerText = nama;
             document.getElementById('trigger_price').innerText = 'Rp ' + new Intl.NumberFormat('id-ID').format(harga) + '/malam';
             document.getElementById('custom_options').classList.remove('show');
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            
+        document.addEventListener('DOMContentLoaded', function () {
+
             // --- VARIABLES ---
             const checkInInput = document.getElementById('check_in');
             const checkOutInput = document.getElementById('check_out');
@@ -365,138 +338,79 @@
             const checkOutBg = document.getElementById('check_out_bg');
             const checkOutIcon = document.getElementById('check_out_icon');
 
-            // --- FLATPICKR (DATE PICKER) ---
+            const kamarSelect = document.getElementById('kamar_select');
+            const previewFoto = document.getElementById('preview_foto');
+            const noPreview = document.getElementById('no_preview');
+            const previewTipe = document.getElementById('preview_tipe');
+            const previewHarga = document.getElementById('preview_harga');
+            const txtDurasi = document.getElementById('txt_durasi');
+            const txtTotal = document.getElementById('txt_total');
+            const inputTotal = document.getElementById('input_total_harga');
+            const btnSubmitDesktop = document.getElementById('btnSubmitDesktop');
+            const btnSubmitMobile = document.getElementById('btnSubmitMobile');
+
+            // LOGIKA HARGA (Unit dipaku di angka 1)
+            let hargaSaatIni = {{ isset($selectedRoom) ? $selectedRoom->harga : 0 }};
+            let currentQty = 1;
+
+            // --- FLATPICKR ---
             const fpCheckIn = flatpickr(checkInInput, {
                 minDate: "today",
                 dateFormat: "Y-m-d",
                 disableMobile: "true",
-                onChange: function(selectedDates, dateStr) {
+                onChange: function (selectedDates) {
                     if (selectedDates.length > 0) {
                         const nextDay = new Date(selectedDates[0]);
                         nextDay.setDate(nextDay.getDate() + 1);
-                        
-                        // Update Min Date untuk Check-Out
                         fpCheckOut.set('minDate', nextDay);
                         fpCheckOut.clear();
-                        
-                        // Aktifkan Check-Out UI
+
+                        // Aktifkan UI Checkout
                         checkOutInput.disabled = false;
                         checkOutInput.placeholder = "Pilih Tanggal";
-                        
                         checkOutContainer.classList.remove('cursor-not-allowed');
                         checkOutContainer.classList.add('cursor-pointer');
                         checkOutBg.classList.add('group-hover:bg-gray-100', 'group-hover:border-yellow-200');
                         checkOutIcon.classList.remove('bg-gray-100', 'text-gray-400');
                         checkOutIcon.classList.add('bg-yellow-100', 'text-yellow-600');
-
-                        // Buka Checkout otomatis setelah pilih Checkin
-                        setTimeout(() => fpCheckOut.open(), 200); 
+                        setTimeout(() => fpCheckOut.open(), 200);
                     }
                     hitungTotal();
                 }
             });
 
             const fpCheckOut = flatpickr(checkOutInput, {
-                minDate: "today", 
+                minDate: "today",
                 dateFormat: "Y-m-d",
                 disableMobile: "true",
-                onChange: function() { hitungTotal(); }
+                onChange: function () { hitungTotal(); }
             });
 
-            // --- CLICK LISTENER BUAT CONTAINER ---
-            checkInContainer.addEventListener('click', function() {
-                fpCheckIn.open();
-            });
+            checkInContainer.addEventListener('click', () => fpCheckIn.open());
+            checkOutContainer.addEventListener('click', () => { if (!checkOutInput.disabled) fpCheckOut.open(); });
 
-            checkOutContainer.addEventListener('click', function() {
-                if (!checkOutInput.disabled) {
-                    fpCheckOut.open();
-                }
-            });
-
-            // --- CUSTOM DROPDOWN TOGGLE ---
+            // --- DROPDOWN TOGGLE ---
             const trigger = document.getElementById('custom_trigger');
             const options = document.getElementById('custom_options');
-            
-            trigger.addEventListener('click', function(e) {
-                e.stopPropagation();
-                options.classList.toggle('show');
-            });
-            
-            document.addEventListener('click', function(e) {
-                if (!trigger.contains(e.target) && !options.contains(e.target)) {
-                    options.classList.remove('show');
-                }
-            });
+            trigger.addEventListener('click', (e) => { e.stopPropagation(); options.classList.toggle('show'); });
+            document.addEventListener('click', (e) => { if (!trigger.contains(e.target)) options.classList.remove('show'); });
 
-
-            // --- VARIABLES LOGIKA HITUNGAN ---
-            const kamarSelect = document.getElementById('kamar_select');
-            const btnMinus = document.getElementById('btnMinus');
-            const btnPlus = document.getElementById('btnPlus');
-            const jumlahKamarDisplay = document.getElementById('jumlah_kamar_display');
-            const jumlahKamarHidden = document.getElementById('jumlah_kamar_hidden');
-            
-            const previewFoto = document.getElementById('preview_foto');
-            const noPreview = document.getElementById('no_preview');
-            const previewTipe = document.getElementById('preview_tipe');
-            const previewHarga = document.getElementById('preview_harga');
-            const txtDurasi = document.getElementById('txt_durasi');
-            const txtQty = document.getElementById('txt_qty');
-            const txtTotal = document.getElementById('txt_total');
-            const inputTotal = document.getElementById('input_total_harga');
-            const btnSubmitDesktop = document.getElementById('btnSubmitDesktop');
-            const btnSubmitMobile = document.getElementById('btnSubmitMobile');
-
-            let hargaSaatIni = {{ isset($selectedRoom) ? $selectedRoom->harga : 0 }};
-            let currentQty = 1; 
-
-            // LISTENERS
-            kamarSelect.addEventListener('change', updateKamar);
-            
-            btnMinus.addEventListener('click', function() {
-                if (currentQty > 1) {
-                    currentQty--;
-                    updateQtyDisplay();
-                    hitungTotal();
-                }
-            });
-            btnPlus.addEventListener('click', function() {
-                if (currentQty < 5) { 
-                    currentQty++;
-                    updateQtyDisplay();
-                    hitungTotal();
-                }
-            });
-
-            function updateQtyDisplay() {
-                jumlahKamarDisplay.value = currentQty;
-                jumlahKamarHidden.value = currentQty;
-                txtQty.innerText = currentQty + " Unit";
-                btnMinus.disabled = (currentQty === 1);
-                btnPlus.disabled = (currentQty === 5);
-            }
-
-            function updateKamar() {
+            // --- CORE LOGIC ---
+            kamarSelect.addEventListener('change', function () {
                 const selectedOption = kamarSelect.options[kamarSelect.selectedIndex];
                 if (kamarSelect.value) {
-                    const harga = parseInt(selectedOption.getAttribute('data-harga'));
-                    hargaSaatIni = harga;
+                    hargaSaatIni = parseInt(selectedOption.getAttribute('data-harga'));
                     previewFoto.src = selectedOption.getAttribute('data-foto');
                     previewFoto.classList.remove('opacity-0');
                     noPreview.classList.add('hidden');
                     previewTipe.innerText = selectedOption.getAttribute('data-tipe');
-                    previewHarga.innerText = "Rp " + new Intl.NumberFormat('id-ID').format(harga);
+                    previewHarga.innerText = "Rp " + new Intl.NumberFormat('id-ID').format(hargaSaatIni);
                     hitungTotal();
                 } else {
                     hargaSaatIni = 0;
-                    previewFoto.classList.add('opacity-0');
-                    noPreview.classList.remove('hidden');
-                    previewTipe.innerText = "Pilih Kamar Dulu";
-                    previewHarga.innerText = "-";
                     resetHitungan();
                 }
-            }
+            });
 
             function hitungTotal() {
                 const checkInVal = checkInInput.value;
@@ -505,12 +419,10 @@
                 if (hargaSaatIni > 0 && checkInVal && checkOutVal) {
                     const start = new Date(checkInVal);
                     const end = new Date(checkOutVal);
-
                     if (end <= start) return;
 
-                    const diffTime = Math.abs(end - start);
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-                    const totalHarga = diffDays * hargaSaatIni * currentQty; 
+                    const diffDays = Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24));
+                    const totalHarga = diffDays * hargaSaatIni * currentQty;
 
                     txtDurasi.innerText = diffDays + " Malam";
                     txtTotal.innerText = "Rp " + new Intl.NumberFormat('id-ID').format(totalHarga);
@@ -525,11 +437,9 @@
                 const btns = [btnSubmitDesktop, btnSubmitMobile];
                 btns.forEach(btn => {
                     btn.disabled = !enable;
-                    if(enable) {
-                        if(btn === btnSubmitDesktop) btn.innerHTML = `<span>Lanjut ke Pembayaran</span> <i class="fa-solid fa-arrow-right"></i>`;
-                        else btn.innerText = "Lanjut ke Pembayaran";
-                    } else {
-                        btn.innerText = "Lengkapi Data Dulu";
+                    btn.innerText = enable ? "Lanjut ke Pembayaran" : "Lengkapi Data Dulu";
+                    if (enable && btn === btnSubmitDesktop) {
+                        btn.innerHTML = `<span>Lanjut ke Pembayaran</span> <i class="fa-solid fa-arrow-right"></i>`;
                     }
                 });
             }
@@ -538,10 +448,13 @@
                 txtDurasi.innerText = "0 Malam";
                 txtTotal.innerText = "Rp 0";
                 toggleButton(false);
+                if (!kamarSelect.value) {
+                    previewFoto.classList.add('opacity-0');
+                    noPreview.classList.remove('hidden');
+                    previewTipe.innerText = "Pilih Kamar Dulu";
+                    previewHarga.innerText = "-";
+                }
             }
-
-            // Inisialisasi awal
-            updateQtyDisplay();
         });
     </script>
 @endsection

@@ -37,7 +37,7 @@
                             {{-- Warna Status Kiri --}}
                             <div class="absolute left-0 top-0 bottom-0 w-1.5 
                                 {{ $booking->status == 'confirmed' ? 'bg-green-500' : '' }}
-                                {{ $booking->status == 'checked_out' ? 'bg-blue-500' : '' }} {{-- Tambahkan ini --}}
+                                {{ $booking->status == 'checked_out' ? 'bg-blue-500' : '' }}
                                 {{ $booking->status == 'pending' ? 'bg-yellow-500' : '' }}
                                 {{ $booking->status == 'cancelled' ? 'bg-red-500' : '' }}">
                             </div>
@@ -61,12 +61,11 @@
                                             </span>
 
                                             @if($booking->status == 'pending')
-                                                <span class="text-[10px] bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded font-bold uppercase animate-pulse">Menunggu
-                                                    Pembayaran</span>
+                                                <span class="text-[10px] bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded font-bold uppercase animate-pulse">Menunggu Pembayaran</span>
                                             @elseif($booking->status == 'confirmed')
                                                 <span class="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded font-bold uppercase">Lunas & Menginap</span>
                                             @elseif($booking->status == 'checked_out')
-                                                <span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold uppercase">Checked Out</span>
+                                                <span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold uppercase">Selesai Menginap</span>
                                             @else
                                                 <span class="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded font-bold uppercase">Dibatalkan</span>
                                             @endif
@@ -79,10 +78,9 @@
                                         <div class="text-sm text-gray-500 flex flex-wrap items-center gap-x-4 gap-y-1">
                                             <span class="font-bold text-gray-900">Rp {{ number_format($booking->total_harga, 0, ',', '.') }}</span>
                                             <span class="hidden sm:inline">•</span>
-                                            <span class="text-xs sm:text-sm">{{ $booking->jumlah_kamar }} Unit</span>
+                                            <span class="text-xs sm:text-sm">Terdaftar: {{ $booking->created_at->format('d M Y') }}</span> {{-- Mengganti Jumlah Unit --}}
                                         </div>
 
-                                        {{-- TIMER: Muncul hanya jika status PENDING --}}
                                         @if($booking->status == 'pending' && $booking->expires_at)
                                             <div class="mt-2 text-[11px] font-mono text-red-600 flex items-center gap-1 bg-red-50 w-fit px-2 py-1 rounded-lg border border-red-100"
                                                 id="timer-{{ $booking->id }}" data-expire="{{ \Carbon\Carbon::parse($booking->expires_at)->toIso8601String() }}">
@@ -95,12 +93,11 @@
 
                                 {{-- KANAN: TOMBOL AKSI --}}
                                 <div class="flex flex-row md:flex-col gap-2 w-full md:w-40 mt-2 md:mt-0">
-
                                     @if($booking->status == 'pending')
                                         @if($booking->snap_token)
                                             <button onclick="payNow('{{ $booking->snap_token }}')"
                                                 class="flex-1 text-center bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-xl text-xs md:text-sm font-bold transition shadow-md hover:shadow-blue-200">
-                                                <i class="fa-solid fa-credit-card mr-1"></i> Bayar Sekarang
+                                                <i class="fa-solid fa-credit-card mr-1"></i> Bayar
                                             </button>
                                         @endif
 
@@ -119,12 +116,11 @@
                                             class="flex-1 text-center bg-gray-900 text-white hover:bg-gray-800 px-4 py-2 rounded-xl text-xs md:text-sm font-bold transition shadow-md">
                                             <i class="fa-solid fa-circle-info mr-1"></i> Detail
                                         </a>
-                                        <div
-                                            class="flex-1 text-center bg-green-50 text-green-600 border border-green-200 px-4 py-2 rounded-xl text-xs md:text-sm font-bold cursor-default">
+                                        <div class="flex-1 text-center bg-green-50 text-green-600 border border-green-200 px-4 py-2 rounded-xl text-xs md:text-sm font-bold cursor-default">
                                             <i class="fa-solid fa-check"></i> Lunas
                                         </div>
 
-                                    @elseif($booking->status == 'checked_out') {{-- Tambahkan blok ini --}}
+                                    @elseif($booking->status == 'checked_out')
                                         <a href="{{ route('booking.show', $booking->id) }}"
                                             class="flex-1 text-center bg-blue-50 text-blue-600 hover:bg-blue-100 px-4 py-2 rounded-xl text-xs md:text-sm font-bold transition">
                                             <i class="fa-solid fa-file-invoice mr-1"></i> Invoice
@@ -133,9 +129,8 @@
                                             Selesai
                                         </div>
 
-                                    @else {{-- Ini baru untuk yang Cancelled --}}
-                                        <div
-                                            class="flex-1 text-center bg-red-50 text-red-400 px-4 py-2 rounded-xl text-xs md:text-sm font-bold cursor-default italic">
+                                    @else
+                                        <div class="flex-1 text-center bg-red-50 text-red-400 px-4 py-2 rounded-xl text-xs md:text-sm font-bold cursor-default italic">
                                             Pesanan Hangus
                                         </div>
                                     @endif
@@ -148,11 +143,9 @@
         </div>
     </div>
 
-    {{-- Script Midtrans Snap --}}
+    {{-- Script Midtrans Snap & Timer Tetap Sama --}}
     <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('services.midtrans.clientKey') }}"></script>
-
     <script type="text/javascript">
-        // 1. Fungsi Bayar Midtrans
         function payNow(snapToken) {
             window.snap.pay(snapToken, {
                 onSuccess: function(result) { window.location.reload(); },
@@ -162,18 +155,14 @@
             });
         }
 
-        // 2. Fungsi Timer Hitung Mundur
         function startCountdowns() {
             const timers = document.querySelectorAll('[id^="timer-"]');
-
             timers.forEach(timer => {
                 const expireDate = new Date(timer.getAttribute('data-expire')).getTime();
                 const textElement = timer.querySelector('.countdown-text');
-
                 const x = setInterval(function() {
                     const now = new Date().getTime();
                     const distance = expireDate - now;
-
                     const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                     const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                     const seconds = Math.floor((distance % (1000 * 60)) / 1000);
@@ -181,16 +170,9 @@
                     if (distance < 0) {
                         clearInterval(x);
                         textElement.innerHTML = "WAKTU HABIS";
-
-                        // Ubah semua teks di body jadi huruf kecil dulu baru dicek
                         const bodyText = document.body.innerText.toLowerCase();
-
-                        // Cek apakah ada kata "menunggu" atau "pending"
                         if (bodyText.includes("menunggu") || bodyText.includes("pending")) {
-                            console.log("Status masih pending di layar, reload...");
-                            setTimeout(function () {
-                                window.location.reload();
-                            }, 2000); // 2 detik saja cukup kalau sudah pakai trik Controller di atas
+                            setTimeout(function () { window.location.reload(); }, 2000);
                         }
                     } else {
                         textElement.innerHTML = hours + "j " + minutes + "m " + seconds + "d";
@@ -198,7 +180,6 @@
                 }, 1000);
             });
         }
-
         document.addEventListener('DOMContentLoaded', startCountdowns);
     </script>
 @endsection
