@@ -1,4 +1,5 @@
 <x-guest-layout>
+    <x-slot name="title">Sign In - Hotel Rumah RB</x-slot>
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
     <form method="POST" action="{{ route('login') }}">
@@ -37,7 +38,7 @@
             @endif
 
             <x-primary-button class="ms-4 bg-yellow-600 hover:bg-yellow-700 focus:bg-yellow-700 active:bg-yellow-800">
-                {{ __('Log in') }}
+                {{ __('Sign In') }}
             </x-primary-button>
         </div>
 
