@@ -15,7 +15,7 @@ return new class extends Migration
     Schema::create('room_units', function (Blueprint $table) {
         $table->id();
         $table->unsignedBigInteger('kamar_id'); 
-        $table->string('nomor_kamar')->unique();
+        $table->string('nomor_kamar', 10)->unique();
         $table->enum('status', ['available', 'booked', 'maintenance'])->default('available');
         $table->timestamps();
     });
