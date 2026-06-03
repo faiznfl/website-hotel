@@ -40,9 +40,11 @@ class UserResource extends Resource
             Section::make()
                 ->schema([
                     TextInput::make('name')
+                    ->label('Nama')
                         ->required()
                         ->maxLength(255),
                     TextInput::make('email')
+                        ->label('Email')
                         ->email()
                         ->required()
                         ->maxLength(255)
@@ -50,6 +52,7 @@ class UserResource extends Resource
                     
                     // INPUT ROLE PENTING
                     Select::make('role')
+                        ->label('Role')
                         ->options([
                             'admin' => 'Administrator',
                             'manager' => 'Manager',
@@ -59,7 +62,6 @@ class UserResource extends Resource
                         ->native(false),
 
                     TextInput::make('password')
-                        // Label dinamis: Jika konteksnya 'create' jadi "Password", selain itu jadi "Password Baru"
                         ->label(fn (string $context): string => $context === 'create' ? 'Password' : 'Password Baru')
                         ->password()
                         ->required(fn (string $context): bool => $context === 'create')
@@ -77,7 +79,7 @@ class UserResource extends Resource
     {
         return $table
         ->columns([
-            TextColumn::make('name')->searchable(),
+            TextColumn::make('name')->searchable()->label('Nama'),
             TextColumn::make('email')->searchable(),
             BadgeColumn::make('role')
                 ->badge() // Mengubah tampilan jadi kotak berwarna (badge)
