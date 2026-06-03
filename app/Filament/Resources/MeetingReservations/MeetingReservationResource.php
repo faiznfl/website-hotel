@@ -162,7 +162,7 @@ class MeetingReservationResource extends Resource
                     ->searchable(),
 
                 TextColumn::make('tanggal_booking')
-                    ->label('Jadwal Meeting')
+                    ->label('Jadwal')
                     ->formatStateUsing(function ($state) {
                         return \Carbon\Carbon::parse($state)
                             ->locale('id')
