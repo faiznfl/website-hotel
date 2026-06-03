@@ -10,18 +10,24 @@
     <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script>
 
     {{-- HERO SECTION --}}
-    <div class="relative w-full h-[300px] md:h-[350px]">
-        <img src="{{ asset('img/hotel-luar.png') }}" alt="Restoran Hotel" class="w-full h-full object-cover">
-        <div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-center px-4">
-            <h1 class="text-3xl md:text-5xl font-bold text-white mb-2 shadow-sm">Restoran & Dining</h1>
-            <div class="w-20 h-1 bg-yellow-500 rounded-full mb-4"></div>
-            <p class="text-gray-200 text-sm md:text-base max-w-2xl">Nikmati hidangan lezat kami dari kenyamanan kamar Anda.</p>
-        </div>
+    {{-- Tinggi Hero disamakan: HP (250px), Tablet (300px), Desktop (400px) --}}
+    <div class="relative w-full h-[250px] sm:h-[300px] md:h-[400px] overflow-hidden">
+        <img src="{{ asset('img/hotel-luar.png') }}" alt="Restoran Hotel"
+            class="absolute inset-0 w-full h-full object-cover">
+        <div class="absolute inset-0 bg-black/40"></div>
     </div>
 
     {{-- MAIN CONTENT --}}
-    <div class="bg-gray-50 min-h-screen py-10">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    {{-- Padding Section disamakan: py-10 (HP), py-16 (Desktop) --}}
+    <section class="py-10 md:py-16 bg-gray-50 min-h-screen">
+        <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            {{-- JUDUL HALAMAN (Sama persis dengan halaman Rooms) --}}
+            <div class="text-center mb-8 md:mb-12">
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 uppercase">RESTORAN</h2>
+                <div class="w-16 md:w-20 h-1 bg-yellow-400 mx-auto mt-3 md:mt-4 rounded"></div>
+                <p class="text-gray-500 text-xs sm:text-sm mt-3 max-w-xl mx-auto">Nikmati hidangan lezat kami dari kenyamanan kamar Anda.</p>
+            </div>
 
             {{-- SEARCH & FILTER --}}
             <div class="bg-white rounded-lg shadow-sm p-4 mb-8 flex flex-col md:flex-row gap-4 justify-between items-center sticky top-0 z-20 border border-gray-100">
@@ -72,7 +78,7 @@
                 <div class="text-center py-20 bg-white rounded-lg border border-dashed border-gray-300"><p class="text-gray-500">Menu belum tersedia.</p></div>
             @endif
         </div>
-    </div>
+    </section>
 
     @auth
         {{-- Floating Cart Button --}}
