@@ -10,7 +10,7 @@ class ListOrders extends ListRecords
 {
     protected static string $resource = OrderResource::class;
 
-    protected ?string $heading = 'Data Menu Customer';
+    protected ?string $heading = 'Data Order Menu Customer';
 
     protected function getHeaderActions(): array
     {
