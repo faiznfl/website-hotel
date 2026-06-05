@@ -21,13 +21,21 @@ class LaporanController extends Controller
 
         // 1. Ambil data Hotel (Jika kategori 'hotel' atau 'semua')
         if ($kategori === 'hotel' || $kategori === 'semua') {
-            $queryHotel = \App\Models\Booking::whereDate('check_in', '>=', $awal)
+            $queryHotel = Booking::whereDate('check_in', '>=', $awal)
                             ->whereDate('check_in', '<=', $akhir);
             
-            // Filter status khusus hotel (confirmed, pending, dll)
-            if ($status !== 'semua' && $kategori === 'hotel') {
-                $queryHotel->where('status', $status);
+            // --- PERBAIKAN LOGIKA FILTER STATUS HOTEL ---
+            if ($status !== 'semua') {
+                // Jika status yang dipilih admin adalah 'confirmed'
+                if ($status === 'confirmed') {
+                    // Tarik baik yang masih confirmed (menginap) maupun yang sudah checked_out
+                    $queryHotel->whereIn('status', ['confirmed', 'checked_out']);
+                } else {
+                    // Jika memilih status lain (misal: 'cancelled' atau 'pending')
+                    $queryHotel->where('status', $status);
+                }
             }
+            
             $bookings = $queryHotel->orderBy('check_in', 'asc')->get();
         }
 

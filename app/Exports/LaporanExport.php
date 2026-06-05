@@ -61,7 +61,9 @@ class LaporanExport implements FromArray, ShouldAutoSize, WithStyles, WithColumn
                     (float)$b->total_harga,
                     ucfirst($b->status),
                 ];
-                if ($b->status === 'confirmed') $totalPendapatan += $b->total_harga;
+                if (in_array($b->status, ['confirmed', 'checked_out'])) {
+                    $totalPendapatan += $b->total_harga;
+                }
             }
             $data[] = []; $data[] = []; 
         }

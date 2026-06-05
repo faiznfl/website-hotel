@@ -61,11 +61,14 @@
         }
 
         .section-title {
-            background-color: #eee;
-            padding: 5px;
+            background-color: #2C3E50;
+            color: #ffffff;
+            padding: 6px;
             font-weight: bold;
             margin-top: 10px;
             border: 1px solid #ddd;
+            text-transform: uppercase;
+            font-size: 10px;
         }
 
         .text-center {
@@ -80,9 +83,13 @@
             font-weight: bold;
         }
 
-        /* Status Styles */
+        /* --- STATUS UTILITY COLORS --- */
         .status-lunas {
             color: #155724;
+        }
+
+        .status-checkout {
+            color: #004085; /* Warna Biru Navy untuk membedakan dengan Confirmed Green */
         }
 
         .status-pending {
@@ -135,19 +142,23 @@
         <table class="table-data">
             <thead>
                 <tr>
-                    <th>No</th>
-                    <th>Kode</th>
+                    <th style="width: 5%;">No</th>
+                    <th style="width: 15%;">Kode</th>
                     <th>Nama Tamu</th>
-                    <th>Check In</th>
-                    <th>Check Out</th>
-                    <th>Total Harga</th>
-                    <th>Status</th>
+                    <th style="width: 15%;">Check In</th>
+                    <th style="width: 15%;">Check Out</th>
+                    <th style="width: 15%;">Total Harga</th>
+                    <th style="width: 15%;">Status</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($bookings as $index => $b)
-                    @php if ($b->status == 'confirmed')
-                    $grand_total_semua += $b->total_harga; @endphp
+                    {{-- FIX LOGIKA: confirmed DAN checked_out dimasukkan ke dalam hitungan --}}
+                    @php 
+                        if (in_array($b->status, ['confirmed', 'checked_out'])) {
+                            $grand_total_semua += $b->total_harga; 
+                        }
+                    @endphp
                     <tr>
                         <td class="text-center">{{ $index + 1 }}</td>
                         <td class="text-center">{{ $b->kode_booking }}</td>
@@ -155,8 +166,16 @@
                         <td class="text-center">{{ \Carbon\Carbon::parse($b->check_in)->format('d/m/Y') }}</td>
                         <td class="text-center">{{ \Carbon\Carbon::parse($b->check_out)->format('d/m/Y') }}</td>
                         <td class="text-right">Rp {{ number_format($b->total_harga, 0, ',', '.') }}</td>
-                        <td class="text-center text-bold {{ $b->status == 'confirmed' ? 'status-lunas' : '' }}">
-                            {{ ucfirst($b->status) }}
+                        
+                        {{-- COLOR CLASS ADJUSTMENT --}}
+                        <td class="text-center text-bold 
+                            {{ $b->status == 'confirmed' ? 'status-lunas' : '' }}
+                            {{ $b->status == 'checked_out' ? 'status-checkout' : '' }}
+                            {{ $b->status == 'pending' ? 'status-pending' : '' }}
+                            {{ $b->status == 'cancelled' ? 'status-batal' : '' }}">
+                            
+                            {{-- Formatting label agar enak dibaca (contoh: Checked Out) --}}
+                            {{ str_replace('_', ' ', ucfirst($b->status)) }}
                         </td>
                     </tr>
                 @endforeach
@@ -170,19 +189,22 @@
         <table class="table-data">
             <thead>
                 <tr>
-                    <th>No</th>
-                    <th>ID Order</th>
+                    <th style="width: 5%;">No</th>
+                    <th style="width: 15%;">ID Order</th>
                     <th>Customer</th>
-                    <th>Tanggal</th>
-                    <th>Lokasi/Kamar</th>
-                    <th>Total Harga</th>
-                    <th>Status</th>
+                    <th style="width: 15%;">Tanggal</th>
+                    <th style="width: 15%;">Lokasi/Kamar</th>
+                    <th style="width: 15%;">Total Harga</th>
+                    <th style="width: 15%;">Status</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($orders as $index => $o)
-                    @php if ($o->status_pembayaran == 'Lunas')
-                    $grand_total_semua += $o->total_harga; @endphp
+                    @php 
+                        if ($o->status_pembayaran == 'Lunas') {
+                            $grand_total_semua += $o->total_harga; 
+                        }
+                    @endphp
                     <tr>
                         <td class="text-center">{{ $index + 1 }}</td>
                         <td class="text-center">FOOD-{{ $o->id }}</td>
@@ -203,9 +225,9 @@
     <table class="table-data" style="margin-top: 10px;">
         <tr>
             <td class="text-right text-bold" style="width: 70%; padding: 10px; background-color: #f9f9f9;">
-                TOTAL PENDAPATAN BERSIH (CONFIRMED / LUNAS):
+                TOTAL PENDAPATAN BERSIH (CONFIRMED / CHECKED OUT / LUNAS):
             </td>
-            <td class="text-right text-bold" style="font-size: 14px; padding: 10px; background-color: #f4f4f4;">
+            <td class="text-right text-bold" style="font-size: 14px; padding: 10px; background-color: #27AE60; color: white;">
                 Rp {{ number_format($grand_total_semua, 0, ',', '.') }}
             </td>
         </tr>

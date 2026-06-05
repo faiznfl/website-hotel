@@ -8,10 +8,10 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Pages\Page;
-use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Utilities\Get;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel; 
+use Filament\Schemas\Components\Group;
 
 class Laporan extends Page
 {
@@ -28,6 +28,8 @@ class Laporan extends Page
                 ->icon('heroicon-o-printer')
                 ->color('success')
                 ->modalWidth('md')
+                // KUNCI PINDAH TAB: Paksa browser membuka tab baru HANYA jika format yang dipilih adalah PDF
+                ->openUrlInNewTab(fn (array $data) => $data['format'] === 'pdf')
                 ->form([
                     // 1. Pilih Kategori Laporan
                     Select::make('kategori_laporan')
@@ -48,7 +50,8 @@ class Laporan extends Page
                             'excel' => 'Microsoft Excel (.xlsx)',
                         ])
                         ->default('pdf')
-                        ->required(),
+                        ->required()
+                        ->live(), // Diaktifkan live agar terbaca real-time oleh openUrlInNewTab
                     
                     // 2. Filter Status (Dinamis sesuai kategori)
                     Select::make('status')
@@ -117,11 +120,12 @@ class Laporan extends Page
                         $awal = $data['tanggal_awal']; $akhir = $data['tanggal_akhir'];
                     }
 
-                    // Eksekusi Export
+                    // Eksekusi Export Excel (Langsung terunduh di halaman yang sama)
                     if ($data['format'] === 'excel') {
                         return Excel::download(new LaporanExport($awal, $akhir, $status, $kategori), "Laporan_{$kategori}_{$awal}.xlsx");
                     }
 
+                    // Eksekusi Stream PDF (Otomatis melompat ke tab baru berkat modifier openUrlInNewTab)
                     return redirect()->route('cetak.laporan.pdf', [
                         'awal' => $awal, 
                         'akhir' => $akhir, 
