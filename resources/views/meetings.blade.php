@@ -4,14 +4,14 @@
 
 @section('content')
 
-    {{-- HERO SECTION (Mini) --}}
+    {{-- HERO SECTION (Mini) - TETAP ASLI BAWAAN KAKAK --}}
     <div class="relative w-full h-[250px] sm:h-[300px] md:h-[400px] overflow-hidden">
         <img src="{{ asset('img/hotel-luar.png') }}" alt="Meetings & Events Hero"
             class="absolute inset-0 w-full h-full object-cover">
         <div class="absolute inset-0 bg-black/40"></div>
     </div>
 
-    {{-- MAIN CONTENT --}}
+    {{-- MAIN CONTENT - DIUBAH BAGIAN INI SAJA --}}
     <section class="py-10 md:py-16 bg-gray-50 min-h-screen">
         <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -25,7 +25,7 @@
                 </p>
             </div>
 
-            {{-- GRID 2 KOLOM (1 di HP, 2 di Tablet/Laptop) --}}
+            {{-- GRID 2 KOLOM --}}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
 
                 {{-- LOOPING DATA --}}
@@ -33,18 +33,16 @@
                     <div
                         class="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 flex flex-col h-full group overflow-hidden">
 
-                        {{-- Gambar (Dibuat lebih tinggi: h-72 agar proporsional di 2 kolom) --}}
+                        {{-- Gambar --}}
                         <div class="relative h-56 md:h-72 overflow-hidden">
                             <img src="{{ asset('storage/' . $meeting->gambar) }}" alt="{{ $meeting->judul }}"
                                 class="w-full h-full object-cover transform transition duration-700 group-hover:scale-110">
-
-                            {{-- Overlay di HP --}}
                             <div
                                 class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 sm:hidden">
                             </div>
                         </div>
 
-                        {{-- Konten --}}
+                        {{-- Konten Kartu --}}
                         <div class="p-6 md:p-8 flex-1 flex flex-col">
 
                             {{-- Judul Paket --}}
@@ -59,12 +57,18 @@
                                 {!! strip_tags($meeting->deskripsi) !!}
                             </div>
 
-                            {{-- Fasilitas (Tags) --}}
-                            @if($meeting->fasilitas)
-                                <div class="flex flex-wrap gap-2 mb-8">
+                            {{-- FASILITAS & KAPASITAS (Dibikin tags segaris, simpel & sederhana) --}}
+                            <div class="flex flex-wrap gap-2 mb-8">
+                                {{-- Tag Kapasitas Sederhana --}}
+                                <span
+                                    class="inline-flex items-center gap-1.5 bg-gray-50 text-gray-700 text-xs px-3 py-1.5 rounded-full border border-gray-200">
+                                    <i class="fa-solid fa-users text-yellow-600"></i> {{ $meeting->kapasitas ?? '100' }} Orang
+                                </span>
+
+                                {{-- Looping Fasilitas Asli --}}
+                                @if($meeting->fasilitas)
                                     @foreach (explode(',', $meeting->fasilitas) as $index => $facility)
-                                        {{-- Tampilkan lebih banyak fasilitas (max 5) karena kartu lebar --}}
-                                        @if($index < 5)
+                                        @if($index < 4) {{-- Dibatasi max 4 agar barisan tag tetap rapi segaris --}}
                                             <span
                                                 class="inline-flex items-center gap-1.5 bg-gray-50 text-gray-700 text-xs px-3 py-1.5 rounded-full border border-gray-200">
                                                 <i class="fa-solid fa-circle-check text-yellow-500"></i>
@@ -72,11 +76,13 @@
                                             </span>
                                         @endif
                                     @endforeach
-                                    @if(count(explode(',', $meeting->fasilitas)) > 5)
-                                        <span class="text-xs text-gray-400 self-center font-medium">+Lainnya</span>
+                                    @if(count(explode(',', $meeting->fasilitas)) > 4)
+                                        <span
+                                            class="text-xs text-gray-400 self-center font-medium">+{{ count(explode(',', $meeting->fasilitas)) - 4 }}
+                                            Lainnya</span>
                                     @endif
-                                </div>
-                            @endif
+                                @endif
+                            </div>
 
                             {{-- Tombol --}}
                             <div class="mt-auto pt-6 border-t border-gray-100">

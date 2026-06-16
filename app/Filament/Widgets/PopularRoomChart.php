@@ -21,9 +21,9 @@ class PopularRoomChart extends ChartWidget
         // Mengambil top 3 tipe kamar yang paling banyak di-booking
         $data = Booking::select('kamars.tipe_kamar', DB::raw('count(*) as total'))
             ->join('kamars', 'bookings.kamar_id', '=', 'kamars.id')
-            ->where('bookings.status', 'confirmed')
+            ->whereIn('bookings.status', ['confirmed', 'checked_out']) // <-- Kunci Perbaikan
             ->groupBy('kamars.tipe_kamar')
-            ->orderBy('total', 'desc') // Pastikan yang paling banyak di atas
+            ->orderBy('total', 'desc') 
             ->limit(3)
             ->get();
 

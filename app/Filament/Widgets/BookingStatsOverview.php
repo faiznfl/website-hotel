@@ -13,22 +13,22 @@ class BookingStatsOverview extends BaseWidget
 
     protected function getStats(): array
     {
-        // 1. Cek Tamu Check-in Hari Ini (Real-time)
+        // 1. Cek Tamu Check-in Hari Ini (Tetap 'confirmed' karena agenda masuk)
         $checkInToday = Booking::whereDate('check_in', Carbon::today())
             ->where('status', 'confirmed')
             ->count();
 
-        // 2. Hitung Omzet Bulan Ini (Data Real dari Database)
+        // 2. FIX OMZET: Ubah 'where' menjadi 'whereIn' agar checked_out tetap terhitung uangnya
         $omzetBulanIni = Booking::whereMonth('created_at', Carbon::now()->month)
             ->whereYear('created_at', Carbon::now()->year)
-            ->where('status', 'confirmed')
+            ->whereIn('status', ['confirmed', 'checked_out']) // <-- Kunci Perbaikan
             ->sum('total_harga'); 
 
         // 3. Persentase Okupansi (Kamar Terisi / Total Kamar)
-        $totalKamar = 20; // Silakan ganti sesuai jumlah kamar asli Kakak
+        $totalKamar = 20; 
         
-        // Menghitung kamar yang sedang ditempati hari ini
-        $kamarTerpakai = Booking::where('status', 'confirmed')
+        // FIX OKUPANSI: Tamu yang checked_out hari ini atau sedang stay tetap dihitung mengisi kamar
+        $kamarTerpakai = Booking::whereIn('status', ['confirmed', 'checked_out']) // <-- Kunci Perbaikan
             ->whereDate('check_in', '<=', Carbon::today())
             ->whereDate('check_out', '>', Carbon::today())
             ->sum('jumlah_kamar');
@@ -39,8 +39,8 @@ class BookingStatsOverview extends BaseWidget
             Stat::make('Omzet Bulan Ini', 'Rp ' . number_format($omzetBulanIni, 0, ',', '.'))
                 ->description('Total pendapatan kotor terkonfirmasi')
                 ->descriptionIcon('heroicon-m-banknotes')
-                ->color('success') // Hijau melambangkan profit
-                ->chart([10, 25, 40, 30, 45, 60, 90]), // Grafik tren kecil (opsional)
+                ->color('success') 
+                ->chart([10, 25, 40, 30, 45, 60, 90]), 
 
             Stat::make('Tingkat Hunian', number_format($occupancyRate, 0) . '%')
                 ->description($kamarTerpakai . ' dari ' . $totalKamar . ' kamar terisi')

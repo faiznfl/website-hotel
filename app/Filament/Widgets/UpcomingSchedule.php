@@ -24,9 +24,9 @@ class UpcomingSchedule extends BaseWidget
         return $table
             ->query(
                 Booking::query()
-                    ->where('status', 'confirmed')
+                    ->whereIn('status', ['confirmed', 'checked_out']) // <-- Kunci Perbaikan
                     ->where(function($query) {
-                        $query->whereDate('check_in', '>=', now()->subDay()) // Ambil yang baru masuk
+                        $query->whereDate('check_in', '>=', now()->subDay()) 
                               ->orWhereDate('check_out', '>=', now());
                     })
                     ->orderBy('check_in', 'asc')

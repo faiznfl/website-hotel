@@ -25,14 +25,13 @@ class BookingTrendChart extends ChartWidget
         for ($i = 5; $i >= 0; $i--) {
             $date = Carbon::now()->subMonths($i);
             
+            // FIX GRAFIK: Menggunakan whereIn
             $count = Booking::whereMonth('created_at', $date->month)
                             ->whereYear('created_at', $date->year)
-                            ->where('status', 'confirmed')
+                            ->whereIn('status', ['confirmed', 'checked_out']) // <-- Kunci Perbaikan
                             ->count();
 
             $data->push($count);
-            
-            // Format bulan jadi Bahasa Indonesia (Contoh: Januari, Februari)
             $labels->push($date->translatedFormat('F')); 
         }
 
