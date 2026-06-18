@@ -99,7 +99,8 @@ class GalleryResource extends Resource
                     ->badge()
                     ->default('Fasilitas Umum (Hotel)') // Jika kamar_id kosong, tampilkan ini
                     ->color(fn ($state) => $state === 'Fasilitas Umum (Hotel)' ? 'success' : 'warning')
-                    ->sortable(),
+                    ->sortable()
+                    ->searchable(),
 
                 TextColumn::make('created_at')
                     ->label('Diupload Pada')

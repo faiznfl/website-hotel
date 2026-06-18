@@ -107,7 +107,6 @@ class MeetingResource extends Resource
                                 'undo',
                                 'redo',
                             ])
-                            ->required()
                             ->columnSpanFull(),
 
                         Textarea::make('fasilitas')

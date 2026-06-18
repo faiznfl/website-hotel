@@ -214,10 +214,14 @@
                                 <div class="flex items-center gap-4">
                                     <div
                                         class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs md:text-sm border border-blue-200 shadow-sm">
-                                        {{ substr($testi->name, 0, 1) }}
+                                        {{-- Mengambil huruf pertama dari nama user lewat relasi --}}
+                                        {{ substr($testi->user->name ?? 'T', 0, 1) }}
                                     </div>
                                     <div>
-                                        <h4 class="font-bold text-gray-900 text-xs md:text-sm">{{ $testi->name }}</h4>
+                                        {{-- PANGGIL LEWAT RELASI: $testi->user->name --}}
+                                        <h4 class="font-bold text-gray-900 text-xs md:text-sm">
+                                            {{ $testi->user->name ?? 'Tamu Hotel' }}
+                                        </h4>
                                     </div>
                                 </div>
                             </div>

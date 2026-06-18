@@ -53,11 +53,15 @@
                                 {{-- Avatar Inisial --}}
                                 <div
                                     class="w-10 h-10 flex-shrink-0 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm border border-blue-200 shadow-sm">
-                                    {{ substr($testi->name, 0, 1) }}
+                                    {{-- FIX: Ambil huruf pertama dari nama user lewat relasi --}}
+                                    {{ substr($testi->user->name ?? 'T', 0, 1) }}
                                 </div>
 
                                 <div>
-                                    <h4 class="font-bold text-gray-900 text-sm">{{ $testi->name }}</h4>
+                                    {{-- FIX: Panggil nama user melalui objek relasi user --}}
+                                    <h4 class="font-bold text-gray-900 text-sm">
+                                        {{ $testi->user->name ?? 'Tamu Hotel' }}
+                                    </h4>
                                     <span class="text-xs text-gray-400 block">
                                         {{-- Menampilkan tanggal: "2 hari yang lalu" --}}
                                         {{ $testi->created_at->diffForHumans() }}
