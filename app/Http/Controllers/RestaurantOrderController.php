@@ -122,4 +122,43 @@ class RestaurantOrderController extends Controller
             ], 500);
         }
     }
+
+    // Tambahkan fungsi ini di RestaurantOrderController.php
+
+public function cancel(Request $request)
+{
+    $request->validate([
+        'order_id' => 'required|exists:orders,id'
+    ]);
+
+    try {
+        $order = Order::findOrFail($request->order_id);
+
+        // Hanya hapus data jika statusnya memang masih 'Belum Bayar'
+        if ($order->status_pembayaran === 'Belum Bayar') {
+            
+            // Hapus detail item terlebih dahulu (mencegah error foreign key constraint)
+            OrderItem::where('order_id', $order->id)->delete();
+            
+            // Hapus data order utama
+            $order->delete();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Pesanan berhasil dibatalkan dan dihapus dari sistem.'
+            ], 200);
+        }
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Pesanan tidak bisa dibatalkan karena status sudah berubah.'
+        ], 400);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Gagal membatalkan pesanan: ' . $e->getMessage()
+        ], 500);
+    }
+}
 }

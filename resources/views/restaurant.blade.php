@@ -110,7 +110,7 @@
                             <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Nomor Kamar</label>
                             <input type="text" id="room-number" placeholder="Contoh: 101" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-yellow-500 text-sm">
                         </div>
-                        
+
                         <div>
                             <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Metode Pembayaran</label>
                             <div class="grid grid-cols-2 gap-2">
@@ -203,7 +203,7 @@
                 const container = document.getElementById('cart-items'); const badge = document.getElementById('cart-badge'); const totalEl = document.getElementById('cart-total');
                 const totalQty = cart.reduce((sum, i) => sum + i.qty, 0); const totalPrice = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
                 badge.innerText = totalQty; badge.classList.toggle('hidden', totalQty <= 0); totalEl.innerText = "Rp " + new Intl.NumberFormat('id-ID').format(totalPrice);
-                
+
                 if(cart.length === 0) container.innerHTML = `<div class="text-center py-4 text-gray-500">Keranjang kosong.</div>`;
                 else container.innerHTML = cart.map(item => `
                     <div class="flex items-center justify-between border-b border-gray-100 pb-3 last:border-0">
@@ -228,35 +228,64 @@
             function closeSuccess() { document.getElementById('success-popup').classList.add('hidden'); location.reload(); }
 
             async function finalProcess() {
-                const room = document.getElementById('room-number').value.trim();
-                const method = document.querySelector('input[name="payment_method"]:checked').value;
-                const btn = document.getElementById('btn-final-send');
-                
-                btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i>`; btn.disabled = true;
+                    const room = document.getElementById('room-number').value.trim();
+                    const method = document.querySelector('input[name="payment_method"]:checked').value;
+                    const btn = document.getElementById('btn-final-send');
 
-                try {
-                    const response = await fetch("{{ route('restaurant.order.store') }}", {
-                        method: "POST", headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": "{{ csrf_token() }}" },
-                        body: JSON.stringify({ room_number: room, payment_method: method, cart: cart })
-                    });
-                    
-                    const result = await response.json();
-                    if(response.ok) {
-                        if(result.payment_method === 'online') {
-                            window.snap.pay(result.snap_token, {
-                                onSuccess: () => showFinishPopup(true),
-                                onPending: () => showFinishPopup(true),
-                                onError: () => { showToast("❌ Pembayaran Gagal."); resetBtn(); },
-                                onClose: () => { showToast("⚠️ Silakan selesaikan pembayaran."); resetBtn(); }
-                            });
+                    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i>`; btn.disabled = true;
+
+                    try {
+                        const response = await fetch("{{ route('restaurant.order.store') }}", {
+                            method: "POST", headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": "{{ csrf_token() }}" },
+                            body: JSON.stringify({ room_number: room, payment_method: method, cart: cart })
+                        });
+
+                        const result = await response.json();
+                        if (response.ok) {
+                            if (result.payment_method === 'online') {
+                                window.snap.pay(result.snap_token, {
+                                    onSuccess: () => showFinishPopup(true),
+                                    // MODIFIKASI: Jika ditutup atau tertunda, hapus dari database admin
+                                    onPending: () => {
+                                        sendCancelRequest(result.order_id, "⚠️ Pembayaran tertunda/dibatalkan.");
+                                    },
+                                    onError: () => {
+                                        sendCancelRequest(result.order_id, "❌ Pembayaran Gagal.");
+                                    },
+                                    onClose: () => {
+                                        sendCancelRequest(result.order_id, "⚠️ Transaksi dibatalkan.");
+                                    }
+                                });
+                            } else {
+                                showFinishPopup(false);
+                            }
                         } else {
-                            showFinishPopup(false);
+                            showToast("❌ " + result.message); resetBtn();
                         }
-                    } else {
-                        showToast("❌ " + result.message); resetBtn();
-                    }
-                } catch(e) { showToast("❌ Koneksi Error."); resetBtn(); }
-            }
+                    } catch (e) { showToast("❌ Koneksi Error."); resetBtn(); }
+                }
+
+                // TAMBAHKAN FUNGSI BARU INI UNTUK MENGHAPUS DATA DI DB ADMIN
+                function sendCancelRequest(orderId, toastMessage) {
+                    fetch("/restaurant/order/cancel", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                        },
+                        body: JSON.stringify({ order_id: orderId })
+                    })
+                        .then(res => res.json())
+                        .then(data => {
+                            document.getElementById('confirm-modal').classList.add('hidden');
+                            showToast(toastMessage + " Data pesanan otomatis dihapus.");
+                            resetBtn();
+                        })
+                        .catch(err => {
+                            showToast("❌ Gagal sinkronisasi pembatalan.");
+                            resetBtn();
+                        });
+                }
 
             function showFinishPopup(isOnline) {
                 cart = []; saveCart();

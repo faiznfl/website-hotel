@@ -86,10 +86,11 @@ Route::middleware('auth')->group(function () {
     
     // --- RESTAURANT ORDER ---
     Route::post('/restaurant-order/store', [RestaurantOrderController::class, 'store'])->name('restaurant.order.store');
+    Route::post('/restaurant/order/cancel', [RestaurantOrderController::class, 'cancel'])->name('restaurant.order.cancel');
 
     // --- BOOKING FLOW (URUTAN ALUR) ---
     
-    // 1. Halaman Form Booking (Pilih Kamar & Tanggal)
+    // 1. Halaman Form Booking (Pilih Kamar & Tanggal)xxxxxxxxxx
     Route::get('/booking/create', [BookingController::class, 'create'])->name('booking.create');
     
     // 2. Proses Simpan ke Database (Aksi Submit Form)
