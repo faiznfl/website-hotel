@@ -87,7 +87,8 @@
                 <ul class="flex flex-col p-4 font-medium space-y-1">
                     @foreach([
                         ['url' => '/', 'label' => 'Home', 'icon' => 'fa-house'],
-                        ['url' => 'rooms', 'label' => 'Rooms & Suite', 'icon' => 'fa-bed'],
+                        ['url' => 'rooms', 'label' => 'Rooms', 'icon' => 'fa-bed'],
+                        ['url' => 'restaurant', 'label' => 'Restaurant', 'icon' => 'fa-utensils'],
                         ['url' => 'meetings-events', 'label' => 'Meetings & Events', 'icon' => 'fa-handshake'],
                         ['url' => 'gallery', 'label' => 'Gallery', 'icon' => 'fa-images'],
                         ['url' => 'contact', 'label' => 'Contact', 'icon' => 'fa-envelope']
